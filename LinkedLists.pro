@@ -1,11 +1,7 @@
-TEMPLATE = app
-CONFIG += console
-CONFIG -= app_bundle
-CONFIG -= qt
+TEMPLATE = subdirs
 
-SOURCES += \
-        main.c \
-        linkedlist.c
+SUBDIRS += \
+    Application \
+    LinkedListsLib
 
-HEADERS += \
-        linkedlist.h
+Application.depends = LinkedListsLib
