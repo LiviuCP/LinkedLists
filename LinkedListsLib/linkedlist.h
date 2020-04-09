@@ -12,13 +12,16 @@ typedef struct ListElement ListElement;
 typedef struct
 {
     ListElement* first;
-} List;
+}
+List;
 
-void prependElement(List* list, ListElement* newElement);
-void appendElement(List* list, ListElement* newElement);
-ListElement* removeFirstElement(List* list);
-ListElement* removeLastElement(List* list);
+void prependElementToList(List* list, ListElement* newElement);
+void appendElementToList(List* list, ListElement* newElement);
+ListElement* removeFirstListElement(List* list);
+ListElement* removeLastListElement(List* list);
+
+unsigned int getListSize(List* list);
+
 void printList(List* list);
-unsigned int size(List* list);
 
 #endif // LINKEDLIST_H

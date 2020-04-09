@@ -15,7 +15,7 @@ int main()
         {
             ListElement* element = (ListElement*)malloc(sizeof(ListElement));
             element->id = currentId;
-            appendElement(list, element);
+            appendElementToList(list, element);
         }
     }
     while (currentId > 0);
@@ -42,7 +42,7 @@ int main()
             // erase list
             if (list->first != NULL)
             {
-                free(removeFirstElement(list));
+                free(removeFirstListElement(list));
             }
             free(list);
             printf("You exited the app!\n");
@@ -53,7 +53,7 @@ int main()
         {
             ListElement* element = (ListElement*)malloc(sizeof(ListElement));
             element->id = currentId;
-            appendElement(list, element);
+            appendElementToList(list, element);
         }
             break;
         case 2:
@@ -62,14 +62,14 @@ int main()
         {
             ListElement* element = (ListElement*)malloc(sizeof(ListElement));
             element->id = currentId;
-            prependElement(list, element);
+            prependElementToList(list, element);
         }
             break;
         case 3:
-            removeFirstElement(list);
+            removeFirstListElement(list);
             break;
         case 4:
-            removeLastElement(list);
+            removeLastListElement(list);
             break;
         default:
             printf("Invalid option\n");

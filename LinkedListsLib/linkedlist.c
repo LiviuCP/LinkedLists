@@ -2,7 +2,7 @@
 
 #include "linkedlist.h"
 
-void prependElement(List* list, ListElement* newElement)
+void prependElementToList(List* list, ListElement* newElement)
 {
     if (list != NULL && newElement != NULL)
     {
@@ -11,7 +11,7 @@ void prependElement(List* list, ListElement* newElement)
     }
 }
 
-void appendElement(List* list, ListElement* newElement)
+void appendElementToList(List* list, ListElement* newElement)
 {
     ListElement* currentElement;
     if (list != NULL && newElement != NULL)
@@ -32,7 +32,7 @@ void appendElement(List* list, ListElement* newElement)
     }
 }
 
-ListElement* removeFirstElement(List* list)
+ListElement* removeFirstListElement(List* list)
 {
     ListElement* removedElement = NULL;
 
@@ -52,7 +52,7 @@ ListElement* removeFirstElement(List* list)
     return removedElement;
 }
 
-ListElement* removeLastElement(List* list)
+ListElement* removeLastListElement(List* list)
 {
     ListElement* removedElement = NULL;
 
@@ -80,36 +80,7 @@ ListElement* removeLastElement(List* list)
     return removedElement;
 }
 
-void printList(List* list)
-{
-    if (list != NULL)
-    {
-        if (size(list) != 0)
-        {
-            ListElement* currentElement = list->first;
-            int currentElementIndex = 0;
-
-            while (currentElement != NULL)
-            {
-                printf("Index: %d \t Id: %d\n", currentElementIndex+1, currentElement->id);
-                currentElement = currentElement->next;
-                ++currentElementIndex;
-            }
-
-            printf("\nThe list has %d elements\n\n", (int)size(list));
-        }
-        else
-        {
-            printf("Empty list!\n");
-        }
-    }
-    else
-    {
-        printf("The list does not exist!");
-    }
-}
-
-unsigned int size(List *list)
+unsigned int getListSize(List *list)
 {
     unsigned int length = 0;
 
@@ -125,4 +96,33 @@ unsigned int size(List *list)
     }
 
     return length;
+}
+
+void printList(List* list)
+{
+    if (list != NULL)
+    {
+        if (getListSize(list) != 0)
+        {
+            ListElement* currentElement = list->first;
+            int currentElementIndex = 0;
+
+            while (currentElement != NULL)
+            {
+                printf("Index: %d \t Id: %d\n", currentElementIndex+1, currentElement->id);
+                currentElement = currentElement->next;
+                ++currentElementIndex;
+            }
+
+            printf("\nThe list has %d elements\n\n", (int)getListSize(list));
+        }
+        else
+        {
+            printf("Empty list!\n");
+        }
+    }
+    else
+    {
+        printf("The list does not exist!");
+    }
 }
