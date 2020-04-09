@@ -1,0 +1,1 @@
+A small linked lists project that I created for educational purposes only.
