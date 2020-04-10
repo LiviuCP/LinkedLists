@@ -2,6 +2,9 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     Application \
-    LinkedListsLib
+    LinkedListsLib \
+    Utils
 
 Application.depends = LinkedListsLib
+Application.depends = Utils
+LinkedListsLib.depends = Utils

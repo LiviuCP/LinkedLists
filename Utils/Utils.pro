@@ -1,15 +1,15 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-04-09T12:56:35
+# Project created by QtCreator 2020-04-10T12:34:58
 #
 #-------------------------------------------------
 
 QT       -= gui
 
-TARGET = LinkedListsLib
+TARGET = Utils
 TEMPLATE = lib
 
-DEFINES += LINKEDLISTSLIB_LIBRARY
+DEFINES += UTILS_LIBRARY
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -23,19 +23,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        linkedlistslib.cpp \
-        linkedlist.c
+        utils.cpp \
+        codeutils.c
 
 HEADERS += \
-        linkedlistslib.h \
-        linkedlistslib_global.h \
-        linkedlist.h
+        utils.h \
+        utils_global.h \
+        codeutils.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
-
-QMAKE_LFLAGS += "-Wl,-rpath,\'$$top_builddir/Utils\'"
-
-LIBS += -L$$top_builddir/Utils -lUtils

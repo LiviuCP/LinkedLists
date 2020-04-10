@@ -1,6 +1,7 @@
 #include "stdio.h"
 
 #include "linkedlist.h"
+#include "../Utils/codeutils.h"
 
 void prependElementToList(List* list, ListElement* newElement)
 {
@@ -118,7 +119,7 @@ void printList(List* list)
         }
         else
         {
-            printf("Empty list!\n");
+            printf("Empty list!\n\n");
         }
     }
     else
