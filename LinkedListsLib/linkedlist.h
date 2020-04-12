@@ -3,7 +3,7 @@
 
 struct ListElement
 {
-    unsigned long id;
+    unsigned long priority;
     struct ListElement* next;
 };
 

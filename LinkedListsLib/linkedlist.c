@@ -110,7 +110,7 @@ void printList(List* list)
 
             while (currentElement != NULL)
             {
-                printf("Index: %d \t Id: %d\n", currentElementIndex+1, currentElement->id);
+                printf("Index: %d \t Priority: %d\n", currentElementIndex+1, currentElement->priority);
                 currentElement = currentElement->next;
                 ++currentElementIndex;
             }
