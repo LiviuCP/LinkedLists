@@ -1,4 +1,5 @@
 #include "stdio.h"
+#include "assert.h"
 
 #include "linkedlist.h"
 #include "../Utils/codeutils.h"
@@ -103,27 +104,70 @@ void printList(List* list)
 {
     if (list != NULL)
     {
-        if (getListSize(list) != 0)
+        int currentElementIndex = 0;
+        for (ListIterator it = lbegin(list); !areEqual(it, lend(list)); next(&it))
         {
-            ListElement* currentElement = list->first;
-            int currentElementIndex = 0;
-
-            while (currentElement != NULL)
-            {
-                printf("Index: %d \t Priority: %d\n", currentElementIndex+1, currentElement->priority);
-                currentElement = currentElement->next;
-                ++currentElementIndex;
-            }
-
-            printf("\nThe list has %d elements\n\n", (int)getListSize(list));
+            printf("Index: %d\t Priority: %d\n", currentElementIndex+1, it.current->priority);
+            ++currentElementIndex;
+        }
+        if (currentElementIndex == 0)
+        {
+            printf("Empty list!\n\n");
         }
         else
         {
-            printf("Empty list!\n\n");
+            printf("\nThe list has %d elements\n\n", (int)getListSize(list));
         }
     }
     else
     {
         printf("The list does not exist!");
     }
+}
+
+ListIterator lbegin(List *list)
+{
+    ListIterator result;
+
+    if (list == NULL)
+    {
+        fprintf(stderr, "ASSERT ERROR! Attempt to get iterator from NULL list");
+        assert(0);
+    }
+    result.current = list->first;
+
+    return result;
+}
+
+ListIterator lend(List *list)
+{
+    ListIterator result;
+
+    if (list == NULL)
+    {
+        fprintf(stderr, "ASSERT ERROR! Attempt to get iterator from NULL list");
+        assert(0);
+    }
+    result.current = NULL;
+
+    return result;
+}
+
+void next(ListIterator* iterator)
+{
+    if (iterator == NULL)
+    {
+        fprintf(stderr, "ASSERT ERROR! Attempt to advance a NULL iterator");
+        assert(0);
+    }
+
+    if (iterator->current != NULL)
+    {
+        iterator->current = iterator->current->next;
+    }
+}
+
+int areEqual(ListIterator first, ListIterator second)
+{
+    return first.current == second.current;
 }
