@@ -7,24 +7,22 @@
 
 int main()
 {
-    size_t currentElementPriority = 0;
+    size_t priority = 0;
     List* list = (List*)malloc(sizeof(List));
     printf("Let's enter the elements (enter 0 to finish)!\n");
     for (;;)
     {
         printf("Element priority: ");
-        if (!readUnsignedLong(&currentElementPriority))
+        if (!readUnsignedLong(&priority))
         {
             system("clear");
             printf("Invalid input! Please try again\n\n");
             continue;
         }
 
-        if (currentElementPriority > 0)
+        if (priority > 0)
         {
-            ListElement* element = (ListElement*)malloc(sizeof(ListElement));
-            element->priority = currentElementPriority;
-            appendElementToList(list, element);
+            createAndAppendToList(list, priority);
         }
         else
         {
@@ -72,13 +70,13 @@ int main()
                 break;
             case 1:
                 printf("\nEnter the element priority: ");
-                if (!readUnsignedLong(&currentElementPriority))
+                if (!readUnsignedLong(&priority))
                 {
                     system("clear");
                     printf("Invalid input. No element appended to list\n\n");
                     continue;
                 }
-                else if (currentElementPriority == 0)
+                else if (priority == 0)
                 {
                     system("clear");
                     printf("Priority should be greater than 0. No element appended to list\n\n");
@@ -86,22 +84,20 @@ int main()
                 }
                 else
                 {
-                    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
-                    element->priority = currentElementPriority;
-                    appendElementToList(list, element);
+                    createAndAppendToList(list, priority);
                     system("clear");
                     printf("Element appended\n\n");
                 }
                 break;
             case 2:
                 printf("\nEnter the priority: ");
-                if (!readUnsignedLong(&currentElementPriority))
+                if (!readUnsignedLong(&priority))
                 {
                     system("clear");
                     printf("Invalid input. No element prepended to list\n\n");
                     continue;
                 }
-                else if (currentElementPriority == 0)
+                else if (priority == 0)
                 {
                     system("clear");
                     printf("Priority should be greater than 0. No element prepended to list\n\n");
@@ -109,9 +105,7 @@ int main()
                 }
                 else
                 {
-                    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
-                    element->priority = currentElementPriority;
-                    prependElementToList(list, element);
+                    createAndPrependToList(list, priority);
                     system("clear");
                     printf("Element prepended\n\n");
                 }

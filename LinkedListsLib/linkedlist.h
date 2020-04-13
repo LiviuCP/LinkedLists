@@ -1,6 +1,8 @@
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
+#include <stdlib.h>
+
 struct ListElement
 {
     unsigned long priority;
@@ -25,8 +27,10 @@ ListIterator;
 extern "C"{
 #endif
 
-void prependElementToList(List* list, ListElement* newElement);
-void appendElementToList(List* list, ListElement* newElement);
+void prependToList(List* list, ListElement* newElement);
+void appendToList(List* list, ListElement* newElement);
+ListElement* createAndPrependToList(List* list, size_t priority);
+ListElement* createAndAppendToList(List* list, size_t priority);
 
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);

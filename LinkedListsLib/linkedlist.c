@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <assert.h>
-#include <stdlib.h>
 
 #include "linkedlist.h"
 #include "../Utils/codeutils.h"
 
-void prependElementToList(List* list, ListElement* newElement)
+void prependToList(List* list, ListElement* newElement)
 {
     if (list != NULL && newElement != NULL)
     {
@@ -14,7 +13,7 @@ void prependElementToList(List* list, ListElement* newElement)
     }
 }
 
-void appendElementToList(List* list, ListElement* newElement)
+void appendToList(List* list, ListElement* newElement)
 {
     ListElement* currentElement;
     if (list != NULL && newElement != NULL)
@@ -33,6 +32,32 @@ void appendElementToList(List* list, ListElement* newElement)
             currentElement->next = newElement;
         }
     }
+}
+
+ListElement* createAndPrependToList(List *list, size_t priority)
+{
+    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
+
+    if (element != NULL)
+    {
+        element->priority = priority;
+        prependToList(list, element);
+    }
+
+    return element;
+}
+
+ListElement* createAndAppendToList(List *list, size_t priority)
+{
+    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
+
+    if (element != NULL)
+    {
+        element->priority = priority;
+        appendToList(list, element);
+    }
+
+    return element;
 }
 
 ListElement* removeFirstListElement(List* list)
