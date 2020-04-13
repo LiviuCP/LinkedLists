@@ -41,6 +41,7 @@ ListElement* createAndPrependToList(List *list, size_t priority)
     if (element != NULL)
     {
         element->priority = priority;
+        element->next = NULL;
         prependToList(list, element);
     }
 
@@ -54,6 +55,7 @@ ListElement* createAndAppendToList(List *list, size_t priority)
     if (element != NULL)
     {
         element->priority = priority;
+        element->next = NULL;
         appendToList(list, element);
     }
 
@@ -70,6 +72,7 @@ ListElement* removeFirstListElement(List* list)
         if (removedElement->next != NULL)
         {
             list->first = removedElement->next;
+            removedElement->next = NULL;
         }
         else
         {
@@ -113,6 +116,7 @@ void clearList(List *list)
     if (list != NULL)
     {
         ListElement* currentElement = list->first;
+        list->first = NULL;
 
         while (currentElement != NULL)
         {
@@ -121,8 +125,6 @@ void clearList(List *list)
             free(elementToDelete);
             elementToDelete = NULL;
         }
-
-        list->first = NULL;
     }
 }
 
@@ -130,7 +132,7 @@ size_t getListSize(const List *list)
 {
     size_t length = 0;
 
-    if (list != NULL)
+    if (list != NULL && list->first != NULL)
     {
         ListElement* currentElement = list->first;
 
