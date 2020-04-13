@@ -21,8 +21,13 @@ typedef struct
 }
 ListIterator;
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 void prependElementToList(List* list, ListElement* newElement);
 void appendElementToList(List* list, ListElement* newElement);
+
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
 void sortAscendingByPriority(List* list);
@@ -33,5 +38,10 @@ ListIterator lbegin(List* list);
 ListIterator lend(List* list);
 void next(ListIterator* iterator);
 int areEqual(ListIterator first, ListIterator second);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // LINKEDLIST_H

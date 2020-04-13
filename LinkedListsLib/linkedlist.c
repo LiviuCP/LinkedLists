@@ -188,9 +188,6 @@ void sortAscendingByPriority(List* list)
                 }
             }
 
-            printf("after iteration\n");
-            printList(list);
-
             if (!wasSortingPerformed)
             {
                 break;
