@@ -29,8 +29,6 @@ void sortAscendingByPriority(List* list);
 
 unsigned int getListSize(List* list);
 
-void printList(List* list);
-
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);
 void next(ListIterator* iterator);
