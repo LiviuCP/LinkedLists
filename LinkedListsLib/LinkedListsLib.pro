@@ -6,6 +6,8 @@
 
 QT       -= gui
 
+QMAKE_CFLAGS += -std=c11
+
 TARGET = LinkedListsLib
 TEMPLATE = lib
 
