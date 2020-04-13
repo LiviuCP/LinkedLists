@@ -126,9 +126,9 @@ void clearList(List *list)
     }
 }
 
-unsigned int getListSize(List *list)
+size_t getListSize(const List *list)
 {
-    unsigned int length = 0;
+    size_t length = 0;
 
     if (list != NULL)
     {
@@ -142,6 +142,31 @@ unsigned int getListSize(List *list)
     }
 
     return length;
+}
+
+ListElement* getElementAtIndex(const List* list, size_t index)
+{
+    ListElement* result = NULL;
+
+    if (list != NULL)
+    {
+        if (index >= getListSize(list))
+        {
+            fprintf(stderr, "ASSERTION ERROR! The index is out of bounds!");
+            assert(0);
+        }
+
+        ListElement* currentElement = list->first;
+
+        for (size_t currentIndex = 0; currentIndex < index; ++currentIndex)
+        {
+            currentElement = currentElement->next;
+        }
+
+        result = currentElement;
+    }
+
+    return result;
 }
 
 ListIterator lbegin(List *list)

@@ -8,6 +8,7 @@
 int main()
 {
     size_t priority = 0;
+    size_t index = 0;
     List* list = (List*)malloc(sizeof(List));
     printf("Let's enter the elements (enter 0 to finish)!\n");
     for (;;)
@@ -46,6 +47,7 @@ int main()
         printf("4 - remove last element\n");
         printf("5 - sort ascending by priority\n");
         printf("6 - empty list\n");
+        printf("7 - get element from chosen index");
         printf("0 - exit\n");
 
         size_t choice;
@@ -158,6 +160,26 @@ int main()
                 {
                     system("clear");
                     printf("The list is already empty!\n\n");
+                }
+                break;
+            case 7:
+                printf("\nEnter the index: ");
+                if (!readUnsignedLong(&index))
+                {
+                    system("clear");
+                    printf("Invalid input. No element appended to list\n\n");
+                    continue;
+                }
+                else if (index > getListSize(list))
+                {
+                    system("clear");
+                    printf("Invalid index (out of bounds)!\n\n");
+                    continue;
+                }
+                else
+                {
+                    system("clear");
+                    printf("Element with index %d has priority %zu\n\n", (unsigned int)index, (size_t)getElementAtIndex(list, index)->priority);
                 }
                 break;
             default:

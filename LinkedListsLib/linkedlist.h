@@ -38,7 +38,8 @@ void clearList(List* list);
 
 void sortAscendingByPriority(List* list);
 
-unsigned int getListSize(List* list);
+size_t getListSize(const List* list);
+ListElement* getElementAtIndex(const List* list, size_t index);
 
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);
