@@ -46,6 +46,7 @@ int main()
         printf("2 - prepend element\n");
         printf("3 - remove first element\n");
         printf("4 - remove last element\n");
+        printf("5 - sort ascending by priority\n");
         printf("0 - exit\n");
 
         size_t choice;
@@ -139,6 +140,19 @@ int main()
                 {
                     system("clear");
                     printf("Cannot remove last element! The list is empty.\n\n");
+                }
+                break;
+            case 5:
+                if (getListSize(list) != 0)
+                {
+                    sortAscendingByPriority(list);
+                    system("clear");
+                    printf("The list has been sorted.\n\n");
+                }
+                else
+                {
+                    system("clear");
+                    printf("Nothing to sort, list is empty\n\n");
                 }
                 break;
             default:

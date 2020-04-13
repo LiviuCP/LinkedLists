@@ -25,6 +25,7 @@ void prependElementToList(List* list, ListElement* newElement);
 void appendElementToList(List* list, ListElement* newElement);
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
+void sortAscendingByPriority(List* list);
 
 unsigned int getListSize(List* list);
 

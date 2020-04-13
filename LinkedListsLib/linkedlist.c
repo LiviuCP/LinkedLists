@@ -1,5 +1,6 @@
-#include "stdio.h"
-#include "assert.h"
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
 
 #include "linkedlist.h"
 #include "../Utils/codeutils.h"
@@ -170,4 +171,55 @@ void next(ListIterator* iterator)
 int areEqual(ListIterator first, ListIterator second)
 {
     return first.current == second.current;
+}
+
+void sortAscendingByPriority(List* list)
+{
+    if (list != NULL)
+    {
+        // bubble sort used due to the access model of the list elements (non-constant, element after element)
+        for (;;)
+        {
+            ListElement* currentElement = list->first;
+            ListElement* previousElement = list->first;
+
+            int wasSortingPerformed = 0;
+
+            if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)
+            {
+                previousElement = list->first->next;
+                list->first = currentElement->next;
+                ListElement* temp = currentElement->next->next;
+                currentElement->next->next = currentElement;
+                currentElement->next = temp;
+                wasSortingPerformed = 1;
+            }
+
+            while (currentElement != NULL)
+            {
+                if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)
+                {
+                    previousElement->next = currentElement->next;
+                    ListElement* temp = currentElement->next->next;
+                    currentElement->next->next = currentElement;
+                    currentElement->next = temp;
+                    wasSortingPerformed = 1;
+                    previousElement = previousElement->next;
+                }
+                else
+                {
+                    previousElement = currentElement;
+                    currentElement = currentElement->next;
+                }
+            }
+
+            printf("after iteration\n");
+            printList(list);
+
+            if (!wasSortingPerformed)
+            {
+                break;
+            }
+        }
+    }
 }
