@@ -34,6 +34,8 @@ ListElement* createAndAppendToList(List* list, size_t priority);
 
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
+void clearList(List* list);
+
 void sortAscendingByPriority(List* list);
 
 unsigned int getListSize(List* list);

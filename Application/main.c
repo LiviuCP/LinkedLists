@@ -45,6 +45,7 @@ int main()
         printf("3 - remove first element\n");
         printf("4 - remove last element\n");
         printf("5 - sort ascending by priority\n");
+        printf("6 - empty list\n");
         printf("0 - exit\n");
 
         size_t choice;
@@ -60,10 +61,7 @@ int main()
             {
             case 0:
                 // erase list
-                if (list->first != NULL)
-                {
-                    free(removeFirstListElement(list));
-                }
+                clearList(list);
                 free(list);
                 system("clear");
                 printf("You exited the app!\n");
@@ -147,6 +145,19 @@ int main()
                 {
                     system("clear");
                     printf("Nothing to sort, list is empty\n\n");
+                }
+                break;
+            case 6:
+                if (getListSize(list) != 0)
+                {
+                    clearList(list);
+                    system("clear");
+                    printf("The list has been emptied\n\n");
+                }
+                else
+                {
+                    system("clear");
+                    printf("The list is already empty!\n\n");
                 }
                 break;
             default:

@@ -108,6 +108,24 @@ ListElement* removeLastListElement(List* list)
     return removedElement;
 }
 
+void clearList(List *list)
+{
+    if (list != NULL)
+    {
+        ListElement* currentElement = list->first;
+
+        while (currentElement != NULL)
+        {
+            ListElement* elementToDelete = currentElement;
+            currentElement = currentElement->next;
+            free(elementToDelete);
+            elementToDelete = NULL;
+        }
+
+        list->first = NULL;
+    }
+}
+
 unsigned int getListSize(List *list)
 {
     unsigned int length = 0;
