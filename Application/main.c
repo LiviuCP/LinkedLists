@@ -63,8 +63,7 @@ int main()
             {
             case 0:
                 // erase list
-                clearList(list);
-                free(list);
+                deleteList(list);
                 system("clear");
                 printf("You exited the app!\n");
                 break;

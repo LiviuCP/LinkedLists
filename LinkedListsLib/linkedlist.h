@@ -27,6 +27,9 @@ ListIterator;
 extern "C"{
 #endif
 
+List* createList();
+void deleteList(List* list);
+
 void prependToList(List* list, ListElement* newElement);
 void appendToList(List* list, ListElement* newElement);
 ListElement* createAndPrependToList(List* list, size_t priority);

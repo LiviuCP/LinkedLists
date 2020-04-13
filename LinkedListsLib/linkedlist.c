@@ -4,6 +4,30 @@
 #include "linkedlist.h"
 #include "../Utils/codeutils.h"
 
+List *createList()
+{
+    List* list = (List*)malloc(sizeof(List));
+
+    if (list != NULL)
+    {
+        list->first = NULL;
+    }
+
+    return list;
+}
+
+void deleteList(List *list)
+{
+    if (list != NULL)
+    {
+        if (list->first != NULL)
+        {
+            clearList(list);
+        }
+        free(list);
+    }
+}
+
 void prependToList(List* list, ListElement* newElement)
 {
     if (list != NULL && newElement != NULL)

@@ -24,12 +24,18 @@ LinkedListTests::LinkedListTests()
 
 List* LinkedListTests::createLinkedList(std::initializer_list<size_t> priorities)
 {
-    List* list = static_cast<List*>(malloc(sizeof(List)));
-    list->first = nullptr;
+    List* list = createList();
 
-    for (auto priority : priorities)
+    if (list != nullptr)
     {
-        createAndAppendToList(list, priority);
+        for (auto priority : priorities)
+        {
+            createAndAppendToList(list, priority);
+        }
+    }
+    else
+    {
+        qWarning("The list could not be created");
     }
 
     return list;
@@ -52,7 +58,7 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
         clearList(list);
         QVERIFY2(getListSize(list) == 0, "The list has not been correctly emptied");
 
-        free(list);
+        deleteList(list);
     }
 }
 
@@ -64,7 +70,7 @@ void LinkedListTests::testBasicListOperations()
 
         QVERIFY2(getListSize(list) == 10 && getElementAtIndex(list, 0)->priority == 6 && getElementAtIndex(list, 9)->priority == 8, "Element has not been correctly created and appended");
 
-        free(list);
+        deleteList(list);
     }
 
     {
@@ -73,7 +79,7 @@ void LinkedListTests::testBasicListOperations()
 
         QVERIFY2(getListSize(list) == 10 && getElementAtIndex(list, 0)->priority == 8 && getElementAtIndex(list, 9)->priority == 7, "Element has not been correctly created and prepended");
 
-        free(list);
+        deleteList(list);
     }
 
     {
@@ -84,7 +90,7 @@ void LinkedListTests::testBasicListOperations()
         QVERIFY(firstElement->next == nullptr && firstElement->priority == 6);
 
         free(firstElement);
-        free(list);
+        deleteList(list);
     }
 
     {
@@ -95,7 +101,7 @@ void LinkedListTests::testBasicListOperations()
         QVERIFY(lastElement->next == nullptr && lastElement->priority == 8);
 
         free(lastElement);
-        free(list);
+        deleteList(list);
     }
 }
 
