@@ -152,6 +152,74 @@ void clearList(List *list)
     }
 }
 
+void reverseList(List *list)
+{
+    if (list != NULL && list->first != NULL)
+    {
+        ListElement* firstElement = list->first;
+        ListElement* currentElement = firstElement->next;
+        firstElement->next = NULL;
+
+        while(currentElement != NULL)
+        {
+            ListElement* nextElement = currentElement->next;
+            currentElement->next = firstElement;
+            firstElement = currentElement;
+            currentElement = nextElement;
+        }
+
+        list->first = firstElement;
+    }
+}
+
+void sortAscendingByPriority(List* list)
+{
+    if (list != NULL)
+    {
+        // bubble sort used due to the access model of the list elements (non-constant, element after element)
+        for (;;)
+        {
+            ListElement* currentElement = list->first;
+            ListElement* previousElement = list->first;
+
+            int wasSortingPerformed = 0;
+
+            if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)
+            {
+                previousElement = list->first->next;
+                list->first = currentElement->next;
+                ListElement* temp = currentElement->next->next;
+                currentElement->next->next = currentElement;
+                currentElement->next = temp;
+                wasSortingPerformed = 1;
+            }
+
+            while (currentElement != NULL)
+            {
+                if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)
+                {
+                    previousElement->next = currentElement->next;
+                    ListElement* temp = currentElement->next->next;
+                    currentElement->next->next = currentElement;
+                    currentElement->next = temp;
+                    wasSortingPerformed = 1;
+                    previousElement = previousElement->next;
+                }
+                else
+                {
+                    previousElement = currentElement;
+                    currentElement = currentElement->next;
+                }
+            }
+
+            if (!wasSortingPerformed)
+            {
+                break;
+            }
+        }
+    }
+}
+
 size_t getListSize(const List *list)
 {
     size_t length = 0;
@@ -240,72 +308,4 @@ void next(ListIterator* iterator)
 int areEqual(ListIterator first, ListIterator second)
 {
     return first.current == second.current;
-}
-
-void reverseList(List *list)
-{
-    if (list != NULL && list->first != NULL)
-    {
-        ListElement* firstElement = list->first;
-        ListElement* currentElement = firstElement->next;
-        firstElement->next = NULL;
-
-        while(currentElement != NULL)
-        {
-            ListElement* nextElement = currentElement->next;
-            currentElement->next = firstElement;
-            firstElement = currentElement;
-            currentElement = nextElement;
-        }
-
-        list->first = firstElement;
-    }
-}
-
-void sortAscendingByPriority(List* list)
-{
-    if (list != NULL)
-    {
-        // bubble sort used due to the access model of the list elements (non-constant, element after element)
-        for (;;)
-        {
-            ListElement* currentElement = list->first;
-            ListElement* previousElement = list->first;
-
-            int wasSortingPerformed = 0;
-
-            if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)
-            {
-                previousElement = list->first->next;
-                list->first = currentElement->next;
-                ListElement* temp = currentElement->next->next;
-                currentElement->next->next = currentElement;
-                currentElement->next = temp;
-                wasSortingPerformed = 1;
-            }
-
-            while (currentElement != NULL)
-            {
-                if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)
-                {
-                    previousElement->next = currentElement->next;
-                    ListElement* temp = currentElement->next->next;
-                    currentElement->next->next = currentElement;
-                    currentElement->next = temp;
-                    wasSortingPerformed = 1;
-                    previousElement = previousElement->next;
-                }
-                else
-                {
-                    previousElement = currentElement;
-                    currentElement = currentElement->next;
-                }
-            }
-
-            if (!wasSortingPerformed)
-            {
-                break;
-            }
-        }
-    }
 }

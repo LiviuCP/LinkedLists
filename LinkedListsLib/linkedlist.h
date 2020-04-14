@@ -40,11 +40,10 @@ ListElement* removeLastListElement(List* list);
 void clearList(List* list);
 
 void reverseList(List* list);
-
 void sortAscendingByPriority(List* list);
 
 size_t getListSize(const List* list);
-ListElement* getElementAtIndex(const List* list, size_t index);
+ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
 
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);
