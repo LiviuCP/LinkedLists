@@ -31,7 +31,8 @@ SOURCES += \
 HEADERS += \
         utils.h \
         utils_global.h \
-        codeutils.h
+        codeutils.h \
+        error.h
 
 unix {
     target.path = /usr/lib

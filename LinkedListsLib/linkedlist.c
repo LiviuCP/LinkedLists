@@ -1,8 +1,7 @@
 #include <stdio.h>
-#include <assert.h>
-
 #include "linkedlist.h"
 #include "../Utils/codeutils.h"
+#include "../Utils/error.h"
 
 List *createList()
 {
@@ -244,11 +243,7 @@ ListElement* getElementAtIndex(const List* list, size_t index)
 
     if (list != NULL)
     {
-        if (index >= getListSize(list))
-        {
-            fprintf(stderr, "ASSERTION ERROR! The index is out of bounds!");
-            assert(0);
-        }
+        ASSERT_CONDITION(index < getListSize(list), "The index is out of bounds!")
 
         ListElement* currentElement = list->first;
 
@@ -267,11 +262,7 @@ ListIterator lbegin(List *list)
 {
     ListIterator result;
 
-    if (list == NULL)
-    {
-        fprintf(stderr, "ASSERT ERROR! Attempt to get iterator from NULL list");
-        assert(0);
-    }
+    ASSERT_CONDITION(list != NULL, "Attempt to get iterator from NULL list");
 
     result.list = list;
     result.current = list->first;
@@ -283,11 +274,8 @@ ListIterator lend(List *list)
 {
     ListIterator result;
 
-    if (list == NULL)
-    {
-        fprintf(stderr, "ASSERT ERROR! Attempt to get iterator from NULL list");
-        assert(0);
-    }
+    ASSERT_CONDITION(list != NULL, "Attempt to get iterator from NULL list")
+
     result.list = list;
     result.current = NULL;
 
@@ -296,11 +284,7 @@ ListIterator lend(List *list)
 
 void lnext(ListIterator* iterator)
 {
-    if (iterator == NULL)
-    {
-        fprintf(stderr, "ASSERT ERROR! Attempt to advance a NULL iterator");
-        assert(0);
-    }
+    ASSERT_CONDITION(iterator != NULL, "Attempt to advance a NULL iterator")
 
     if (iterator->current != NULL)
     {
@@ -310,11 +294,6 @@ void lnext(ListIterator* iterator)
 
 int areIteratorsEqual(ListIterator first, ListIterator second)
 {
-    if (first.list != second.list)
-    {
-        fprintf(stderr, "ASSERT ERROR! Iterators belong to different lists");
-        assert(0);
-    }
-
+    ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists")
     return first.current == second.current;
 }
