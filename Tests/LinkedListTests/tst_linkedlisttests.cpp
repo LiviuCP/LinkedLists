@@ -17,6 +17,7 @@ private slots:
     void testListIsCorrectlyCreatedAndCleared();
     void testBasicListOperations();
     void testSortAscendingByPriority();
+    void testIterators();
 };
 
 LinkedListTests::LinkedListTests()
@@ -118,6 +119,8 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list);
     }
 
     {
@@ -130,6 +133,8 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list);
     }
 
     {
@@ -142,6 +147,8 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list);
     }
 
     {
@@ -154,6 +161,8 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list);
     }
 
     {
@@ -166,6 +175,8 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list);
     }
 
     {
@@ -178,6 +189,8 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list);
     }
 
     {
@@ -190,6 +203,41 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list);
+    }
+}
+
+void LinkedListTests::testIterators()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 9, 8});
+        ListIterator it = lbegin(list);
+        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 6, "The begin iterator is not correctly generated");
+        next(&it);
+        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 2, "The iterator is not correctly incremented");
+        next(&it);
+        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 5, "The iterator is not correctly incremented");
+        next(&it);
+        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 9, "The iterator is not correctly incremented");
+        next(&it);
+        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 8, "The iterator is not correctly incremented");
+        next(&it);
+        QVERIFY2(areEqual(it, lend(list)), "The iterator is not correctly incremented");
+        next(&it);
+        QVERIFY2(areEqual(it, lend(list)), "The iterator is not correctly incremented");
+
+        deleteList(list);
+    }
+
+    {
+        List* list = createList();
+        ListIterator it = lbegin(list);
+        QVERIFY2(areEqual(it, lend(list)), "The list is empty but the begin and end iterators are not equal");
+        next(&it);
+        QVERIFY2(areEqual(it, lend(list)), "The iterator is not correctly incremented");
+
+        deleteList(list);
     }
 }
 
