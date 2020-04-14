@@ -46,8 +46,9 @@ int main()
         printf("3 - remove first element\n");
         printf("4 - remove last element\n");
         printf("5 - sort ascending by priority\n");
-        printf("6 - empty list\n");
-        printf("7 - get element from chosen index");
+        printf("6 - reverse list elements\n");
+        printf("7 - empty list\n");
+        printf("8 - get element from chosen index\n");
         printf("0 - exit\n");
 
         size_t choice;
@@ -151,6 +152,19 @@ int main()
             case 6:
                 if (getListSize(list) != 0)
                 {
+                    reverseList(list);
+                    system("clear");
+                    printf("The list has been reversed.\n\n");
+                }
+                else
+                {
+                    system("clear");
+                    printf("Nothing to reverse, list is empty\n\n");
+                }
+                break;
+            case 7:
+                if (getListSize(list) != 0)
+                {
                     clearList(list);
                     system("clear");
                     printf("The list has been emptied\n\n");
@@ -161,7 +175,7 @@ int main()
                     printf("The list is already empty!\n\n");
                 }
                 break;
-            case 7:
+            case 8:
                 printf("\nEnter the index: ");
                 if (!readUnsignedLong(&index))
                 {

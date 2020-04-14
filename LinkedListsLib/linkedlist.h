@@ -39,6 +39,8 @@ ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
 void clearList(List* list);
 
+void reverseList(List* list);
+
 void sortAscendingByPriority(List* list);
 
 size_t getListSize(const List* list);

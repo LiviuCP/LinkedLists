@@ -16,6 +16,7 @@ public:
 private slots:
     void testListIsCorrectlyCreatedAndCleared();
     void testBasicListOperations();
+    void testReverseList();
     void testSortAscendingByPriority();
     void testIterators();
 };
@@ -103,6 +104,57 @@ void LinkedListTests::testBasicListOperations()
         QVERIFY(lastElement->next == nullptr && lastElement->priority == 8);
 
         free(lastElement);
+        deleteList(list);
+    }
+}
+
+void LinkedListTests::testReverseList()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7});
+        reverseList(list);
+
+        QVERIFY2(getListSize(list) == 9 &&
+                 getElementAtIndex(list, 0)->priority == 7 &&
+                 getElementAtIndex(list, 1)->priority == 9 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 1 &&
+                 getElementAtIndex(list, 4)->priority == 3 &&
+                 getElementAtIndex(list, 5)->priority == 4 &&
+                 getElementAtIndex(list, 6)->priority == 5 &&
+                 getElementAtIndex(list, 7)->priority == 2 &&
+                 getElementAtIndex(list, 8)->priority == 6,   "The list has not been correctly reversed");
+
+        deleteList(list);
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2});
+        reverseList(list);
+
+        QVERIFY2(getListSize(list) == 2 &&
+                 getElementAtIndex(list, 0)->priority == 2 &&
+                 getElementAtIndex(list, 1)->priority == 6,   "The list has not been correctly reversed");
+
+        deleteList(list);
+    }
+
+    {
+        List* list = createList();
+        createAndAppendToList(list, 2);
+        reverseList(list);
+
+        QVERIFY2(getListSize(list) == 1 && getElementAtIndex(list, 0)->priority == 2, "The list has not been correctly reversed");
+
+        deleteList(list);
+    }
+
+    {
+        List* list = createList();
+        reverseList(list);
+
+        QVERIFY2(getListSize(list) == 0, "The list has not been correctly reversed");
+
         deleteList(list);
     }
 }

@@ -242,6 +242,26 @@ int areEqual(ListIterator first, ListIterator second)
     return first.current == second.current;
 }
 
+void reverseList(List *list)
+{
+    if (list != NULL && list->first != NULL)
+    {
+        ListElement* firstElement = list->first;
+        ListElement* currentElement = firstElement->next;
+        firstElement->next = NULL;
+
+        while(currentElement != NULL)
+        {
+            ListElement* nextElement = currentElement->next;
+            currentElement->next = firstElement;
+            firstElement = currentElement;
+            currentElement = nextElement;
+        }
+
+        list->first = firstElement;
+    }
+}
+
 void sortAscendingByPriority(List* list)
 {
     if (list != NULL)
