@@ -16,6 +16,7 @@ public:
 private slots:
     void testListIsCorrectlyCreatedAndCleared();
     void testBasicListOperations();
+    void testSortAscendingByPriority();
 };
 
 LinkedListTests::LinkedListTests()
@@ -102,6 +103,93 @@ void LinkedListTests::testBasicListOperations()
 
         free(lastElement);
         deleteList(list);
+    }
+}
+
+void LinkedListTests::testSortAscendingByPriority()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 3 &&
+                 getElementAtIndex(list, 4)->priority == 5 &&
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 3 &&
+                 getElementAtIndex(list, 4)->priority == 5 &&
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 3 &&
+                 getElementAtIndex(list, 4)->priority == 5 &&
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 3 &&
+                 getElementAtIndex(list, 4)->priority == 5 &&
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 1, 2, 6, 5}); // random
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 3 &&
+                 getElementAtIndex(list, 4)->priority == 5 &&
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{1, 2, 2, 3, 5, 6}); // perfectly sorted ascending
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 3 &&
+                 getElementAtIndex(list, 4)->priority == 5 &&
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 5, 3, 2, 2, 1}); // perfectly sorted descending
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 3 &&
+                 getElementAtIndex(list, 4)->priority == 5 &&
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
     }
 }
 
