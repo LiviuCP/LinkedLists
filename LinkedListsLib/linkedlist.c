@@ -272,6 +272,8 @@ ListIterator lbegin(List *list)
         fprintf(stderr, "ASSERT ERROR! Attempt to get iterator from NULL list");
         assert(0);
     }
+
+    result.list = list;
     result.current = list->first;
 
     return result;
@@ -286,12 +288,13 @@ ListIterator lend(List *list)
         fprintf(stderr, "ASSERT ERROR! Attempt to get iterator from NULL list");
         assert(0);
     }
+    result.list = list;
     result.current = NULL;
 
     return result;
 }
 
-void next(ListIterator* iterator)
+void lnext(ListIterator* iterator)
 {
     if (iterator == NULL)
     {
@@ -305,7 +308,13 @@ void next(ListIterator* iterator)
     }
 }
 
-int areEqual(ListIterator first, ListIterator second)
+int areIteratorsEqual(ListIterator first, ListIterator second)
 {
+    if (first.list != second.list)
+    {
+        fprintf(stderr, "ASSERT ERROR! Iterators belong to different lists");
+        assert(0);
+    }
+
     return first.current == second.current;
 }

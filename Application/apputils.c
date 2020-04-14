@@ -7,7 +7,7 @@ void printList(List* list)
     if (list != NULL)
     {
         int currentElementIndex = 0;
-        for (ListIterator it = lbegin(list); !areEqual(it, lend(list)); next(&it))
+        for (ListIterator it = lbegin(list); !areIteratorsEqual(it, lend(list)); lnext(&it))
         {
             printf("Index: %d\t Priority: %lu\n", currentElementIndex+1, it.current->priority);
             ++currentElementIndex;

@@ -19,6 +19,7 @@ List;
 
 typedef struct
 {
+    List* list;
     ListElement* current;
 }
 ListIterator;
@@ -47,8 +48,8 @@ ListElement* getElementAtIndex(const List* list, size_t index); // mainly for te
 
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);
-void next(ListIterator* iterator);
-int areEqual(ListIterator first, ListIterator second);
+void lnext(ListIterator* iterator);
+int areIteratorsEqual(ListIterator first, ListIterator second);
 
 #ifdef __cplusplus
 }

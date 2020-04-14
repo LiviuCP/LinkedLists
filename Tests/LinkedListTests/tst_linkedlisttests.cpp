@@ -265,19 +265,19 @@ void LinkedListTests::testIterators()
     {
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 9, 8});
         ListIterator it = lbegin(list);
-        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 6, "The begin iterator is not correctly generated");
-        next(&it);
-        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 2, "The iterator is not correctly incremented");
-        next(&it);
-        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 5, "The iterator is not correctly incremented");
-        next(&it);
-        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 9, "The iterator is not correctly incremented");
-        next(&it);
-        QVERIFY2(!areEqual(it, lend(list)) && it.current->priority == 8, "The iterator is not correctly incremented");
-        next(&it);
-        QVERIFY2(areEqual(it, lend(list)), "The iterator is not correctly incremented");
-        next(&it);
-        QVERIFY2(areEqual(it, lend(list)), "The iterator is not correctly incremented");
+        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 6, "The begin iterator is not correctly generated");
+        lnext(&it);
+        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 2, "The iterator is not correctly incremented");
+        lnext(&it);
+        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 5, "The iterator is not correctly incremented");
+        lnext(&it);
+        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 9, "The iterator is not correctly incremented");
+        lnext(&it);
+        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 8, "The iterator is not correctly incremented");
+        lnext(&it);
+        QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
+        lnext(&it);
+        QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
 
         deleteList(list);
     }
@@ -285,9 +285,9 @@ void LinkedListTests::testIterators()
     {
         List* list = createList();
         ListIterator it = lbegin(list);
-        QVERIFY2(areEqual(it, lend(list)), "The list is empty but the begin and end iterators are not equal");
-        next(&it);
-        QVERIFY2(areEqual(it, lend(list)), "The iterator is not correctly incremented");
+        QVERIFY2(areIteratorsEqual(it, lend(list)), "The list is empty but the begin and end iterators are not equal");
+        lnext(&it);
+        QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
 
         deleteList(list);
     }
