@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#include "listutils.h"
+
 struct ListElement
 {
     unsigned long priority;
@@ -42,6 +44,7 @@ void clearList(List* list);
 
 void reverseList(List* list);
 void sortAscendingByPriority(List* list);
+void sortDescendingByPriority(List* list);
 
 size_t getListSize(const List* list);
 ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing

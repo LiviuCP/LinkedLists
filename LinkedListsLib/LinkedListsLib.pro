@@ -31,7 +31,8 @@ SOURCES += \
 HEADERS += \
         linkedlistslib.h \
         linkedlistslib_global.h \
-        linkedlist.h
+        linkedlist.h \
+        listutils.h
 
 unix {
     target.path = /usr/lib
