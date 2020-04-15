@@ -173,7 +173,7 @@ void reverseList(List *list)
 
 void sortAscendingByPriority(List* list)
 {
-    if (list != NULL)
+    if (list != NULL && list->first != NULL && list->first->next != NULL)
     {
         // bubble sort used due to the access model of the list elements (non-constant, element after element)
         for (;;)
@@ -183,16 +183,23 @@ void sortAscendingByPriority(List* list)
 
             int wasSortingPerformed = 0;
 
-            if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)
+            /* adjust the previousElement and currentElement positions for the first two elements prior to passing through the others
+               (previousElement always one position before currentElement) */
+            if (list->first->priority > list->first->next->priority)
             {
                 previousElement = list->first->next;
-                list->first = currentElement->next;
+                list->first = list->first->next;
                 ListElement* temp = currentElement->next->next;
                 currentElement->next->next = currentElement;
                 currentElement->next = temp;
                 wasSortingPerformed = 1;
             }
+            else
+            {
+                currentElement = currentElement->next;
+            }
 
+            /* complete iteration by sorting the remaining elements */
             while (currentElement != NULL)
             {
                 if (currentElement->next != NULL && currentElement->priority > currentElement->next->priority)

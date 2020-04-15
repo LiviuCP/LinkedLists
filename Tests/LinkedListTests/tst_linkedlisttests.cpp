@@ -170,7 +170,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 2)->priority == 2 &&
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
     }
@@ -184,7 +184,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 2)->priority == 2 &&
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
     }
@@ -198,7 +198,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 2)->priority == 2 &&
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
     }
@@ -212,7 +212,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 2)->priority == 2 &&
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
     }
@@ -226,7 +226,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 2)->priority == 2 &&
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
     }
@@ -240,7 +240,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 2)->priority == 2 &&
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
     }
@@ -254,7 +254,25 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 2)->priority == 2 &&
                  getElementAtIndex(list, 3)->priority == 3 &&
                  getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted (ascending) by priority");
+                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted ");
+
+        deleteList(list);
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 5});
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 5 && getElementAtIndex(list, 1)->priority == 6, "The list hasn't been correctly sorted ");
+
+        deleteList(list);
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{1});
+        sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
 
         deleteList(list);
     }
