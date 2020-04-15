@@ -65,6 +65,7 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
         QVERIFY2(getListSize(list) == 0, "The list has not been correctly emptied");
 
         deleteList(list);
+        list = nullptr;
     }
 }
 
@@ -77,6 +78,7 @@ void LinkedListTests::testBasicListOperations()
         QVERIFY2(getListSize(list) == 10 && getElementAtIndex(list, 0)->priority == 6 && getElementAtIndex(list, 9)->priority == 8, "Element has not been correctly created and appended");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -86,6 +88,7 @@ void LinkedListTests::testBasicListOperations()
         QVERIFY2(getListSize(list) == 10 && getElementAtIndex(list, 0)->priority == 8 && getElementAtIndex(list, 9)->priority == 7, "Element has not been correctly created and prepended");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -97,6 +100,7 @@ void LinkedListTests::testBasicListOperations()
 
         free(firstElement);
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -108,6 +112,7 @@ void LinkedListTests::testBasicListOperations()
 
         free(lastElement);
         deleteList(list);
+        list = nullptr;
     }
 }
 
@@ -129,6 +134,7 @@ void LinkedListTests::testReverseList()
                  getElementAtIndex(list, 8)->priority == 6,   "The list has not been correctly reversed");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -140,6 +146,7 @@ void LinkedListTests::testReverseList()
                  getElementAtIndex(list, 1)->priority == 6,   "The list has not been correctly reversed");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -150,6 +157,7 @@ void LinkedListTests::testReverseList()
         QVERIFY2(getListSize(list) == 1 && getElementAtIndex(list, 0)->priority == 2, "The list has not been correctly reversed");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -159,6 +167,7 @@ void LinkedListTests::testReverseList()
         QVERIFY2(getListSize(list) == 0, "The list has not been correctly reversed");
 
         deleteList(list);
+        list = nullptr;
     }
 }
 
@@ -176,6 +185,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -190,6 +200,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -204,6 +215,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -218,6 +230,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -232,6 +245,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -246,6 +260,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -260,6 +275,7 @@ void LinkedListTests::testSortAscendingByPriority()
                  getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted ");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -269,6 +285,7 @@ void LinkedListTests::testSortAscendingByPriority()
         QVERIFY2(getElementAtIndex(list, 0)->priority == 5 && getElementAtIndex(list, 1)->priority == 6, "The list hasn't been correctly sorted ");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -278,6 +295,7 @@ void LinkedListTests::testSortAscendingByPriority()
         QVERIFY2(getElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
 
         deleteList(list);
+        list = nullptr;
     }
 }
 
@@ -301,6 +319,7 @@ void LinkedListTests::testIterators()
         QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
 
         deleteList(list);
+        list = nullptr;
     }
 
     {
@@ -311,6 +330,7 @@ void LinkedListTests::testIterators()
         QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
 
         deleteList(list);
+        list = nullptr;
     }
 }
 
@@ -318,35 +338,42 @@ void LinkedListTests::testAssignRemoveObject()
 {
     List* list = createList();
     // Point
-    ListElement* currentElement = createAndAppendToList(list, 2);
-    Point* point = (Point*)malloc(sizeof(Point));
+    Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 3;
     point->y = 4;
-    assignObjectToListElement(currentElement, (void*)point, "coordinates");
+    assignObjectToListElement(createAndAppendToList(list, 2), static_cast<void*>(point), "coordinates");
+    point = nullptr;
     // int
-    currentElement = createAndAppendToList(list, 3);
-    int* distance = (int*)malloc(sizeof(int));
+    int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 5;
-    assignObjectToListElement(currentElement, (void*)distance, "distance");
+    assignObjectToListElement(createAndAppendToList(list, 3), static_cast<void*>(distance), "distance");
+    distance = nullptr;
     // float
-    currentElement = createAndAppendToList(list, 1);
-    float* angle = (float*)malloc(sizeof(float));
+    float* angle = static_cast<float*>(malloc(sizeof(float)));
     *angle = 1.25;
-    assignObjectToListElement(currentElement, (void*)angle, "angle");
+    assignObjectToListElement(createAndAppendToList(list, 1), static_cast<void*>(angle), "angle");
+    angle = nullptr;
     // no object
-    currentElement = createAndPrependToList(list, 10);
+    Q_UNUSED(createAndPrependToList(list, 10));
 
     ListIterator it = lbegin(list);
     QVERIFY2(it.current->objectType == nullptr && it.current->object == nullptr, "Default object and object type are incorrect (should be NULL)");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->objectType, "coordinates") == 0 && ((Point*)(it.current->object))->x == 3 && ((Point*)(it.current->object))->y == 4,  "Object has been incorrectly assigned");
+    QVERIFY2(strcmp(it.current->objectType, "coordinates") == 0 && (static_cast<Point*>(it.current->object))->x == 3 && (static_cast<Point*>(it.current->object))->y == 4,
+             "Object has been incorrectly assigned");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->objectType, "distance") == 0 && *((int*)(it.current->object)) == 5, "Object has been incorrectly assigned");
+    QVERIFY2(strcmp(it.current->objectType, "distance") == 0 && *(static_cast<int*>(it.current->object)) == 5, "Object has been incorrectly assigned");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->objectType, "angle") == 0 && *((float*)(it.current->object)) == 1.25, "Object has been incorrectly assigned");
+    QVERIFY2(strcmp(it.current->objectType, "angle") == 0 && *(static_cast<float*>(it.current->object)) == 1.25f, "Object has been incorrectly assigned");
 
-    void* removedObject = (int*)removeObjectFromListElement(getElementAtIndex(list, 2));
-    QVERIFY2(getElementAtIndex(list, 2)->objectType == nullptr && getElementAtIndex(list, 2)->object == nullptr && (*((int*)removedObject) == 5), "Incorrect object removal from list element");
+    void* removedObject = static_cast<int*>(removeObjectFromListElement(getElementAtIndex(list, 2)));
+    QVERIFY2(getElementAtIndex(list, 2)->objectType == nullptr && getElementAtIndex(list, 2)->object == nullptr && (*(static_cast<int*>(removedObject)) == 5),
+             "Incorrect object removal from list element");
+
+    free(removedObject);
+    removedObject = nullptr;
+    deleteList(list);
+    list = nullptr;
 }
 
 QTEST_APPLESS_MAIN(LinkedListTests)
