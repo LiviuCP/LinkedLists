@@ -3,6 +3,10 @@
 
 #include <stdlib.h>
 
+typedef struct {
+    int x;
+    int y;
+} Point;
 
 #ifdef __cplusplus
 extern "C"{

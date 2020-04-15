@@ -7,7 +7,10 @@
 
 struct ListElement
 {
-    unsigned long priority;
+    void* object;
+    char* objectType;
+    size_t priority;
+
     struct ListElement* next;
 };
 
@@ -37,6 +40,9 @@ void prependToList(List* list, ListElement* newElement);
 void appendToList(List* list, ListElement* newElement);
 ListElement* createAndPrependToList(List* list, size_t priority);
 ListElement* createAndAppendToList(List* list, size_t priority);
+
+void assignObjectToListElement(ListElement* element, void* object, const char* objectType);
+void* removeObjectFromListElement(ListElement* element);
 
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);

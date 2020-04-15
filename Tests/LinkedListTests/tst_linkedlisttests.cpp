@@ -1,5 +1,7 @@
 #include <QtTest>
 
+#include <cstring>
+
 #include "../../LinkedListsLib/linkedlist.h"
 #include "../../Utils/codeutils.h"
 
@@ -19,6 +21,7 @@ private slots:
     void testReverseList();
     void testSortAscendingByPriority();
     void testIterators();
+    void testAssignRemoveObject();
 };
 
 LinkedListTests::LinkedListTests()
@@ -309,6 +312,41 @@ void LinkedListTests::testIterators()
 
         deleteList(list);
     }
+}
+
+void LinkedListTests::testAssignRemoveObject()
+{
+    List* list = createList();
+    // Point
+    ListElement* currentElement = createAndAppendToList(list, 2);
+    Point* point = (Point*)malloc(sizeof(Point));
+    point->x = 3;
+    point->y = 4;
+    assignObjectToListElement(currentElement, (void*)point, "coordinates");
+    // int
+    currentElement = createAndAppendToList(list, 3);
+    int* distance = (int*)malloc(sizeof(int));
+    *distance = 5;
+    assignObjectToListElement(currentElement, (void*)distance, "distance");
+    // float
+    currentElement = createAndAppendToList(list, 1);
+    float* angle = (float*)malloc(sizeof(float));
+    *angle = 1.25;
+    assignObjectToListElement(currentElement, (void*)angle, "angle");
+    // no object
+    currentElement = createAndPrependToList(list, 10);
+
+    ListIterator it = lbegin(list);
+    QVERIFY2(it.current->objectType == nullptr && it.current->object == nullptr, "Default object and object type are incorrect (should be NULL)");
+    lnext(&it);
+    QVERIFY2(strcmp(it.current->objectType, "coordinates") == 0 && ((Point*)(it.current->object))->x == 3 && ((Point*)(it.current->object))->y == 4,  "Object has been incorrectly assigned");
+    lnext(&it);
+    QVERIFY2(strcmp(it.current->objectType, "distance") == 0 && *((int*)(it.current->object)) == 5, "Object has been incorrectly assigned");
+    lnext(&it);
+    QVERIFY2(strcmp(it.current->objectType, "angle") == 0 && *((float*)(it.current->object)) == 1.25, "Object has been incorrectly assigned");
+
+    void* removedObject = (int*)removeObjectFromListElement(getElementAtIndex(list, 2));
+    QVERIFY2(getElementAtIndex(list, 2)->objectType == nullptr && getElementAtIndex(list, 2)->object == nullptr && (*((int*)removedObject) == 5), "Incorrect object removal from list element");
 }
 
 QTEST_APPLESS_MAIN(LinkedListTests)

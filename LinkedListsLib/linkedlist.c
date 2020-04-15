@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+
 #include "linkedlist.h"
 #include "../Utils/codeutils.h"
 #include "../Utils/error.h"
@@ -63,8 +65,11 @@ ListElement* createAndPrependToList(List *list, size_t priority)
 
     if (element != NULL)
     {
+        element->object = NULL;
+        element->objectType = NULL;
         element->priority = priority;
         element->next = NULL;
+
         prependToList(list, element);
     }
 
@@ -77,12 +82,52 @@ ListElement* createAndAppendToList(List *list, size_t priority)
 
     if (element != NULL)
     {
+        element->object = NULL;
+        element->objectType = NULL;
         element->priority = priority;
         element->next = NULL;
+
         appendToList(list, element);
     }
 
     return element;
+}
+
+void assignObjectToListElement(ListElement* element, void* object, const char* objectType)
+{
+    if (element != NULL && object != NULL && objectType != NULL)
+    {
+        ASSERT_CONDITION(element->object == NULL && element->objectType == NULL, "Attempt to assign object without freeing the existing one first!");
+
+        element->objectType = (char*)malloc(strlen(objectType) + 1);
+
+        if (element->objectType == NULL)
+        {
+            fprintf(stderr, "Unable to allocate memory for object type. Object cannot be assigned!");
+        }
+        else
+        {
+            strcpy(element->objectType, objectType);
+            element->object = object;
+        }
+    }
+}
+
+void* removeObjectFromListElement(ListElement* element)
+{
+    ListElement* result = NULL;
+
+    if (element != NULL && element->object != NULL)
+    {
+        ASSERT_CONDITION(element->objectType != NULL, "Object type description referring to NULL object!");
+
+        result  = element->object;
+        element->object = NULL;
+        free(element->objectType);
+        element->objectType = NULL;
+    }
+
+    return result;
 }
 
 ListElement* removeFirstListElement(List* list)
@@ -145,6 +190,7 @@ void clearList(List *list)
         {
             ListElement* elementToDelete = currentElement;
             currentElement = currentElement->next;
+            removeObjectFromListElement(elementToDelete);
             free(elementToDelete);
             elementToDelete = NULL;
         }
