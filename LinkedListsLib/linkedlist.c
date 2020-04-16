@@ -5,7 +5,7 @@
 #include "../Utils/codeutils.h"
 #include "../Utils/error.h"
 
-List *createList()
+List* createList()
 {
     List* list = (List*)malloc(sizeof(List));
 
@@ -18,7 +18,7 @@ List *createList()
 }
 
 // user is responsible for de-allocating the Object of each element prior to erasing the list
-void deleteList(List *list)
+void deleteList(List* list)
 {
     if (list != NULL)
     {
@@ -76,7 +76,7 @@ void appendToList(List* list, ListElement* newElement)
     }
 }
 
-ListElement* createAndPrependToList(List *list, size_t priority)
+ListElement* createAndPrependToList(List* list, size_t priority)
 {
     ListElement* element = (ListElement*)malloc(sizeof(ListElement));
 
@@ -92,7 +92,7 @@ ListElement* createAndPrependToList(List *list, size_t priority)
     return element;
 }
 
-ListElement* createAndAppendToList(List *list, size_t priority)
+ListElement* createAndAppendToList(List* list, size_t priority)
 {
     ListElement* element = (ListElement*)malloc(sizeof(ListElement));
 
@@ -254,7 +254,7 @@ ListElement* removeLastListElement(List* list)
     return removedElement;
 }
 
-ListElement *removeNextListElement(ListIterator it)
+ListElement* removeNextListElement(ListIterator it)
 {
     ListElement* result = NULL;
 
@@ -286,7 +286,7 @@ void clearList(List *list)
     }
 }
 
-void reverseList(List *list)
+void reverseList(List* list)
 {
     if (list != NULL && list->first != NULL)
     {
@@ -311,12 +311,12 @@ void sortAscendingByPriority(List* list)
     SORT_LIST(ASCENDING , priority)
 }
 
-void sortDescendingByPriority(List *list)
+void sortDescendingByPriority(List* list)
 {
     SORT_LIST(DESCENDING , priority)
 }
 
-size_t getListSize(const List *list)
+size_t getListSize(const List* list)
 {
     size_t length = 0;
 
@@ -355,7 +355,7 @@ ListElement* getElementAtIndex(const List* list, size_t index)
     return result;
 }
 
-int isElementContained(const ListElement* element, const List *list)
+int isElementContained(const ListElement* element, const List* list)
 {
     int result = 0;
 
@@ -377,7 +377,7 @@ int isElementContained(const ListElement* element, const List *list)
     return result;
 }
 
-ListIterator lbegin(List *list)
+ListIterator lbegin(List* list)
 {
     ListIterator result;
 
@@ -389,7 +389,7 @@ ListIterator lbegin(List *list)
     return result;
 }
 
-ListIterator lend(List *list)
+ListIterator lend(List* list)
 {
     ListIterator result;
 
