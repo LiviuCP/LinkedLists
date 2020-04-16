@@ -112,15 +112,23 @@ ListElement* createAndInsertAsNext(ListIterator it, size_t priority)
 {
     ListElement* result = NULL;
 
-    if (it.list != NULL && it.current != NULL)
+    if (it.list != NULL)
     {
         ListElement* nextElement = createListElement();
         nextElement->priority = priority;
 
-        if (nextElement != NULL)
+        if (it.current != NULL)
         {
-            result = nextElement;
-            insertAsNext(it, nextElement);
+
+            if (nextElement != NULL)
+            {
+                result = nextElement;
+                insertAsNext(it, nextElement);
+            }
+        }
+        else if (it.list->first == NULL)
+        {
+            it.list->first = nextElement;
         }
     }
 
@@ -129,15 +137,26 @@ ListElement* createAndInsertAsNext(ListIterator it, size_t priority)
 
 void insertAsNext(ListIterator it, ListElement* nextElement)
 {
-    if (it.list != NULL && it.current != NULL && nextElement != NULL)
+    if (it.list != NULL && nextElement != NULL)
     {
         ASSERT_CONDITION(nextElement->next == NULL, "Element to be inserted is linked to another element!");
 
-        if (it.current->next != NULL)
+        if (it.current != NULL)
         {
-            ListElement* temp = it.current->next;
-            it.current->next = nextElement;
-            nextElement->next = temp;
+            if (it.current->next != NULL)
+            {
+                ListElement* temp = it.current->next;
+                it.current->next = nextElement;
+                nextElement->next = temp;
+            }
+            else
+            {
+                it.current->next = nextElement;
+            }
+        }
+        else if (it.list->first == NULL)
+        {
+            it.list->first = nextElement;
         }
     }
 }
