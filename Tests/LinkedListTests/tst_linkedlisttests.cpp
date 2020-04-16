@@ -118,6 +118,61 @@ void LinkedListTests::testBasicListOperations()
         deleteList(list);
         list = nullptr;
     }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+
+        ListIterator it = lbegin(list);
+        createAndInsertAsNext(it, 10);
+
+        QVERIFY2(getListSize(list) == 5 &&
+                 getElementAtIndex(list, 0)->priority == 6 &&
+                 getElementAtIndex(list, 1)->priority == 10 &&
+                 getElementAtIndex(list, 2)->priority == 2 &&
+                 getElementAtIndex(list, 3)->priority == 5 &&
+                 getElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+
+        ListIterator it = lbegin(list);
+        lnext(&it);
+        createAndInsertAsNext(it, 10);
+
+        QVERIFY2(getListSize(list) == 5 &&
+                 getElementAtIndex(list, 0)->priority == 6 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 10 &&
+                 getElementAtIndex(list, 3)->priority == 5 &&
+                 getElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+
+        ListIterator it = lbegin(list);
+        lnext(&it);
+        lnext(&it);
+        lnext(&it);
+        createAndInsertAsNext(it, 10);
+
+        QVERIFY2(getListSize(list) == 5 &&
+                 getElementAtIndex(list, 0)->priority == 6 &&
+                 getElementAtIndex(list, 1)->priority == 2 &&
+                 getElementAtIndex(list, 2)->priority == 5 &&
+                 getElementAtIndex(list, 3)->priority == 4 &&
+                 getElementAtIndex(list, 4)->priority == 10,   "The next element has not been correctly inserted");
+    }
+
+    {
+        List* list = createList();
+        ListIterator it = lbegin(list);
+        createAndInsertAsNext(it, 10);
+
+        QVERIFY2(getListSize(list) == 1 && getElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
+
+    }
 }
 
 void LinkedListTests::testReverseList()
