@@ -36,6 +36,8 @@ extern "C"{
 List* createList();
 void deleteList(List* list);
 
+ListElement* createListElement();
+
 void prependToList(List* list, ListElement* newElement);
 void appendToList(List* list, ListElement* newElement);
 ListElement* createAndPrependToList(List* list, size_t priority);
@@ -54,6 +56,7 @@ void sortDescendingByPriority(List* list);
 
 size_t getListSize(const List* list);
 ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
+int isElementContained(const ListElement* element, const List* list);
 
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);

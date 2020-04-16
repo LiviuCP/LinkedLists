@@ -305,3 +305,40 @@ int areIteratorsEqual(ListIterator first, ListIterator second)
     ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists")
     return first.current == second.current;
 }
+
+int isElementContained(const ListElement* element, const List *list)
+{
+    int result = 0;
+
+    if (element != NULL && list != NULL && list->first != NULL)
+    {
+        ListElement* currentElement = list->first;
+
+        while (currentElement != NULL)
+        {
+            if (element == currentElement)
+            {
+                result = 1;
+                break;
+            }
+            currentElement = currentElement->next;
+        }
+    }
+
+    return result;
+}
+
+ListElement* createListElement()
+{
+    ListElement* result = (ListElement*)malloc(sizeof(ListElement));
+
+    if (result != NULL)
+    {
+        result->next = NULL;
+        result->priority = 0;
+        result->object = NULL;
+        result->objectType = NULL;
+    }
+
+    return result;
+}

@@ -22,6 +22,7 @@ private slots:
     void testSortAscendingByPriority();
     void testIterators();
     void testAssignRemoveObject();
+    void testIsElementContained();
 };
 
 LinkedListTests::LinkedListTests()
@@ -374,6 +375,27 @@ void LinkedListTests::testAssignRemoveObject()
     removedObject = nullptr;
     deleteList(list);
     list = nullptr;
+}
+
+void LinkedListTests::testIsElementContained()
+{
+    ListElement* firstElement = createListElement();
+    firstElement->priority = 10;
+
+    ListElement* secondElement = createListElement();
+    secondElement->priority = 10;
+
+    List* list = createList();
+    createAndAppendToList(list, 7);
+    appendToList(list, firstElement);
+    createAndAppendToList(list, 5);
+    createAndPrependToList(list, 4);
+
+    QVERIFY2(isElementContained(firstElement, list), "Element is marked as not contained in the list (should be");
+    QVERIFY2(!isElementContained(secondElement, list), "Element is marked as contained in the list (should NOT be");
+
+    deleteList(list);
+    free(secondElement);
 }
 
 QTEST_APPLESS_MAIN(LinkedListTests)
