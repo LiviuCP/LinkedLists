@@ -48,6 +48,8 @@ void prependToList(List* list, ListElement* newElement)
 {
     if (list != NULL && newElement != NULL)
     {
+        ASSERT_CONDITION(newElement->next == NULL, "Element to be inserted is linked to another element!");
+
         newElement->next = list->first;
         list->first = newElement;
     }
@@ -104,6 +106,40 @@ ListElement* createAndAppendToList(List *list, size_t priority)
     }
 
     return element;
+}
+
+ListElement* createAndInsertAsNext(ListIterator it, size_t priority)
+{
+    ListElement* result = NULL;
+
+    if (it.list != NULL && it.current != NULL)
+    {
+        ListElement* nextElement = createListElement();
+        nextElement->priority = priority;
+
+        if (nextElement != NULL)
+        {
+            result = nextElement;
+            insertAsNext(it, nextElement);
+        }
+    }
+
+    return result;
+}
+
+void insertAsNext(ListIterator it, ListElement* nextElement)
+{
+    if (it.list != NULL && it.current != NULL && nextElement != NULL)
+    {
+        ASSERT_CONDITION(nextElement->next == NULL, "Element to be inserted is linked to another element!");
+
+        if (it.current->next != NULL)
+        {
+            ListElement* temp = it.current->next;
+            it.current->next = nextElement;
+            nextElement->next = temp;
+        }
+    }
 }
 
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
@@ -197,6 +233,20 @@ ListElement* removeLastListElement(List* list)
     }
 
     return removedElement;
+}
+
+ListElement *removeNextListElement(ListIterator it)
+{
+    ListElement* result = NULL;
+
+    if (it.list != NULL && it.current != NULL && it.current->next != NULL)
+    {
+        result = it.current->next;
+        it.current->next = result->next;
+        result->next = NULL;
+    }
+
+    return result;
 }
 
 // user is responsible for de-allocating the Object of each element prior to erasing elements from the list
