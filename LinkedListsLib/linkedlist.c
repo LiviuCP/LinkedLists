@@ -17,6 +17,7 @@ List *createList()
     return list;
 }
 
+// user is responsible for de-allocating the Object of each element prior to erasing the list
 void deleteList(List *list)
 {
     if (list != NULL)
@@ -27,6 +28,20 @@ void deleteList(List *list)
         }
         free(list);
     }
+}
+
+ListElement* createListElement()
+{
+    ListElement* result = (ListElement*)malloc(sizeof(ListElement));
+
+    if (result != NULL)
+    {
+        result->next = NULL;
+        result->priority = 0;
+        result->object = NULL;
+    }
+
+    return result;
 }
 
 void prependToList(List* list, ListElement* newElement)
@@ -66,7 +81,6 @@ ListElement* createAndPrependToList(List *list, size_t priority)
     if (element != NULL)
     {
         element->object = NULL;
-        element->objectType = NULL;
         element->priority = priority;
         element->next = NULL;
 
@@ -83,7 +97,6 @@ ListElement* createAndAppendToList(List *list, size_t priority)
     if (element != NULL)
     {
         element->object = NULL;
-        element->objectType = NULL;
         element->priority = priority;
         element->next = NULL;
 
@@ -93,38 +106,45 @@ ListElement* createAndAppendToList(List *list, size_t priority)
     return element;
 }
 
-void assignObjectToListElement(ListElement* element, void* object, const char* objectType)
+void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
 {
-    if (element != NULL && object != NULL && objectType != NULL)
+    if (element != NULL && objectPayload != NULL && objectType != NULL)
     {
-        ASSERT_CONDITION(element->object == NULL && element->objectType == NULL, "Attempt to assign object without freeing the existing one first!");
+        ASSERT_CONDITION(element->object == NULL, "Attempt to assign object without freeing the existing one first!");
 
-        element->objectType = (char*)malloc(strlen(objectType) + 1);
+        element->object = (Object*)malloc(sizeof (Object));
 
-        if (element->objectType == NULL)
+        if (element->object != NULL)
         {
-            fprintf(stderr, "Unable to allocate memory for object type. Object cannot be assigned!");
+            element->object->type = (char*)malloc(strlen(objectType) + 1);
+
+            if (element->object->type == NULL)
+            {
+                fprintf(stderr, "Unable to allocate memory for object type. Object cannot be assigned!");
+                free(element->object);
+                element->object = NULL;
+            }
+            else
+            {
+                strcpy(element->object->type, objectType);
+                element->object->payload= objectPayload;
+            }
         }
         else
         {
-            strcpy(element->objectType, objectType);
-            element->object = object;
+            fprintf(stderr, "Unable to allocate memory for object. Object cannot be assigned!");
         }
     }
 }
 
-void* removeObjectFromListElement(ListElement* element)
+Object* removeObjectFromListElement(ListElement* element)
 {
-    ListElement* result = NULL;
+    Object* result = NULL;
 
     if (element != NULL && element->object != NULL)
     {
-        ASSERT_CONDITION(element->objectType != NULL, "Object type description referring to NULL object!");
-
         result  = element->object;
         element->object = NULL;
-        free(element->objectType);
-        element->objectType = NULL;
     }
 
     return result;
@@ -179,6 +199,7 @@ ListElement* removeLastListElement(List* list)
     return removedElement;
 }
 
+// user is responsible for de-allocating the Object of each element prior to erasing elements from the list
 void clearList(List *list)
 {
     if (list != NULL)
@@ -190,7 +211,6 @@ void clearList(List *list)
         {
             ListElement* elementToDelete = currentElement;
             currentElement = currentElement->next;
-            removeObjectFromListElement(elementToDelete);
             free(elementToDelete);
             elementToDelete = NULL;
         }
@@ -266,6 +286,28 @@ ListElement* getElementAtIndex(const List* list, size_t index)
     return result;
 }
 
+int isElementContained(const ListElement* element, const List *list)
+{
+    int result = 0;
+
+    if (element != NULL && list != NULL && list->first != NULL)
+    {
+        ListElement* currentElement = list->first;
+
+        while (currentElement != NULL)
+        {
+            if (element == currentElement)
+            {
+                result = 1;
+                break;
+            }
+            currentElement = currentElement->next;
+        }
+    }
+
+    return result;
+}
+
 ListIterator lbegin(List *list)
 {
     ListIterator result;
@@ -304,41 +346,4 @@ int areIteratorsEqual(ListIterator first, ListIterator second)
 {
     ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists")
     return first.current == second.current;
-}
-
-int isElementContained(const ListElement* element, const List *list)
-{
-    int result = 0;
-
-    if (element != NULL && list != NULL && list->first != NULL)
-    {
-        ListElement* currentElement = list->first;
-
-        while (currentElement != NULL)
-        {
-            if (element == currentElement)
-            {
-                result = 1;
-                break;
-            }
-            currentElement = currentElement->next;
-        }
-    }
-
-    return result;
-}
-
-ListElement* createListElement()
-{
-    ListElement* result = (ListElement*)malloc(sizeof(ListElement));
-
-    if (result != NULL)
-    {
-        result->next = NULL;
-        result->priority = 0;
-        result->object = NULL;
-        result->objectType = NULL;
-    }
-
-    return result;
 }

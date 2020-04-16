@@ -5,10 +5,16 @@
 
 #include "listutils.h"
 
+typedef struct
+{
+    char* type;
+    void* payload;
+}
+Object;
+
 struct ListElement
 {
-    void* object;
-    char* objectType;
+    Object* object;
     size_t priority;
 
     struct ListElement* next;
@@ -43,8 +49,8 @@ void appendToList(List* list, ListElement* newElement);
 ListElement* createAndPrependToList(List* list, size_t priority);
 ListElement* createAndAppendToList(List* list, size_t priority);
 
-void assignObjectToListElement(ListElement* element, void* object, const char* objectType);
-void* removeObjectFromListElement(ListElement* element);
+void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
+Object* removeObjectFromListElement(ListElement* element);
 
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);

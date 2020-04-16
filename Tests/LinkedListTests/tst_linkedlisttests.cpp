@@ -23,6 +23,9 @@ private slots:
     void testIterators();
     void testAssignRemoveObject();
     void testIsElementContained();
+
+private:
+    void _freeSimpleListObjects(List* list); // to be used only with objects with simple payloads that don't contain pointers to other data structures
 };
 
 LinkedListTests::LinkedListTests()
@@ -342,37 +345,38 @@ void LinkedListTests::testAssignRemoveObject()
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 3;
     point->y = 4;
-    assignObjectToListElement(createAndAppendToList(list, 2), static_cast<void*>(point), "coordinates");
+    assignObjectToListElement(createAndAppendToList(list, 2), "coordinates", static_cast<void*>(point));
     point = nullptr;
     // int
     int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 5;
-    assignObjectToListElement(createAndAppendToList(list, 3), static_cast<void*>(distance), "distance");
+    assignObjectToListElement(createAndAppendToList(list, 3), "distance", static_cast<void*>(distance));
     distance = nullptr;
     // float
     float* angle = static_cast<float*>(malloc(sizeof(float)));
     *angle = 1.25;
-    assignObjectToListElement(createAndAppendToList(list, 1), static_cast<void*>(angle), "angle");
+    assignObjectToListElement(createAndAppendToList(list, 1), "angle", static_cast<void*>(angle));
     angle = nullptr;
     // no object
     Q_UNUSED(createAndPrependToList(list, 10));
 
     ListIterator it = lbegin(list);
-    QVERIFY2(it.current->objectType == nullptr && it.current->object == nullptr, "Default object and object type are incorrect (should be NULL)");
+    QVERIFY2(it.current->object == nullptr, "Default object and object type are incorrect (should be NULL)");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->objectType, "coordinates") == 0 && (static_cast<Point*>(it.current->object))->x == 3 && (static_cast<Point*>(it.current->object))->y == 4,
-             "Object has been incorrectly assigned");
+    QVERIFY2(strcmp(it.current->object->type, "coordinates") == 0 && (static_cast<Point*>(it.current->object->payload))->x == 3
+             && (static_cast<Point*>(it.current->object->payload))->y == 4, "Object has been incorrectly assigned");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->objectType, "distance") == 0 && *(static_cast<int*>(it.current->object)) == 5, "Object has been incorrectly assigned");
+    QVERIFY2(strcmp(it.current->object->type, "distance") == 0 && *(static_cast<int*>(it.current->object->payload)) == 5, "Object has been incorrectly assigned");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->objectType, "angle") == 0 && *(static_cast<float*>(it.current->object)) == 1.25f, "Object has been incorrectly assigned");
+    QVERIFY2(strcmp(it.current->object->type, "angle") == 0 && *(static_cast<float*>(it.current->object->payload)) == 1.25f, "Object has been incorrectly assigned");
 
-    void* removedObject = static_cast<int*>(removeObjectFromListElement(getElementAtIndex(list, 2)));
-    QVERIFY2(getElementAtIndex(list, 2)->objectType == nullptr && getElementAtIndex(list, 2)->object == nullptr && (*(static_cast<int*>(removedObject)) == 5),
+    Object* removedObject = static_cast<Object*>(removeObjectFromListElement(getElementAtIndex(list, 2)));
+    QVERIFY2(getElementAtIndex(list, 2)->object == nullptr && (strcmp(removedObject->type, "distance") == 0) && (*(static_cast<int*>(removedObject->payload)) == 5),
              "Incorrect object removal from list element");
 
     free(removedObject);
     removedObject = nullptr;
+    _freeSimpleListObjects(list); // for remaining objects that should be de-allocated
     deleteList(list);
     list = nullptr;
 }
@@ -396,6 +400,27 @@ void LinkedListTests::testIsElementContained()
 
     deleteList(list);
     free(secondElement);
+}
+
+void LinkedListTests::_freeSimpleListObjects(List *list)
+{
+    if (list != nullptr)
+    {
+        for (ListIterator it = lbegin(list); !areIteratorsEqual(it, lend(list)); lnext(&it))
+        {
+            if (it.current->object != nullptr)
+            {
+                Object* object = it.current->object;
+                it.current->object = nullptr;
+                free(object->type);
+                object->type = nullptr;
+                free(object->payload);
+                object->payload = nullptr;
+                free(object);
+                object = nullptr;
+            }
+        }
+    }
 }
 
 QTEST_APPLESS_MAIN(LinkedListTests)
