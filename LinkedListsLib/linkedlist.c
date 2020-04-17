@@ -108,7 +108,7 @@ ListElement* createAndAppendToList(List* list, size_t priority)
     return element;
 }
 
-ListElement* createAndInsertAsNext(ListIterator it, size_t priority)
+ListElement* createAndInsertAfter(ListIterator it, size_t priority)
 {
     ListElement* result = NULL;
 
@@ -123,7 +123,7 @@ ListElement* createAndInsertAsNext(ListIterator it, size_t priority)
             if (nextElement != NULL)
             {
                 result = nextElement;
-                insertAsNext(it, nextElement);
+                insertAfter(it, nextElement);
             }
         }
         else if (it.list->first == NULL)
@@ -135,7 +135,7 @@ ListElement* createAndInsertAsNext(ListIterator it, size_t priority)
     return result;
 }
 
-void insertAsNext(ListIterator it, ListElement* nextElement)
+void insertAfter(ListIterator it, ListElement* nextElement)
 {
     if (it.list != NULL && nextElement != NULL)
     {

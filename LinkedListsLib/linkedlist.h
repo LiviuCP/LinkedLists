@@ -49,8 +49,8 @@ void appendToList(List* list, ListElement* newElement);
 ListElement* createAndPrependToList(List* list, size_t priority);
 ListElement* createAndAppendToList(List* list, size_t priority);
 
-ListElement* createAndInsertAsNext(ListIterator it, size_t priority);
-void insertAsNext(ListIterator it, ListElement* nextElement);
+ListElement* createAndInsertAfter(ListIterator it, size_t priority);
+void insertAfter(ListIterator it, ListElement* nextElement);
 
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
 Object* removeObjectFromListElement(ListElement* element);

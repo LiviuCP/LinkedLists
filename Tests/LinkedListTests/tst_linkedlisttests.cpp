@@ -131,7 +131,7 @@ void LinkedListTests::testInsertElementAfter()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
 
         ListIterator it = lbegin(list);
-        createAndInsertAsNext(it, 10);
+        createAndInsertAfter(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
                  getElementAtIndex(list, 0)->priority == 6 &&
@@ -149,7 +149,7 @@ void LinkedListTests::testInsertElementAfter()
 
         ListIterator it = lbegin(list);
         lnext(&it);
-        createAndInsertAsNext(it, 10);
+        createAndInsertAfter(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
                  getElementAtIndex(list, 0)->priority == 6 &&
@@ -169,7 +169,7 @@ void LinkedListTests::testInsertElementAfter()
         lnext(&it);
         lnext(&it);
         lnext(&it);
-        createAndInsertAsNext(it, 10);
+        createAndInsertAfter(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
                  getElementAtIndex(list, 0)->priority == 6 &&
@@ -185,7 +185,7 @@ void LinkedListTests::testInsertElementAfter()
     {
         List* list = createList();
         ListIterator it = lbegin(list);
-        createAndInsertAsNext(it, 10);
+        createAndInsertAfter(it, 10);
 
         QVERIFY2(getListSize(list) == 1 && getElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
 
