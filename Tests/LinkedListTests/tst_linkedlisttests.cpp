@@ -33,6 +33,7 @@ private slots:
     void testIterators();
     void testAssignRemoveObject();
     void testIsElementContained();
+    void testGetLastElement();
 
 private:
     void _freeSimpleListObjects(List* list); // to be used only with objects with simple payloads that don't contain pointers to other data structures
@@ -940,6 +941,27 @@ void LinkedListTests::testIsElementContained()
 
     deleteList(list);
     free(secondElement);
+}
+
+void LinkedListTests::testGetLastElement()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 9});
+
+        QVERIFY2(getLastElement(list)->priority == 9, "The last list element is not correctly retrieved");
+
+        deleteList(list);
+        list = nullptr;
+    }
+
+    {
+        List* list = createList();
+
+        QVERIFY2(getLastElement(list) == nullptr, "The last list element is not correctly retrieved");
+
+        deleteList(list);
+        list = nullptr;
+    }
 }
 
 void LinkedListTests::_freeSimpleListObjects(List *list)

@@ -521,6 +521,25 @@ ListElement* getElementAtIndex(const List* list, size_t index)
     return result;
 }
 
+ListElement* getLastElement(const List* list)
+{
+    ListElement* result = NULL;
+
+    if (list != NULL && list->first != NULL)
+    {
+        ListElement* currentElement = list->first;
+
+        while (currentElement->next != NULL)
+        {
+            currentElement = currentElement->next;
+        }
+
+        result = currentElement;
+    }
+
+    return result;
+}
+
 int isElementContained(const ListElement* element, const List* list)
 {
     int result = 0;
