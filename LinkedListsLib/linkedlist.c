@@ -220,6 +220,67 @@ void moveContentToList(List* source, List* destination)
     }
 }
 
+/* The objects of the source list will not be copied into the destination list. This is because without knowing the object types the only way to achieve this is by
+   shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, the objects will not be copied at all so the new elements of the
+   destination list will contain NULL objects
+*/
+ListElement* copyContentToList(const List* source, List* destination)
+{
+    ListElement* result = NULL;
+
+    if (source != NULL && destination != NULL && source != destination && source->first != NULL)
+    {
+        List* temp = createList();
+
+        if (temp != NULL)
+        {
+            ListElement* currentSourceElement = source->first;
+            // use createAndAppendToList() only once to avoid overhead of finding last list element
+            ListElement* lastAppendedElement = createAndAppendToList(temp, currentSourceElement->priority);
+
+            if (lastAppendedElement != NULL)
+            {
+                currentSourceElement = currentSourceElement->next;
+
+                while (currentSourceElement != NULL)
+                {
+                    ListElement* elementToAppend = createListElement();
+
+                    if (elementToAppend == NULL)
+                    {
+                        // abort operation if a single additional element cannot be created
+                        deleteList(temp);
+                        temp = NULL;
+                        break;
+                    }
+                    else
+                    {
+                        elementToAppend->priority = currentSourceElement->priority;
+                        lastAppendedElement->next = elementToAppend;
+                        lastAppendedElement = elementToAppend;
+                        currentSourceElement = currentSourceElement->next;
+                    }
+                }
+
+                if (temp != NULL)
+                {
+                    result = temp->first;
+                    moveContentToList(temp, destination);
+                    deleteList(temp);
+                    temp = NULL;
+                }
+            }
+            else {
+                // abort operation if the first copied element cannot be created
+                deleteList(temp);
+                temp = NULL;
+            }
+        }
+    }
+
+    return result;
+}
+
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
 {
     if (element != NULL && objectPayload != NULL && objectType != NULL)

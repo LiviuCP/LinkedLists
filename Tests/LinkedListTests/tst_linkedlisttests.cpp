@@ -24,6 +24,7 @@ private slots:
     void testInsertElementBefore();
     void testInsertElementAfter();
     void testMoveContentToList();
+    void testCopyContentToList();
     void testRemoveElementBefore();
     void testRemoveElementAfter();
     void testRemoveCurrentElement();
@@ -336,6 +337,62 @@ void LinkedListTests::testMoveContentToList()
                  getListSize(destination) == 2 &&
                  getElementAtIndex(destination, 0)->priority == 6 &&
                  getElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly moved to destination");
+
+        deleteList(source);
+        source = nullptr;
+        deleteList(destination);
+        destination = nullptr;
+    }
+}
+
+void LinkedListTests::testCopyContentToList()
+{
+    {
+        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
+        List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
+
+        copyContentToList(source, destination);
+
+        QVERIFY2(getListSize(source) == 2 &&
+                 getListSize(destination) == 4 &&
+                 getElementAtIndex(destination, 0)->priority == 7 &&
+                 getElementAtIndex(destination, 1)->priority == 4 &&
+                 getElementAtIndex(destination, 2)->priority == 6 &&
+                 getElementAtIndex(destination, 3)->priority == 2,   "The source list content has not been correctly copied to destination");
+
+        deleteList(source);
+        source = nullptr;
+        deleteList(destination);
+        destination = nullptr;
+    }
+
+    {
+        List* source = createList();
+        List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
+
+        copyContentToList(source, destination);
+
+        QVERIFY2(getListSize(source) == 0 &&
+                 getListSize(destination) == 2 &&
+                 getElementAtIndex(destination, 0)->priority == 7 &&
+                 getElementAtIndex(destination, 1)->priority == 4,   "The source list content has not been correctly copied to destination");
+
+        deleteList(source);
+        source = nullptr;
+        deleteList(destination);
+        destination = nullptr;
+    }
+
+    {
+        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
+        List* destination = createList();
+
+        copyContentToList(source, destination);
+
+        QVERIFY2(getListSize(source) == 2 &&
+                 getListSize(destination) == 2 &&
+                 getElementAtIndex(destination, 0)->priority == 6 &&
+                 getElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly copied to destination");
 
         deleteList(source);
         source = nullptr;
