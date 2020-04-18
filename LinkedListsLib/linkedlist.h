@@ -51,12 +51,15 @@ ListElement* createAndAppendToList(List* list, size_t priority);
 
 ListElement* createAndInsertAfter(ListIterator it, size_t priority);
 void insertAfter(ListIterator it, ListElement* nextElement);
+ListElement* createAndInsertBefore(ListIterator it, size_t priority);
+void insertBefore(ListIterator it, ListElement* previousElement);
 
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
 Object* removeObjectFromListElement(ListElement* element);
 
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
+ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
 
 void clearList(List* list);

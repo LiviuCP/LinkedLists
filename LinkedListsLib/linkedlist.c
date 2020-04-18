@@ -161,6 +161,56 @@ void insertAfter(ListIterator it, ListElement* nextElement)
     }
 }
 
+ListElement* createAndInsertBefore(ListIterator it, size_t priority)
+{
+    ListElement* result = NULL;
+
+    if (it.list != NULL)
+    {
+        ListElement* previousElement = createListElement();
+        previousElement->priority = priority;
+
+        if (previousElement != NULL)
+        {
+            result = previousElement;
+            insertBefore(it, previousElement);
+        }
+    }
+
+    return result;
+}
+
+void insertBefore(ListIterator it, ListElement* previousElement)
+{
+    if (it.list != NULL && previousElement != NULL)
+    {
+        ASSERT_CONDITION(previousElement->next == NULL, "Element to be inserted is linked to another element!");
+
+        if (it.current != NULL)
+        {
+            if (it.current == it.list->first)
+            {
+                previousElement->next = it.list->first;
+                it.list->first = previousElement;
+            }
+            else
+            {
+                ListElement* currentElement = it.list->first;
+                while (currentElement->next != it.current)
+                {
+                    currentElement = currentElement->next;
+                }
+                currentElement->next = previousElement;
+                previousElement->next = it.current;
+            }
+        }
+        else
+        {
+            appendToList(it.list, previousElement);
+        }
+    }
+}
+
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
 {
     if (element != NULL && objectPayload != NULL && objectType != NULL)
@@ -252,6 +302,39 @@ ListElement* removeLastListElement(List* list)
     }
 
     return removedElement;
+}
+
+ListElement* removePreviousListElement(ListIterator it)
+{
+    ListElement* result = NULL;
+
+    if (it.list != NULL && it.list->first != NULL && it.current != it.list->first)
+    {
+        ListElement* currentElement = it.list->first;
+        ListElement* previousElement = it.list->first;
+
+        if (currentElement->next == it.current)
+        {
+            it.list->first = it.current;
+        }
+        else
+        {
+            currentElement = currentElement->next;
+
+            while (currentElement->next != it.current)
+            {
+                previousElement = currentElement;
+                currentElement = currentElement->next;
+            }
+
+            previousElement->next = it.current;
+        }
+
+        currentElement->next = NULL;
+        result = currentElement;
+    }
+
+    return result;
 }
 
 ListElement* removeNextListElement(ListIterator it)
