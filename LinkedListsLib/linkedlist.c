@@ -211,6 +211,15 @@ void insertBefore(ListIterator it, ListElement* previousElement)
     }
 }
 
+void moveContentToList(List* source, List* destination)
+{
+    if (source != NULL && destination != NULL && source != destination && source->first != NULL)
+    {
+        appendToList(destination, source->first);
+        source->first = NULL;
+    }
+}
+
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
 {
     if (element != NULL && objectPayload != NULL && objectType != NULL)

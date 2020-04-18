@@ -54,6 +54,8 @@ void insertAfter(ListIterator it, ListElement* nextElement);
 ListElement* createAndInsertBefore(ListIterator it, size_t priority);
 void insertBefore(ListIterator it, ListElement* previousElement);
 
+void moveContentToList(List* source, List* destination);
+
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
 Object* removeObjectFromListElement(ListElement* element);
 
