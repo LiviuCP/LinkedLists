@@ -25,6 +25,7 @@ private slots:
     void testInsertElementAfter();
     void testRemoveElementBefore();
     void testRemoveElementAfter();
+    void testRemoveCurrentElement();
     void testReverseList();
     void testSortAscendingByPriority();
     void testIterators();
@@ -473,6 +474,79 @@ void LinkedListTests::testRemoveElementAfter()
         ListElement* removedElement = removeNextListElement(it);
 
         QVERIFY2(getListSize(list) == 1 && removedElement == nullptr && getElementAtIndex(list, 0)->priority == 5, "The only existing list element has not been correctly removed");
+
+        deleteList(list);
+        list = nullptr;
+    }
+}
+
+void LinkedListTests::testRemoveCurrentElement()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+
+        ListIterator it = lbegin(list);
+        ListElement* removedElement = removeCurrentListElement(it);
+
+        QVERIFY2(getListSize(list) == 2 &&
+                 removedElement->priority == 6 &&
+                 getElementAtIndex(list, 0)->priority == 2 &&
+                 getElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
+
+        free(removedElement);
+        removedElement = nullptr;
+        deleteList(list);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+
+        ListIterator it = lbegin(list);
+        lnext(&it);
+        ListElement* removedElement = removeCurrentListElement(it);
+
+        QVERIFY2(getListSize(list) == 2 &&
+                 removedElement->priority == 2 &&
+                 getElementAtIndex(list, 0)->priority == 6 &&
+                 getElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
+
+        free(removedElement);
+        removedElement = nullptr;
+        deleteList(list);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+
+        ListIterator it = lbegin(list);
+        lnext(&it);
+        lnext(&it);
+        ListElement* removedElement = removeCurrentListElement(it);
+
+        QVERIFY2(getListSize(list) == 2 &&
+                 removedElement->priority == 5 &&
+                 getElementAtIndex(list, 0)->priority == 6 &&
+                 getElementAtIndex(list, 1)->priority == 2,   "The current element has not been correctly removed");
+
+        free(removedElement);
+        removedElement = nullptr;
+        deleteList(list);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+
+        ListIterator it = lbegin(list);
+        lnext(&it);
+        lnext(&it);
+        lnext(&it);
+        ListElement* removedElement = removeCurrentListElement(it);
+
+        QVERIFY2(getListSize(list) == 3 &&
+                 removedElement == nullptr,   "The current element removal does not work correctly");
 
         deleteList(list);
         list = nullptr;

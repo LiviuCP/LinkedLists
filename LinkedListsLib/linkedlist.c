@@ -351,6 +351,19 @@ ListElement* removeNextListElement(ListIterator it)
     return result;
 }
 
+ListElement* removeCurrentListElement(ListIterator it)
+{
+    ListElement* result = NULL;
+
+    if (it.list != NULL && it.current != NULL)
+    {
+        lnext(&it);
+        result =removePreviousListElement(it);
+    }
+
+    return result;
+}
+
 // user is responsible for de-allocating the Object of each element prior to erasing elements from the list
 void clearList(List *list)
 {

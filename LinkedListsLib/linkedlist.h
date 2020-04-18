@@ -61,6 +61,7 @@ ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
 ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
+ListElement* removeCurrentListElement(ListIterator it);
 
 void clearList(List* list);
 
