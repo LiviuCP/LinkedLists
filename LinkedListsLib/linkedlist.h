@@ -43,6 +43,8 @@ List* createList();
 void deleteList(List* list, void (*deallocObject)(Object* object));
 void deleteObject(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
 
+int copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
+
 ListElement* createListElement();
 
 void prependToList(List* list, ListElement* newElement);
@@ -56,7 +58,8 @@ ListElement* createAndInsertBefore(ListIterator it, size_t priority);
 void insertBefore(ListIterator it, ListElement* previousElement);
 
 void moveContentToList(List* source, List* destination);
-ListElement* copyContentToList(const List* source, List* destination, void (*deallocObject)(Object* object));
+ListElement* copyContentToList(const List* source, List* destination, int (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+                               void (*deallocObject)(Object* object));
 
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
 Object* removeObjectFromListElement(ListElement* element);

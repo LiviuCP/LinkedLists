@@ -349,7 +349,7 @@ void LinkedListTests::testCopyContentToList()
         List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
         List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
 
-        copyContentToList(source, destination, deleteObject);
+        copyContentToList(source, destination, copyObject, deleteObject);
 
         QVERIFY2(getListSize(source) == 2 &&
                  getListSize(destination) == 4 &&
@@ -368,7 +368,7 @@ void LinkedListTests::testCopyContentToList()
         List* source = createList();
         List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
 
-        copyContentToList(source, destination, deleteObject);
+        copyContentToList(source, destination, copyObject, deleteObject);
 
         QVERIFY2(getListSize(source) == 0 &&
                  getListSize(destination) == 2 &&
@@ -385,7 +385,7 @@ void LinkedListTests::testCopyContentToList()
         List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
         List* destination = createList();
 
-        copyContentToList(source, destination, deleteObject);
+        copyContentToList(source, destination, copyObject, deleteObject);
 
         QVERIFY2(getListSize(source) == 2 &&
                  getListSize(destination) == 2 &&

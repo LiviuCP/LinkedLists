@@ -50,6 +50,21 @@ void deleteObject(Object *object)
     object = NULL;
 }
 
+/* This function is just added for having a default value to be passed to the copyContentToList() function as deep copying function pointer.
+   User is responsible to pass a custom deep copying function with this signature if any list element contains an non-NULL Object.
+*/
+int copyObject(const ListElement* source, ListElement* destination)
+{
+    int success = 0;
+
+    if (source != NULL && destination != NULL)
+    {
+        success = 1;
+    }
+
+    return success;
+}
+
 ListElement* createListElement()
 {
     ListElement* result = (ListElement*)malloc(sizeof(ListElement));
@@ -244,7 +259,8 @@ void moveContentToList(List* source, List* destination)
    shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, the objects will not be copied at all so the new elements of the
    destination list will contain NULL objects
 */
-ListElement* copyContentToList(const List* source, List* destination, void (*deallocObject)(Object* object))
+ListElement* copyContentToList(const List* source, List* destination, int (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+                               void (*deallocObject)(Object* object))
 {
     ListElement* result = NULL;
 
@@ -258,7 +274,7 @@ ListElement* copyContentToList(const List* source, List* destination, void (*dea
             // use createAndAppendToList() only once to avoid overhead of finding last list element
             ListElement* lastAppendedElement = createAndAppendToList(temp, currentSourceElement->priority);
 
-            if (lastAppendedElement != NULL)
+            if (lastAppendedElement != NULL && copyObjectToElement(currentSourceElement, lastAppendedElement))
             {
                 currentSourceElement = currentSourceElement->next;
 
@@ -266,19 +282,19 @@ ListElement* copyContentToList(const List* source, List* destination, void (*dea
                 {
                     ListElement* elementToAppend = createListElement();
 
-                    if (elementToAppend == NULL)
-                    {
-                        // abort operation if a single additional element cannot be created
-                        deleteList(temp, deallocObject);
-                        temp = NULL;
-                        break;
-                    }
-                    else
+                    if (elementToAppend != NULL && copyObjectToElement(currentSourceElement, elementToAppend))
                     {
                         elementToAppend->priority = currentSourceElement->priority;
                         lastAppendedElement->next = elementToAppend;
                         lastAppendedElement = elementToAppend;
                         currentSourceElement = currentSourceElement->next;
+                    }
+                    else
+                    {
+                        // abort operation if a single additional element cannot be created
+                        deleteList(temp, deallocObject);
+                        temp = NULL;
+                        break;
                     }
                 }
 
