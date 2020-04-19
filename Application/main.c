@@ -64,7 +64,7 @@ int main()
             {
             case 0:
                 // erase list
-                deleteList(list);
+                deleteList(list, deleteObject);
                 system("clear");
                 printf("You exited the app!\n");
                 break;
@@ -165,7 +165,7 @@ int main()
             case 7:
                 if (getListSize(list) != 0)
                 {
-                    clearList(list);
+                    clearList(list, deleteObject);
                     system("clear");
                     printf("The list has been emptied\n\n");
                 }

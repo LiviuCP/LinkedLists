@@ -40,7 +40,8 @@ extern "C"{
 #endif
 
 List* createList();
-void deleteList(List* list);
+void deleteList(List* list, void (*deallocObject)(Object* object));
+void deleteObject(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
 
 ListElement* createListElement();
 
@@ -55,7 +56,7 @@ ListElement* createAndInsertBefore(ListIterator it, size_t priority);
 void insertBefore(ListIterator it, ListElement* previousElement);
 
 void moveContentToList(List* source, List* destination);
-ListElement* copyContentToList(const List* source, List* destination);
+ListElement* copyContentToList(const List* source, List* destination, void (*deallocObject)(Object* object));
 
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
 Object* removeObjectFromListElement(ListElement* element);
@@ -66,7 +67,7 @@ ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
 ListElement* removeCurrentListElement(ListIterator it);
 
-void clearList(List* list);
+void clearList(List* list, void (*deallocObject)(Object* object));
 
 void reverseList(List* list);
 void sortAscendingByPriority(List* list);

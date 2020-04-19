@@ -18,16 +18,36 @@ List* createList()
 }
 
 // user is responsible for de-allocating the Object of each element prior to erasing the list
-void deleteList(List* list)
+void deleteList(List* list, void (*deallocObject)(Object* object))
 {
     if (list != NULL)
     {
         if (list->first != NULL)
         {
-            clearList(list);
+            clearList(list, deallocObject);
         }
         free(list);
     }
+}
+
+// user should pass a custom deleter for objects with payloads containing pointers to allocated heap memory
+void deleteObject(Object *object)
+{
+    if (object != NULL)
+    {
+        if (object->type != NULL)
+        {
+            free(object->type);
+            object->type = NULL;
+        }
+        if (object->payload != NULL)
+        {
+            free(object->payload);
+            object->payload = NULL;
+        }
+    }
+    free(object);
+    object = NULL;
 }
 
 ListElement* createListElement()
@@ -224,7 +244,7 @@ void moveContentToList(List* source, List* destination)
    shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, the objects will not be copied at all so the new elements of the
    destination list will contain NULL objects
 */
-ListElement* copyContentToList(const List* source, List* destination)
+ListElement* copyContentToList(const List* source, List* destination, void (*deallocObject)(Object* object))
 {
     ListElement* result = NULL;
 
@@ -249,7 +269,7 @@ ListElement* copyContentToList(const List* source, List* destination)
                     if (elementToAppend == NULL)
                     {
                         // abort operation if a single additional element cannot be created
-                        deleteList(temp);
+                        deleteList(temp, deallocObject);
                         temp = NULL;
                         break;
                     }
@@ -266,13 +286,13 @@ ListElement* copyContentToList(const List* source, List* destination)
                 {
                     result = temp->first;
                     moveContentToList(temp, destination);
-                    deleteList(temp);
+                    deleteList(temp, deallocObject);
                     temp = NULL;
                 }
             }
             else {
                 // abort operation if the first copied element cannot be created
-                deleteList(temp);
+                deleteList(temp, deallocObject);
                 temp = NULL;
             }
         }
@@ -435,7 +455,7 @@ ListElement* removeCurrentListElement(ListIterator it)
 }
 
 // user is responsible for de-allocating the Object of each element prior to erasing elements from the list
-void clearList(List *list)
+void clearList(List *list, void (*deallocObject)(Object* object))
 {
     if (list != NULL)
     {
@@ -444,6 +464,8 @@ void clearList(List *list)
 
         while (currentElement != NULL)
         {
+            deallocObject(currentElement->object);
+            currentElement->object = NULL;
             ListElement* elementToDelete = currentElement;
             currentElement = currentElement->next;
             free(elementToDelete);
