@@ -86,6 +86,10 @@ ListIterator lend(List* list);
 void lnext(ListIterator* iterator);
 int areIteratorsEqual(ListIterator first, ListIterator second);
 
+// for testing purposes only
+void customDeleteObject(Object* object);
+int customCopyObject(const ListElement* source, ListElement* destination);
+
 #ifdef __cplusplus
 }
 #endif

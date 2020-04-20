@@ -8,6 +8,17 @@ typedef struct {
     int y;
 } Point;
 
+typedef struct {
+    Point* start;
+    Point* stop;
+} Segment;
+
+typedef struct {
+    Point* position;
+    int temperature;
+    double humidity;
+} LocalConditions;
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -15,6 +26,9 @@ extern "C"{
 char* getLine();
 int readUnsignedLong(size_t* number);
 int isUnsignedLong(const char* input);
+
+Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY);
+LocalConditions* createLocalConditionsPayload(int coordinateX, int coordinateY, int temperature, double humidity);
 
 #ifdef __cplusplus
 }

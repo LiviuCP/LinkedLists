@@ -5,6 +5,9 @@
 #include "../../LinkedListsLib/linkedlist.h"
 #include "../../Utils/codeutils.h"
 
+void customDeleteObject(Object* object); // custom C-Style object deallocator
+int customCopyObject(const ListElement* source, ListElement* destination); // custom C-Style copy Object function
+
 class LinkedListTests : public QObject
 {
     Q_OBJECT
@@ -395,6 +398,42 @@ void LinkedListTests::testCopyContentToList()
         deleteList(source, deleteObject);
         source = nullptr;
         deleteList(destination, deleteObject);
+        destination = nullptr;
+    }
+
+    {
+        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
+        List* destination = createLinkedList(std::initializer_list<size_t>{5, 4, 3});
+
+        ListIterator it = lbegin(source);
+        assignObjectToListElement(it.current, "Segment", createSegmentPayload(2, 5, 4, 11));
+        lnext(&it);
+        assignObjectToListElement(it.current, "LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8));
+
+        copyContentToList(source, destination, customCopyObject, customDeleteObject);
+
+        const Segment* copiedSegment = static_cast<Segment*>(getElementAtIndex(destination, 3)->object->payload);
+        const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getElementAtIndex(destination, 4)->object->payload);
+
+        QVERIFY2(getListSize(source) == 2 &&
+                 getListSize(destination) == 5 &&
+                 getElementAtIndex(destination, 0)->priority == 5 &&
+                 getElementAtIndex(destination, 0)->object == nullptr &&
+                 getElementAtIndex(destination, 1)->priority == 4 &&
+                 getElementAtIndex(destination, 1)->object == nullptr &&
+                 getElementAtIndex(destination, 2)->priority == 3 &&
+                 getElementAtIndex(destination, 2)->object == nullptr &&
+                 getElementAtIndex(destination, 3)->priority == 6 &&
+                 strcmp(getElementAtIndex(destination, 3)->object->type, "Segment") == 0 &&
+                 copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
+                 getElementAtIndex(destination, 4)->priority == 2 &&
+                 strcmp(getElementAtIndex(destination, 4)->object->type, "LocalConditions") == 0 &&
+                 copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 && copiedConditions->humidity == 12.8,
+                 "The source list content has not been correctly copied to destination");
+
+        deleteList(source, customDeleteObject);
+        source = nullptr;
+        deleteList(destination, customDeleteObject);
         destination = nullptr;
     }
 }

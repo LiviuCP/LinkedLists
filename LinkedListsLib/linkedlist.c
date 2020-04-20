@@ -639,3 +639,125 @@ int areIteratorsEqual(ListIterator first, ListIterator second)
     ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists")
     return first.current == second.current;
 }
+
+/* These two functions are just for illustrating the creation of custom deallocator and custom deep copy function */
+void customDeleteObject(Object* object)
+{
+    if (object != NULL)
+    {
+        if (object->payload != NULL)
+        {
+            ASSERT_CONDITION(object->type != NULL, "Null object type when payload is not null"); // object should have both type and payload
+            if (strcmp(object->type,"Segment") == 0)
+            {
+                Segment* segment = (Segment*)object->payload;
+                free(segment->start);
+                segment->start = NULL;
+                free(segment->stop);
+                segment->stop = NULL;
+            }
+            else if (strcmp(object->type, "LocalConditions") == 0)
+            {
+                LocalConditions* conditions = (LocalConditions*)object->payload;
+                free(conditions->position);
+                conditions->position = NULL;
+            }
+        }
+
+        free(object->payload);
+        object->payload = NULL;
+        free(object->type);
+        object->type = NULL;
+        free(object);
+        object = NULL;
+    }
+}
+
+int customCopyObject(const ListElement* source, ListElement* destination)
+{
+    int success = 0;
+
+    if (source != NULL && destination != NULL && source->object != NULL && source->object->type != NULL && source->object->payload != NULL)
+    {
+        char* destinationObjectType = (char*)malloc(strlen(source->object->type)+1);
+        if (destinationObjectType != NULL)
+        {
+            strcpy(destinationObjectType, source->object->type);
+
+            if (strcmp(destinationObjectType, "Segment") == 0)
+            {
+                Segment* destinationObjectPayload = (Segment*)malloc(sizeof(Segment));
+                if (destinationObjectPayload != NULL)
+                {
+                    destinationObjectPayload->start = (Point*)malloc(sizeof(Point));
+                    destinationObjectPayload->stop = (Point*)malloc(sizeof(Point));
+                    Object* destinationObject = (Object*)malloc(sizeof(Object));
+
+                    if (destinationObjectPayload->start != NULL && destinationObjectPayload->stop != NULL && destinationObject != NULL)
+                    {
+                        const Segment* sourceObjectPayload = (Segment*)source->object->payload;
+                        destinationObjectPayload->start->x = sourceObjectPayload->start->x;
+                        destinationObjectPayload->start->y = sourceObjectPayload->start->y;
+                        destinationObjectPayload->stop->x = sourceObjectPayload->stop->x;
+                        destinationObjectPayload->stop->y = sourceObjectPayload->stop->y;
+                        destinationObject->type = destinationObjectType;
+                        destinationObject->payload = (void*)destinationObjectPayload;
+                        destination->object = destinationObject;
+                        success = 1;
+                    }
+                    else
+                    {
+                        free(destinationObjectPayload->start);
+                        destinationObjectPayload->start = NULL;
+                        free(destinationObjectPayload->stop);
+                        destinationObjectPayload->stop = NULL;
+                        free(destinationObjectPayload);
+                        destinationObjectPayload = NULL;
+                        free(destinationObject);
+                        destinationObject = NULL;
+                    }
+                }
+
+            }
+            else if (strcmp(destinationObjectType, "LocalConditions") == 0)
+            {
+                LocalConditions* destinationObjectPayload = (LocalConditions*)malloc(sizeof(LocalConditions));
+                if (destinationObjectPayload != NULL)
+                {
+                    destinationObjectPayload->position = (Point*)malloc(sizeof(Point));
+                    Object* destinationObject = (Object*)malloc(sizeof(Object));
+                    if (destinationObjectPayload->position != NULL && destinationObject != NULL)
+                    {
+                        const LocalConditions* sourceObjectPayload = (LocalConditions*)source->object->payload;
+                        destinationObjectPayload->position->x = sourceObjectPayload->position->x;
+                        destinationObjectPayload->position->y = sourceObjectPayload->position->y;
+                        destinationObjectPayload->humidity = sourceObjectPayload->humidity;
+                        destinationObjectPayload->temperature = sourceObjectPayload->temperature;
+                        destinationObject->type = destinationObjectType;
+                        destinationObject->payload = (void*)destinationObjectPayload;
+                        destination->object = destinationObject;
+                        success = 1;
+                    }
+                    else
+                    {
+                        free(destinationObjectPayload->position);
+                        destinationObjectPayload->position = NULL;
+                        free(destinationObjectPayload);
+                        destinationObjectPayload = NULL;
+                        free(destinationObject);
+                        destinationObject = NULL;
+                    }
+                }
+            }
+        }
+
+        if (!success)
+        {
+            // no copy action to be performed if object type is unknown
+            free(destinationObjectType);
+            destinationObjectType = NULL;
+        }
+    }
+
+    return success;
+}
