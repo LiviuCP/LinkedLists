@@ -674,6 +674,35 @@ ListElement** moveListToArray(List* list, size_t* arraySize)
     return result;
 }
 
+List* moveArrayToList(ListElement** array, const size_t arraySize)
+{
+    List* result = NULL;
+
+    if (array != NULL && arraySize > 0)
+    {
+        List* list = createList();
+
+        if (list != NULL)
+        {
+            ListElement** currentArrayElement = array;
+            list->first = *currentArrayElement;
+            *currentArrayElement = NULL;
+            ListElement* currentListElement = list->first;
+
+            for (size_t index = 1; index < arraySize; ++index)
+            {
+                currentListElement->next = array[index];
+                currentListElement = currentListElement->next;
+                array[index] = NULL;
+            }
+
+            result = list;
+        }
+    }
+
+    return result;
+}
+
 /* These two functions are just for illustrating the creation of custom deallocator and custom deep copy function */
 void customDeleteObject(Object* object)
 {

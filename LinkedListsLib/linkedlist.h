@@ -87,6 +87,8 @@ void lnext(ListIterator* iterator);
 int areIteratorsEqual(ListIterator first, ListIterator second);
 
 ListElement** moveListToArray(List* list, size_t* arraySize);
+List* moveArrayToList(ListElement** array, const size_t arraySize);
+
 
 // for testing purposes only
 void customDeleteObject(Object* object);

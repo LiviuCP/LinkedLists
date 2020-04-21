@@ -38,6 +38,7 @@ private slots:
     void testIsElementContained();
     void testGetLastElement();
     void testMoveListToArray();
+    void testMoveArrayToList();
 };
 
 LinkedListTests::LinkedListTests()
@@ -1017,6 +1018,37 @@ void LinkedListTests::testMoveListToArray()
     list = nullptr;
     free(array);
     array = nullptr;
+}
+
+void LinkedListTests::testMoveArrayToList()
+{
+    ListElement** array = static_cast<ListElement**>(calloc(4, sizeof(ListElement*)));
+
+    array[0] = createListElement();
+    array[1] = createListElement();
+    array[2] = createListElement();
+    array[3] = createListElement();
+    array[0]->priority = 6;
+    array[1]->priority = 2;
+    array[2]->priority = 5;
+    array[3]->priority = 9;
+
+    List* list = moveArrayToList(array, 4);
+
+    QVERIFY2(array[0] == nullptr &&
+             array[1] == nullptr &&
+             array[2] == nullptr &&
+             array[3] == nullptr &&
+             getListSize(list) == 4 &&
+             getElementAtIndex(list, 0)->priority == 6 &&
+             getElementAtIndex(list, 1)->priority == 2 &&
+             getElementAtIndex(list, 2)->priority == 5 &&
+             getElementAtIndex(list, 3)->priority == 9, "The array content has been incorrectly moved to list");
+
+    free(array);
+    array = nullptr;
+    deleteList(list, deleteObject);
+    list = nullptr;
 }
 
 QTEST_APPLESS_MAIN(LinkedListTests)
