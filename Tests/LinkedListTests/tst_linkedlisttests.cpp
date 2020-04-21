@@ -1022,6 +1022,7 @@ void LinkedListTests::testMoveListToArray()
 
 void LinkedListTests::testMoveArrayToList()
 {
+    List* list = createList();
     ListElement** array = static_cast<ListElement**>(calloc(4, sizeof(ListElement*)));
 
     array[0] = createListElement();
@@ -1033,7 +1034,7 @@ void LinkedListTests::testMoveArrayToList()
     array[2]->priority = 5;
     array[3]->priority = 9;
 
-    List* list = moveArrayToList(array, 4);
+    moveArrayToList(array, 4, list);
 
     QVERIFY2(array[0] == nullptr &&
              array[1] == nullptr &&

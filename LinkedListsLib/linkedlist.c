@@ -674,40 +674,30 @@ ListElement** moveListToArray(List* list, size_t* arraySize)
     return result;
 }
 
-List* moveArrayToList(ListElement** array, const size_t arraySize)
+void moveArrayToList(ListElement** array, const size_t arraySize, List* list)
 {
-    List* result = NULL;
-
-    if (array != NULL && arraySize > 0)
+    if (array != NULL && arraySize > 0 && list != NULL)
     {
-        List* list = createList();
+        ASSERT_CONDITION(list->first == NULL, "Attempt to move pointers array to unempty list");
+        ListElement** currentArrayElement = array;
+        ASSERT_CONDITION(*array != NULL, "NULL value array element identified");
+        list->first = *currentArrayElement;
+        ListElement* currentListElement = list->first;
 
-        if (list != NULL)
+        for (size_t index = 1; index < arraySize; ++index)
         {
-            ListElement** currentArrayElement = array;
-            ASSERT_CONDITION(*array != NULL, "NULL value array element identified");
-            list->first = *currentArrayElement;
-            ListElement* currentListElement = list->first;
+            currentListElement->next = array[index];
+            ASSERT_CONDITION(array[index] != NULL, "NULL value array element identified");
+            currentListElement = currentListElement->next;
+        }
 
-            for (size_t index = 1; index < arraySize; ++index)
-            {
-                currentListElement->next = array[index];
-                ASSERT_CONDITION(array[index] != NULL, "NULL value array element identified");
-                currentListElement = currentListElement->next;
-            }
-
-            // ensure the list is correctly closed and the array loses ownership of the elements
-            array[arraySize-1]->next = NULL;
-            for (size_t index = 0; index < arraySize; ++index)
-            {
-                array[index] = NULL;
-            }
-
-            result = list;
+        // ensure the list is correctly closed and the array loses ownership of the elements
+        array[arraySize-1]->next = NULL;
+        for (size_t index = 0; index < arraySize; ++index)
+        {
+            array[index] = NULL;
         }
     }
-
-    return result;
 }
 
 /* These two functions are just for illustrating the creation of custom deallocator and custom deep copy function */
