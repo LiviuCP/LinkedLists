@@ -40,6 +40,8 @@ private slots:
     void testGetLastElement();
     void testMoveListToArray();
     void testMoveArrayToList();
+private:
+    size_t _getSumOfPriorities(List* list);
 };
 
 LinkedListTests::LinkedListTests()
@@ -763,12 +765,8 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 3 &&
-                 getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -778,12 +776,8 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 3 &&
-                 getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -793,12 +787,8 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 3 &&
-                 getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -808,12 +798,8 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 3 &&
-                 getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -1064,6 +1050,21 @@ void LinkedListTests::testMoveArrayToList()
     array = nullptr;
     deleteList(list, deleteObject);
     list = nullptr;
+}
+
+size_t LinkedListTests::_getSumOfPriorities(List *list)
+{
+    size_t sum = 0;
+
+    if (list != nullptr)
+    {
+        for (size_t index{0}; index < getListSize(list); ++index)
+        {
+            sum = sum + getElementAtIndex(list, index)->priority;
+        }
+    }
+
+    return sum;
 }
 
 QTEST_APPLESS_MAIN(LinkedListTests)
