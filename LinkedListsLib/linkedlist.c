@@ -685,14 +685,21 @@ List* moveArrayToList(ListElement** array, const size_t arraySize)
         if (list != NULL)
         {
             ListElement** currentArrayElement = array;
+            ASSERT_CONDITION(*array != NULL, "NULL value array element identified");
             list->first = *currentArrayElement;
-            *currentArrayElement = NULL;
             ListElement* currentListElement = list->first;
 
             for (size_t index = 1; index < arraySize; ++index)
             {
                 currentListElement->next = array[index];
+                ASSERT_CONDITION(array[index] != NULL, "NULL value array element identified");
                 currentListElement = currentListElement->next;
+            }
+
+            // ensure the list is correctly closed and the array loses ownership of the elements
+            array[arraySize-1]->next = NULL;
+            for (size_t index = 0; index < arraySize; ++index)
+            {
                 array[index] = NULL;
             }
 
