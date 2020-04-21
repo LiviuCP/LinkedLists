@@ -36,6 +36,7 @@ private slots:
     void testIterators();
     void testAssignRemoveObject();
     void testIsElementContained();
+    void testIsSortedAscendingByPriority();
     void testGetLastElement();
     void testMoveListToArray();
     void testMoveArrayToList();
@@ -978,6 +979,19 @@ void LinkedListTests::testIsElementContained()
 
     deleteList(list, deleteObject);
     free(secondElement);
+}
+
+void LinkedListTests::testIsSortedAscendingByPriority()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
+        QVERIFY2(!isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{1, 2, 2, 3, 5, 6}); // highest prio item first
+        QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
+    }
 }
 
 void LinkedListTests::testGetLastElement()

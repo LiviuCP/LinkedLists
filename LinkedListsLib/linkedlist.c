@@ -600,6 +600,16 @@ int isElementContained(const ListElement* element, const List* list)
     return result;
 }
 
+int isSortedAscendingByPriority(const List* list)
+{
+    CHECK_IF_SORTED(ASCENDING, priority);
+}
+
+int isSortedDescendingByPriority(const List* list)
+{
+    CHECK_IF_SORTED(DESCENDING, priority);
+}
+
 ListIterator lbegin(List* list)
 {
     ListIterator result;

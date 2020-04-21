@@ -1,8 +1,9 @@
-#ifndef LISTMACROS_H
-#define LISTMACROS_H
+#ifndef LISTUTILS_H
+#define LISTUTILS_H
 
 #define ASCENDING >
 #define DESCENDING <
+
 #define SORT_LIST(condition, parameter)                                                                                                         \
 {                                                                                                                                               \
     if (list != NULL && list->first != NULL && list->first->next != NULL)                                                                       \
@@ -57,4 +58,32 @@
     }                                                                                                                                           \
 }
 
-#endif // LISTMACROS_H
+#define CHECK_IF_SORTED(condition, parameter)                                                                                                   \
+{                                                                                                                                               \
+    int isSorted = 1;                                                                                                                           \
+                                                                                                                                                \
+    if (list!= NULL)                                                                                                                            \
+    {                                                                                                                                           \
+        if (list->first != NULL)                                                                                                                \
+        {                                                                                                                                       \
+            ListElement* currentElement = list->first;                                                                                          \
+            while (currentElement->next != NULL)                                                                                                \
+            {                                                                                                                                   \
+                if (currentElement->parameter condition currentElement->next->parameter)                                                                  \
+                {                                                                                                                               \
+                    isSorted = 0;                                                                                                               \
+                    break;                                                                                                                      \
+                }                                                                                                                               \
+                currentElement = currentElement->next;                                                                                          \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+    }                                                                                                                                           \
+    else                                                                                                                                        \
+    {                                                                                                                                           \
+        isSorted = 0;                                                                                                                           \
+    }                                                                                                                                           \
+                                                                                                                                                \
+    return isSorted;                                                                                                                            \
+}
+
+#endif // LISTUTILS_H

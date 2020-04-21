@@ -80,6 +80,8 @@ size_t getListSize(const List* list);
 ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
 ListElement* getLastElement(const List* list);
 int isElementContained(const ListElement* element, const List* list);
+int isSortedAscendingByPriority(const List* list);
+int isSortedDescendingByPriority(const List* list);
 
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);
