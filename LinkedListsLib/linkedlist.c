@@ -640,6 +640,40 @@ int areIteratorsEqual(ListIterator first, ListIterator second)
     return first.current == second.current;
 }
 
+ListElement** moveListToArray(List* list, size_t* arraySize)
+{
+    ListElement** result = NULL;
+    *arraySize = 0;
+
+    if (list != NULL && list->first != NULL)
+    {
+        const size_t nrOfElements = getListSize(list);
+
+        ListElement** array = (ListElement**)calloc(nrOfElements, sizeof(ListElement*));
+
+        if (array != NULL)
+        {
+            ListElement* currentElement = list->first;
+            ListElement** currentArrayElement = array;
+
+            while (currentElement != NULL)
+            {
+                *currentArrayElement = currentElement;
+                currentElement = currentElement->next;
+                (*currentArrayElement)->next = NULL; // decouple the list elements, array will now maintain cohesion and order
+                ++currentArrayElement;
+            }
+
+            list->first = NULL;
+            *arraySize = nrOfElements;
+            result = array;
+            array = NULL;
+        }
+    }
+
+    return result;
+}
+
 /* These two functions are just for illustrating the creation of custom deallocator and custom deep copy function */
 void customDeleteObject(Object* object)
 {

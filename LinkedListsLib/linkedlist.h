@@ -86,6 +86,8 @@ ListIterator lend(List* list);
 void lnext(ListIterator* iterator);
 int areIteratorsEqual(ListIterator first, ListIterator second);
 
+ListElement** moveListToArray(List* list, size_t* arraySize);
+
 // for testing purposes only
 void customDeleteObject(Object* object);
 int customCopyObject(const ListElement* source, ListElement* destination);
