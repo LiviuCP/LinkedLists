@@ -831,3 +831,26 @@ int customCopyObject(const ListElement* source, ListElement* destination)
 
     return success;
 }
+
+int sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
+{
+    int result = 0;
+
+    if (list != NULL && list->first != NULL)
+    {
+        size_t arraySize = 0;
+        ListElement** array = moveListToArray(list, &arraySize);
+
+        if (array != NULL)
+        {
+            sortingAlgorithm(array, arraySize);
+            moveArrayToList(array, arraySize, list);
+            result = 1;
+        }
+
+        free(array);
+        array = NULL;
+    }
+
+    return result;
+}

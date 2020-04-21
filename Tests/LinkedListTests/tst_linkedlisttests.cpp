@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "../../LinkedListsLib/linkedlist.h"
+#include "../../LinkedListsLib/sort.h"
 #include "../../Utils/codeutils.h"
 
 void customDeleteObject(Object* object); // custom C-Style object deallocator
@@ -33,6 +34,7 @@ private slots:
     void testRemoveCurrentElement();
     void testReverseList();
     void testSortAscendingByPriority();
+    void testSortAscendingByPriorityUsingRandomAccess();
     void testIterators();
     void testAssignRemoveObject();
     void testIsElementContained();
@@ -865,6 +867,21 @@ void LinkedListTests::testSortAscendingByPriority()
         sortAscendingByPriority(list);
 
         QVERIFY2(getElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+}
+
+void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
+{
+    // insertion sort
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
+        sortByRandomAccess(list, insertionSortAscendingByPriority);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;

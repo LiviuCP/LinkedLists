@@ -26,13 +26,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         linkedlistslib.cpp \
-        linkedlist.c
+        linkedlist.c \
+        sort.c
 
 HEADERS += \
         linkedlistslib.h \
         linkedlistslib_global.h \
         linkedlist.h \
-        listutils.h
+        listutils.h \
+        sort.h
 
 unix {
     target.path = /usr/lib

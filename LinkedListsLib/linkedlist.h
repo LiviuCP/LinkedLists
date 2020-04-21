@@ -76,6 +76,8 @@ void reverseList(List* list);
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);
 
+int sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
+
 size_t getListSize(const List* list);
 ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
 ListElement* getLastElement(const List* list);

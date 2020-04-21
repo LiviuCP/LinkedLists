@@ -69,7 +69,7 @@
             ListElement* currentElement = list->first;                                                                                          \
             while (currentElement->next != NULL)                                                                                                \
             {                                                                                                                                   \
-                if (currentElement->parameter condition currentElement->next->parameter)                                                                  \
+                if (currentElement->parameter condition currentElement->next->parameter)                                                        \
                 {                                                                                                                               \
                     isSorted = 0;                                                                                                               \
                     break;                                                                                                                      \
@@ -84,6 +84,32 @@
     }                                                                                                                                           \
                                                                                                                                                 \
     return isSorted;                                                                                                                            \
+}
+
+#define INSERTION_SORT(condition, parameter)                                                                                                    \
+{                                                                                                                                               \
+    if (array != NULL && arraySize > 0)                                                                                                         \
+    {                                                                                                                                           \
+        for (int index = 1; index<(int)arraySize; ++index)                                                                                      \
+        {                                                                                                                                       \
+            int elementToInsert = index;                                                                                                        \
+                                                                                                                                                \
+            for (int checkedIndex = index-1; checkedIndex>=0; --checkedIndex)                                                                   \
+            {                                                                                                                                   \
+                if (array[checkedIndex]->parameter condition array[elementToInsert]->parameter)                                                 \
+                {                                                                                                                               \
+                    ListElement* swap = array[checkedIndex];                                                                                    \
+                    array[checkedIndex] = array[elementToInsert];                                                                               \
+                    array[elementToInsert] = swap;                                                                                              \
+                    elementToInsert = checkedIndex;                                                                                             \
+                }                                                                                                                               \
+                else                                                                                                                            \
+                {                                                                                                                               \
+                    break;                                                                                                                      \
+                }                                                                                                                               \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+    }                                                                                                                                           \
 }
 
 #endif // LISTUTILS_H
