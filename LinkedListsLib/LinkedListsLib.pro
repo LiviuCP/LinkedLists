@@ -33,8 +33,9 @@ HEADERS += \
         linkedlistslib.h \
         linkedlistslib_global.h \
         linkedlist.h \
-        listutils.h \
+        listsortutils.h \
         sort.h
+
 
 unix {
     target.path = /usr/lib
