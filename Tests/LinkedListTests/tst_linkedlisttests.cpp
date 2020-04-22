@@ -34,11 +34,14 @@ private slots:
     void testRemoveCurrentElement();
     void testReverseList();
     void testSortAscendingByPriority();
+    void testSortDescendingByPriority();
     void testSortAscendingByPriorityUsingRandomAccess();
+    void testSortDescendingByPriorityUsingRandomAccess();
     void testIterators();
     void testAssignRemoveObject();
     void testIsElementContained();
     void testIsSortedAscendingByPriority();
+    void testIsSortedDescendingByPriority();
     void testGetLastElement();
     void testMoveListToArray();
     void testMoveArrayToList();
@@ -767,8 +770,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
-                 "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -778,8 +780,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
-                 "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -789,8 +790,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
-                 "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -800,8 +800,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
-                 "The list hasn't been correctly sorted");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -811,42 +810,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 1, 2, 6, 5}); // random
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 3 &&
-                 getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
-
-        deleteList(list, deleteObject);
-        list = nullptr;
-    }
-
-    {
-        List* list = createLinkedList(std::initializer_list<size_t>{1, 2, 2, 3, 5, 6}); // perfectly sorted ascending
-        sortAscendingByPriority(list);
-
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 3 &&
-                 getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted");
-
-        deleteList(list, deleteObject);
-        list = nullptr;
-    }
-
-    {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 5, 3, 2, 2, 1}); // perfectly sorted descending
-        sortAscendingByPriority(list);
-
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 3 &&
-                 getElementAtIndex(list, 4)->priority == 5 &&
-                 getElementAtIndex(list, 5)->priority == 6, "The list hasn't been correctly sorted ");
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -865,6 +829,79 @@ void LinkedListTests::testSortAscendingByPriority()
     {
         List* list = createLinkedList(std::initializer_list<size_t>{1});
         sortAscendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+}
+
+void LinkedListTests::testSortDescendingByPriority()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
+        sortDescendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
+        sortDescendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
+        sortDescendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
+        sortDescendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 1, 2, 6, 5}); // random
+        sortDescendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{5, 6});
+        sortDescendingByPriority(list);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && getElementAtIndex(list, 1)->priority == 5, "The list hasn't been correctly sorted ");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{1});
+        sortDescendingByPriority(list);
 
         QVERIFY2(getElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
 
@@ -917,6 +954,57 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         sortByRandomAccess(list, quickSortAscendingByPriority);
 
         QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+}
+
+void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
+{
+    // insertion sort
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
+        sortByRandomAccess(list, insertionSortDescendingByPriority);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
+                 "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    // heap sort
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
+        sortByRandomAccess(list, insertionSortDescendingByPriority);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
+                 "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    // merge sort
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
+        sortByRandomAccess(list, insertionSortDescendingByPriority);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
+                 "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    // quick sort
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
+        sortByRandomAccess(list, insertionSortDescendingByPriority);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1023,13 +1111,36 @@ void LinkedListTests::testIsElementContained()
 void LinkedListTests::testIsSortedAscendingByPriority()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3});
         QVERIFY2(!isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{1, 2, 2, 3, 5, 6}); // highest prio item first
+        List* list = createLinkedList(std::initializer_list<size_t>{1, 2, 2, 3, 5, 6});
         QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{5, 5, 5, 5, 5, 5});
+        QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
+    }
+}
+
+void LinkedListTests::testIsSortedDescendingByPriority()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3});
+        QVERIFY2(!isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 5, 4, 2, 2, 1});
+        QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
+    }
+
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{5, 5, 5, 5, 5, 5});
+        QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
     }
 }
 
