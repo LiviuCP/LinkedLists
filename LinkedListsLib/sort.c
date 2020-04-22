@@ -12,6 +12,8 @@
 void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending);
 void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
 void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
+void _doQuickSortAscendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
+void _doQuickSortDescendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
 
 void swapElement(ListElement** first, ListElement** second)
 {
@@ -58,6 +60,22 @@ void mergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
     }
 }
 
+void quickSortAscendingByPriority(ListElement** array, const size_t arraySize)
+{
+    if (array != NULL && arraySize > 0)
+    {
+        _doQuickSortAscendingByPriority(array, 0, arraySize-1);
+    }
+}
+
+void quickSortDescendingByPriority(ListElement** array, const size_t arraySize)
+{
+    if (array != NULL && arraySize > 0)
+    {
+        _doQuickSortDescendingByPriority(array, 0, arraySize-1);
+    }
+}
+
 // "private" functions
 void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending)
 {
@@ -82,4 +100,14 @@ void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray
 void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
 {
     MERGE_SORT(DESCENDING, priority, _doMergeSortDescendingByPriority);
+}
+
+void _doQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+{
+    QUICK_SORT(ASCENDING, priority, _doQuickSortAscendingByPriority);
+}
+
+void _doQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+{
+    QUICK_SORT(DESCENDING, priority, _doQuickSortDescendingByPriority);
 }

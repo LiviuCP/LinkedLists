@@ -232,4 +232,55 @@
     }                                                                                                                                           \
 }
 
+#define QUICK_SORT(condition, parameter, recursiveCall)                                                                                         \
+{                                                                                                                                               \
+    if (beginIndex != endIndex)                                                                                                                 \
+    {                                                                                                                                           \
+        if (beginIndex == endIndex-1)                                                                                                           \
+        {                                                                                                                                       \
+            if (array[beginIndex]->parameter condition array[endIndex]->parameter)                                                              \
+            {                                                                                                                                   \
+                swapElement(&array[beginIndex], &array[endIndex]);                                                                              \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+        else                                                                                                                                    \
+        {                                                                                                                                       \
+            const ListElement* pivot = array[beginIndex];                                                                                       \
+            size_t leftIndex = beginIndex+1;                                                                                                    \
+            size_t rightIndex = endIndex;                                                                                                       \
+                                                                                                                                                \
+            while (leftIndex < rightIndex)                                                                                                      \
+            {                                                                                                                                   \
+                while (pivot->parameter condition array[leftIndex]->parameter || pivot->parameter == array[leftIndex]->parameter)               \
+                {                                                                                                                               \
+                    ++leftIndex;                                                                                                                \
+                }                                                                                                                               \
+                while (array[rightIndex]->parameter condition pivot->parameter)                                                                 \
+                {                                                                                                                               \
+                    --rightIndex;                                                                                                               \
+                }                                                                                                                               \
+                if (leftIndex < rightIndex)                                                                                                     \
+                {                                                                                                                               \
+                    swapElement(&array[leftIndex], &array[rightIndex]);                                                                         \
+                    ++leftIndex;                                                                                                                \
+                    --rightIndex;                                                                                                               \
+                }                                                                                                                               \
+                else                                                                                                                            \
+                {                                                                                                                               \
+                    break;                                                                                                                      \
+                }                                                                                                                               \
+            }                                                                                                                                   \
+            if (rightIndex > beginIndex)                                                                                                        \
+            {                                                                                                                                   \
+                swapElement(&array[beginIndex], &array[rightIndex]);                                                                            \
+                recursiveCall(array,beginIndex,rightIndex-1);                                                                                   \
+            }                                                                                                                                   \
+            if (rightIndex < endIndex)                                                                                                          \
+            {                                                                                                                                   \
+                recursiveCall(array,rightIndex+1,endIndex);                                                                                     \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+    }                                                                                                                                           \
+}
+
 #endif // LISTUTILS_H

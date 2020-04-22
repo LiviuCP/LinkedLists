@@ -910,6 +910,18 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         deleteList(list, deleteObject);
         list = nullptr;
     }
+
+    // quick sort
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
+        sortByRandomAccess(list, quickSortAscendingByPriority);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
 }
 
 void LinkedListTests::testIterators()
