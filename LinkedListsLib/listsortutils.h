@@ -1,6 +1,8 @@
 #ifndef LISTUTILS_H
 #define LISTUTILS_H
 
+#include "../Utils/codeutils.h"
+
 #define ASCENDING >
 #define DESCENDING <
 
@@ -60,7 +62,7 @@
 
 #define CHECK_IF_SORTED(condition, parameter)                                                                                                   \
 {                                                                                                                                               \
-    int isSorted = 1;                                                                                                                           \
+    boolean isSorted = TRUE;                                                                                                                        \
                                                                                                                                                 \
     if (list!= NULL)                                                                                                                            \
     {                                                                                                                                           \
@@ -80,7 +82,7 @@
     }                                                                                                                                           \
     else                                                                                                                                        \
     {                                                                                                                                           \
-        isSorted = 0;                                                                                                                           \
+        isSorted = FALSE;                                                                                                                       \
     }                                                                                                                                           \
                                                                                                                                                 \
     return isSorted;                                                                                                                            \

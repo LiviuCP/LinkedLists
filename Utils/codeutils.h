@@ -3,6 +3,11 @@
 
 #include <stdlib.h>
 
+typedef unsigned int boolean;
+
+#define TRUE 1u
+#define FALSE 0u
+
 typedef struct {
     int x;
     int y;

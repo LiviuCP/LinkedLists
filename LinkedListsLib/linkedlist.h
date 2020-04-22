@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#include "../Utils/codeutils.h"
+
 typedef struct
 {
     char* type;
@@ -41,7 +43,7 @@ List* createList();
 void deleteList(List* list, void (*deallocObject)(Object* object));
 void deleteObject(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
 
-int copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
+boolean copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
 
 ListElement* createListElement();
 
@@ -56,7 +58,7 @@ ListElement* createAndInsertBefore(ListIterator it, size_t priority);
 void insertBefore(ListIterator it, ListElement* previousElement);
 
 void moveContentToList(List* source, List* destination);
-ListElement* copyContentToList(const List* source, List* destination, int (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination),
                                void (*deallocObject)(Object* object));
 
 void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
@@ -74,19 +76,19 @@ void reverseList(List* list);
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);
 
-int sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
+boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
 
 size_t getListSize(const List* list);
 ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
 ListElement* getLastElement(const List* list);
-int isElementContained(const ListElement* element, const List* list);
-int isSortedAscendingByPriority(const List* list);
-int isSortedDescendingByPriority(const List* list);
+boolean isElementContained(const ListElement* element, const List* list);
+boolean isSortedAscendingByPriority(const List* list);
+boolean isSortedDescendingByPriority(const List* list);
 
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);
 void lnext(ListIterator* iterator);
-int areIteratorsEqual(ListIterator first, ListIterator second);
+boolean areIteratorsEqual(ListIterator first, ListIterator second);
 
 ListElement** moveListToArray(List* list, size_t* arraySize);
 void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
@@ -94,7 +96,7 @@ void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
 
 // for testing purposes only
 void customDeleteObject(Object* object);
-int customCopyObject(const ListElement* source, ListElement* destination);
+boolean customCopyObject(const ListElement* source, ListElement* destination);
 
 #ifdef __cplusplus
 }

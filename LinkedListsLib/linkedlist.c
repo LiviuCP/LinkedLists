@@ -4,7 +4,6 @@
 #include "linkedlist.h"
 #include "listsortutils.h"
 
-#include "../Utils/codeutils.h"
 #include "../Utils/error.h"
 
 List* createList()
@@ -55,13 +54,13 @@ void deleteObject(Object *object)
 /* This function is just added for having a default value to be passed to the copyContentToList() function as deep copying function pointer.
    User is responsible to pass a custom deep copying function with this signature if any list element contains an non-NULL Object.
 */
-int copyObject(const ListElement* source, ListElement* destination)
+boolean copyObject(const ListElement* source, ListElement* destination)
 {
-    int success = 0;
+    boolean success = FALSE;
 
     if (source != NULL && destination != NULL)
     {
-        success = 1;
+        success = TRUE;
     }
 
     return success;
@@ -261,7 +260,7 @@ void moveContentToList(List* source, List* destination)
    shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, the objects will not be copied at all so the new elements of the
    destination list will contain NULL objects
 */
-ListElement* copyContentToList(const List* source, List* destination, int (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination),
                                void (*deallocObject)(Object* object))
 {
     ListElement* result = NULL;
@@ -580,9 +579,9 @@ ListElement* getLastElement(const List* list)
     return result;
 }
 
-int isElementContained(const ListElement* element, const List* list)
+boolean isElementContained(const ListElement* element, const List* list)
 {
-    int result = 0;
+    boolean result = FALSE;
 
     if (element != NULL && list != NULL && list->first != NULL)
     {
@@ -592,7 +591,7 @@ int isElementContained(const ListElement* element, const List* list)
         {
             if (element == currentElement)
             {
-                result = 1;
+                result = TRUE;
                 break;
             }
             currentElement = currentElement->next;
@@ -602,12 +601,12 @@ int isElementContained(const ListElement* element, const List* list)
     return result;
 }
 
-int isSortedAscendingByPriority(const List* list)
+boolean isSortedAscendingByPriority(const List* list)
 {
     CHECK_IF_SORTED(ASCENDING, priority);
 }
 
-int isSortedDescendingByPriority(const List* list)
+boolean isSortedDescendingByPriority(const List* list)
 {
     CHECK_IF_SORTED(DESCENDING, priority);
 }
@@ -646,7 +645,7 @@ void lnext(ListIterator* iterator)
     }
 }
 
-int areIteratorsEqual(ListIterator first, ListIterator second)
+boolean areIteratorsEqual(ListIterator first, ListIterator second)
 {
     ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists")
     return first.current == second.current;
@@ -745,9 +744,9 @@ void customDeleteObject(Object* object)
     }
 }
 
-int customCopyObject(const ListElement* source, ListElement* destination)
+boolean customCopyObject(const ListElement* source, ListElement* destination)
 {
-    int success = 0;
+    boolean success = FALSE;
 
     if (source != NULL && destination != NULL && source->object != NULL && source->object->type != NULL && source->object->payload != NULL)
     {
@@ -775,7 +774,7 @@ int customCopyObject(const ListElement* source, ListElement* destination)
                         destinationObject->type = destinationObjectType;
                         destinationObject->payload = (void*)destinationObjectPayload;
                         destination->object = destinationObject;
-                        success = 1;
+                        success = TRUE;
                     }
                     else
                     {
@@ -808,7 +807,7 @@ int customCopyObject(const ListElement* source, ListElement* destination)
                         destinationObject->type = destinationObjectType;
                         destinationObject->payload = (void*)destinationObjectPayload;
                         destination->object = destinationObject;
-                        success = 1;
+                        success = TRUE;
                     }
                     else
                     {
@@ -834,9 +833,9 @@ int customCopyObject(const ListElement* source, ListElement* destination)
     return success;
 }
 
-int sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
+boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
 {
-    int result = 0;
+    boolean result = FALSE;
 
     if (list != NULL && list->first != NULL)
     {
@@ -847,7 +846,7 @@ int sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array,
         {
             sortingAlgorithm(array, arraySize);
             moveArrayToList(array, arraySize, list);
-            result = 1;
+            result = TRUE;
         }
 
         free(array);
