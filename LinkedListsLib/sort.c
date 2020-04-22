@@ -31,3 +31,44 @@ void heapSortDescendingByPriority(ListElement **array, const size_t arraySize)
 {
     HEAP_SORT(DESCENDING, priority)
 }
+
+void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
+{
+    MERGE_SORT(ASCENDING, priority, _doMergeSortAscendingByPriority);
+}
+
+void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
+{
+    MERGE_SORT(DESCENDING, priority, _doMergeSortDescendingByPriority);
+}
+
+void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending)
+{
+    ListElement** auxArray = (ListElement**)calloc(arraySize, sizeof(ListElement*));
+
+    if (auxArray != NULL)
+    {
+        ascending != 0 ? _doMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1) :
+                         _doMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+    }
+    else
+    {
+        fprintf(stderr, "Cannot perform merge sort, unable to allocate memory for the auxiliary array");
+    }
+}
+
+void mergeSortAscendingByPriority(ListElement** array, const size_t arraySize)
+{
+    if (array != NULL && arraySize > 0)
+    {
+        _doMergeSortByPriority(array, arraySize, 1);
+    }
+}
+
+void mergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
+{
+    if (array != NULL && arraySize > 0)
+    {
+        _doMergeSortByPriority(array, arraySize, 0);
+    }
+}

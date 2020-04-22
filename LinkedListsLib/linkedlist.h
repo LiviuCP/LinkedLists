@@ -3,8 +3,6 @@
 
 #include <stdlib.h>
 
-#include "listutils.h"
-
 typedef struct
 {
     char* type;

@@ -177,4 +177,56 @@
     }                                                                                                                                           \
 }
 
+#define MERGE_SORT(condition, parameter, recursiveCall)                                                                                         \
+{                                                                                                                                               \
+    if (startIndex != endIndex)                                                                                                                 \
+    {                                                                                                                                           \
+        const size_t midIndex = (startIndex + endIndex) / 2;                                                                                    \
+        recursiveCall(array, auxArray, startIndex, midIndex);                                                                                   \
+        recursiveCall(array, auxArray, midIndex+1, endIndex);                                                                                   \
+        size_t firstIndex = startIndex;                                                                                                         \
+        size_t secondIndex = midIndex+1;                                                                                                        \
+        size_t writeIndex = startIndex;                                                                                                         \
+                                                                                                                                                \
+        while (firstIndex<=midIndex && secondIndex<=endIndex)                                                                                   \
+        {                                                                                                                                       \
+            if (array[secondIndex]->parameter condition array[firstIndex]->parameter)                                                           \
+            {                                                                                                                                   \
+                auxArray[writeIndex] = array[firstIndex];                                                                                       \
+                ++firstIndex;                                                                                                                   \
+            }                                                                                                                                   \
+            else                                                                                                                                \
+            {                                                                                                                                   \
+                auxArray[writeIndex] = array[secondIndex];                                                                                      \
+                ++secondIndex;                                                                                                                  \
+            }                                                                                                                                   \
+            ++writeIndex;                                                                                                                       \
+        }                                                                                                                                       \
+                                                                                                                                                \
+        if (firstIndex <= midIndex)                                                                                                             \
+        {                                                                                                                                       \
+            while (writeIndex <= endIndex)                                                                                                      \
+            {                                                                                                                                   \
+                auxArray[writeIndex] = array[firstIndex];                                                                                       \
+                ++firstIndex;                                                                                                                   \
+                ++writeIndex;                                                                                                                   \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+        else if (secondIndex <= endIndex)                                                                                                       \
+        {                                                                                                                                       \
+            while (writeIndex <= endIndex)                                                                                                      \
+            {                                                                                                                                   \
+                auxArray[writeIndex] = array[secondIndex];                                                                                      \
+                ++secondIndex;                                                                                                                  \
+                ++writeIndex;                                                                                                                   \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+                                                                                                                                                \
+        for (firstIndex = startIndex; firstIndex <= endIndex; ++firstIndex)                                                                     \
+        {                                                                                                                                       \
+            array[firstIndex] = auxArray[firstIndex];                                                                                           \
+        }                                                                                                                                       \
+    }                                                                                                                                           \
+}
+
 #endif // LISTUTILS_H
