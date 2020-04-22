@@ -3,6 +3,9 @@
 #include "../Utils/error.h"
 #include <stdio.h>
 
+#define SORT_ASCENDING 1
+#define SORT_DESCENDING 0
+
 void swapElement(ListElement** first, ListElement** second)
 {
     ASSERT_CONDITION(first != NULL && second != NULL, "Attempt to swap by dereferencing NULL pointer");
@@ -61,7 +64,7 @@ void mergeSortAscendingByPriority(ListElement** array, const size_t arraySize)
 {
     if (array != NULL && arraySize > 0)
     {
-        _doMergeSortByPriority(array, arraySize, 1);
+        _doMergeSortByPriority(array, arraySize, SORT_ASCENDING);
     }
 }
 
@@ -69,6 +72,6 @@ void mergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
 {
     if (array != NULL && arraySize > 0)
     {
-        _doMergeSortByPriority(array, arraySize, 0);
+        _doMergeSortByPriority(array, arraySize, SORT_DESCENDING);
     }
 }
