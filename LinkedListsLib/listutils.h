@@ -98,15 +98,80 @@
             {                                                                                                                                   \
                 if (array[checkedIndex]->parameter condition array[elementToInsert]->parameter)                                                 \
                 {                                                                                                                               \
-                    ListElement* swap = array[checkedIndex];                                                                                    \
-                    array[checkedIndex] = array[elementToInsert];                                                                               \
-                    array[elementToInsert] = swap;                                                                                              \
+                    swapElement(&array[checkedIndex], &array[elementToInsert]);                                                                 \
                     elementToInsert = checkedIndex;                                                                                             \
                 }                                                                                                                               \
                 else                                                                                                                            \
                 {                                                                                                                               \
                     break;                                                                                                                      \
                 }                                                                                                                               \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+    }                                                                                                                                           \
+}
+
+#define BUILD_HEAP(condition, parameter)                                                                                                        \
+{                                                                                                                                               \
+    for (int index = 0; index<(int)arraySize; ++index)                                                                                          \
+    {                                                                                                                                           \
+        int checkedElementIndex = index;                                                                                                        \
+        while(checkedElementIndex > 0)                                                                                                          \
+        {                                                                                                                                       \
+            int parentElementIndex = (checkedElementIndex-1)/2;                                                                                 \
+            if (array[checkedElementIndex]->parameter condition array[parentElementIndex]->parameter)                                           \
+            {                                                                                                                                   \
+                swapElement(&array[parentElementIndex], &array[checkedElementIndex]);                                                           \
+                checkedElementIndex = parentElementIndex;                                                                                       \
+            }                                                                                                                                   \
+            else                                                                                                                                \
+            {                                                                                                                                   \
+                break;                                                                                                                          \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+    }                                                                                                                                           \
+}
+
+#define HEAP_SORT(condition, parameter)                                                                                                         \
+{                                                                                                                                               \
+    BUILD_HEAP(condition, parameter)                                                                                                            \
+    int currentToSortIndex = (int)arraySize-1;                                                                                                  \
+    while(currentToSortIndex>0)                                                                                                                 \
+    {                                                                                                                                           \
+        swapElement(&array[0], &array[currentToSortIndex]);                                                                                     \
+        --currentToSortIndex;                                                                                                                   \
+        int checkedElementIndex = 0;                                                                                                            \
+        while (currentToSortIndex > checkedElementIndex)                                                                                        \
+        {                                                                                                                                       \
+            int leftChildIndex = checkedElementIndex+checkedElementIndex+1;                                                                     \
+            if (currentToSortIndex > leftChildIndex)                                                                                            \
+            {                                                                                                                                   \
+                int rightChildIndex = leftChildIndex+1;                                                                                         \
+                int toSwapIndex = leftChildIndex;                                                                                               \
+                if (array[rightChildIndex]->parameter condition array[leftChildIndex]->parameter)                                               \
+                {                                                                                                                               \
+                    toSwapIndex = rightChildIndex;                                                                                              \
+                }                                                                                                                               \
+                if (array[toSwapIndex]->parameter condition array[checkedElementIndex]->parameter)                                              \
+                {                                                                                                                               \
+                    swapElement(&array[checkedElementIndex], &array[toSwapIndex]);                                                              \
+                    checkedElementIndex = toSwapIndex;                                                                                          \
+                }                                                                                                                               \
+                else                                                                                                                            \
+                {                                                                                                                               \
+                    break;                                                                                                                      \
+                }                                                                                                                               \
+            }                                                                                                                                   \
+            else if (leftChildIndex == currentToSortIndex)                                                                                      \
+            {                                                                                                                                   \
+                if (array[leftChildIndex]->parameter condition array[checkedElementIndex]->parameter)                                           \
+                {                                                                                                                               \
+                    swapElement(&array[checkedElementIndex], &array[leftChildIndex]);                                                           \
+                }                                                                                                                               \
+                break;                                                                                                                          \
+            }                                                                                                                                   \
+            else                                                                                                                                \
+            {                                                                                                                                   \
+                break;                                                                                                                          \
             }                                                                                                                                   \
         }                                                                                                                                       \
     }                                                                                                                                           \

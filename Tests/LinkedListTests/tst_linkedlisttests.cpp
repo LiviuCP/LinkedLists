@@ -877,8 +877,20 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 {
     // insertion sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
         sortByRandomAccess(list, insertionSortAscendingByPriority);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+                 "The list hasn't been correctly sorted");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
+    }
+
+    // heap sort
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
+        sortByRandomAccess(list, heapSortAscendingByPriority);
 
         QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");

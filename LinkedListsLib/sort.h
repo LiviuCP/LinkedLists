@@ -11,6 +11,8 @@ extern "C"{
 
 void insertionSortAscendingByPriority(ListElement** array, const size_t arraySize);
 void insertionSortDescendingByPriority(ListElement** array, const size_t arraySize);
+void heapSortAscendingByPriority(ListElement** array, const size_t arraySize);
+void heapSortDescendingByPriority(ListElement** array, const size_t arraySize);
 
 #ifdef __cplusplus
 }
