@@ -6,9 +6,6 @@
 #include "../../LinkedListsLib/sort.h"
 #include "../../Utils/codeutils.h"
 
-void customDeleteObject(Object* object); // custom C-Style object deallocator
-int customCopyObject(const ListElement* source, ListElement* destination); // custom C-Style copy Object function
-
 class LinkedListTests : public QObject
 {
     Q_OBJECT
