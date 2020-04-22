@@ -8,6 +8,11 @@
 #define SORT_ASCENDING 1
 #define SORT_DESCENDING 0
 
+// these functions are supposed to be "private", should not be accessed outside this file
+void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending);
+void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
+void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
+
 void swapElement(ListElement** first, ListElement** second)
 {
     ASSERT_CONDITION(first != NULL && second != NULL, "Attempt to swap by dereferencing NULL pointer");
@@ -37,16 +42,23 @@ void heapSortDescendingByPriority(ListElement** array, const size_t arraySize)
     HEAP_SORT(DESCENDING, priority)
 }
 
-void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
+void mergeSortAscendingByPriority(ListElement** array, const size_t arraySize)
 {
-    MERGE_SORT(ASCENDING, priority, _doMergeSortAscendingByPriority);
+    if (array != NULL && arraySize > 0)
+    {
+        _doMergeSortByPriority(array, arraySize, SORT_ASCENDING);
+    }
 }
 
-void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
+void mergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
 {
-    MERGE_SORT(DESCENDING, priority, _doMergeSortDescendingByPriority);
+    if (array != NULL && arraySize > 0)
+    {
+        _doMergeSortByPriority(array, arraySize, SORT_DESCENDING);
+    }
 }
 
+// "private" functions
 void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending)
 {
     ListElement** auxArray = (ListElement**)calloc(arraySize, sizeof(ListElement*));
@@ -62,18 +74,12 @@ void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int asc
     }
 }
 
-void mergeSortAscendingByPriority(ListElement** array, const size_t arraySize)
+void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
 {
-    if (array != NULL && arraySize > 0)
-    {
-        _doMergeSortByPriority(array, arraySize, SORT_ASCENDING);
-    }
+    MERGE_SORT(ASCENDING, priority, _doMergeSortAscendingByPriority);
 }
 
-void mergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
+void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
 {
-    if (array != NULL && arraySize > 0)
-    {
-        _doMergeSortByPriority(array, arraySize, SORT_DESCENDING);
-    }
+    MERGE_SORT(DESCENDING, priority, _doMergeSortDescendingByPriority);
 }
