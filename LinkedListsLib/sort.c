@@ -1,7 +1,9 @@
+#include <stdio.h>
+
 #include "sort.h"
 #include "listsortutils.h"
+
 #include "../Utils/error.h"
-#include <stdio.h>
 
 #define SORT_ASCENDING 1
 #define SORT_DESCENDING 0
@@ -30,7 +32,7 @@ void heapSortAscendingByPriority(ListElement** array, const size_t arraySize)
     HEAP_SORT(ASCENDING, priority)
 }
 
-void heapSortDescendingByPriority(ListElement **array, const size_t arraySize)
+void heapSortDescendingByPriority(ListElement** array, const size_t arraySize)
 {
     HEAP_SORT(DESCENDING, priority)
 }

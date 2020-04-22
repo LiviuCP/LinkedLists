@@ -133,45 +133,48 @@
 
 #define HEAP_SORT(condition, parameter)                                                                                                         \
 {                                                                                                                                               \
-    BUILD_HEAP(condition, parameter)                                                                                                            \
-    int currentToSortIndex = (int)arraySize-1;                                                                                                  \
-    while(currentToSortIndex>0)                                                                                                                 \
+    if (array != NULL && arraySize > 0)                                                                                                         \
     {                                                                                                                                           \
-        swapElement(&array[0], &array[currentToSortIndex]);                                                                                     \
-        --currentToSortIndex;                                                                                                                   \
-        int checkedElementIndex = 0;                                                                                                            \
-        while (currentToSortIndex > checkedElementIndex)                                                                                        \
+        BUILD_HEAP(condition, parameter)                                                                                                        \
+        int currentToSortIndex = (int)arraySize-1;                                                                                              \
+        while(currentToSortIndex>0)                                                                                                             \
         {                                                                                                                                       \
-            int leftChildIndex = checkedElementIndex+checkedElementIndex+1;                                                                     \
-            if (currentToSortIndex > leftChildIndex)                                                                                            \
+            swapElement(&array[0], &array[currentToSortIndex]);                                                                                 \
+            --currentToSortIndex;                                                                                                               \
+            int checkedElementIndex = 0;                                                                                                        \
+            while (currentToSortIndex > checkedElementIndex)                                                                                    \
             {                                                                                                                                   \
-                int rightChildIndex = leftChildIndex+1;                                                                                         \
-                int toSwapIndex = leftChildIndex;                                                                                               \
-                if (array[rightChildIndex]->parameter condition array[leftChildIndex]->parameter)                                               \
+                int leftChildIndex = checkedElementIndex+checkedElementIndex+1;                                                                 \
+                if (currentToSortIndex > leftChildIndex)                                                                                        \
                 {                                                                                                                               \
-                    toSwapIndex = rightChildIndex;                                                                                              \
+                    int rightChildIndex = leftChildIndex+1;                                                                                     \
+                    int toSwapIndex = leftChildIndex;                                                                                           \
+                    if (array[rightChildIndex]->parameter condition array[leftChildIndex]->parameter)                                           \
+                    {                                                                                                                           \
+                        toSwapIndex = rightChildIndex;                                                                                          \
+                    }                                                                                                                           \
+                    if (array[toSwapIndex]->parameter condition array[checkedElementIndex]->parameter)                                          \
+                    {                                                                                                                           \
+                        swapElement(&array[checkedElementIndex], &array[toSwapIndex]);                                                          \
+                        checkedElementIndex = toSwapIndex;                                                                                      \
+                    }                                                                                                                           \
+                    else                                                                                                                        \
+                    {                                                                                                                           \
+                        break;                                                                                                                  \
+                    }                                                                                                                           \
                 }                                                                                                                               \
-                if (array[toSwapIndex]->parameter condition array[checkedElementIndex]->parameter)                                              \
+                else if (leftChildIndex == currentToSortIndex)                                                                                  \
                 {                                                                                                                               \
-                    swapElement(&array[checkedElementIndex], &array[toSwapIndex]);                                                              \
-                    checkedElementIndex = toSwapIndex;                                                                                          \
+                    if (array[leftChildIndex]->parameter condition array[checkedElementIndex]->parameter)                                       \
+                    {                                                                                                                           \
+                        swapElement(&array[checkedElementIndex], &array[leftChildIndex]);                                                       \
+                    }                                                                                                                           \
+                    break;                                                                                                                      \
                 }                                                                                                                               \
                 else                                                                                                                            \
                 {                                                                                                                               \
                     break;                                                                                                                      \
                 }                                                                                                                               \
-            }                                                                                                                                   \
-            else if (leftChildIndex == currentToSortIndex)                                                                                      \
-            {                                                                                                                                   \
-                if (array[leftChildIndex]->parameter condition array[checkedElementIndex]->parameter)                                           \
-                {                                                                                                                               \
-                    swapElement(&array[checkedElementIndex], &array[leftChildIndex]);                                                           \
-                }                                                                                                                               \
-                break;                                                                                                                          \
-            }                                                                                                                                   \
-            else                                                                                                                                \
-            {                                                                                                                                   \
-                break;                                                                                                                          \
             }                                                                                                                                   \
         }                                                                                                                                       \
     }                                                                                                                                           \
