@@ -1207,23 +1207,23 @@ void LinkedListTests::testGetPreviousElement()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
 
         ListIterator it = lbegin(list);
-        QVERIFY2(getPreviousElement(list, it) == nullptr, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousElement(it) == nullptr, "Previous list element is not correctly determined");
 
         lnext(&it);
-        QVERIFY2(getPreviousElement(list, it)->priority == 6, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousElement(it)->priority == 6, "Previous list element is not correctly determined");
 
         lnext(&it);
-        QVERIFY2(getPreviousElement(list, it)->priority == 2, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousElement(it)->priority == 2, "Previous list element is not correctly determined");
 
         lnext(&it);
-        QVERIFY2(getPreviousElement(list, it)->priority == 5, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousElement(it)->priority == 5, "Previous list element is not correctly determined");
     }
 
     {
         List* list = createList();
         ListIterator it = lbegin(list);
 
-        QVERIFY2(getPreviousElement(list, it) == nullptr, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousElement(it) == nullptr, "Previous list element is not correctly determined");
     }
 }
 

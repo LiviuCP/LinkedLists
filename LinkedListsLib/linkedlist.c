@@ -499,12 +499,10 @@ void swapElements(ListIterator first, ListIterator second)
     ASSERT_CONDITION(first.list != NULL && second.list != NULL, "At least one iterator points to a NULL list");
     ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists");
 
-    const List* list = first.list;
-
     if (first.current != NULL && second.current != NULL && first.current != second.current)
     {
-        ListElement* firstPrevious = getPreviousElement(list, first);
-        ListElement* secondPrevious = getPreviousElement(list, second);
+        ListElement* firstPrevious = getPreviousElement(first);
+        ListElement* secondPrevious = getPreviousElement(second);
         ListElement* firstNext = first.current->next;
         ListElement* secondNext = second.current->next;
 
@@ -591,10 +589,12 @@ ListElement* getElementAtIndex(const List* list, size_t index)
     return result;
 }
 
-ListElement* getPreviousElement(const List* list, ListIterator it)
+ListElement* getPreviousElement(ListIterator it)
 {
     ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
     ListElement* result = NULL;
+
+    const List* list = it.list;
 
     if (list != NULL && list->first != NULL  && it.current != list->first)
     {
