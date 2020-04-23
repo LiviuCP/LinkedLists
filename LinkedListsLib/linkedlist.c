@@ -494,29 +494,29 @@ void clearList(List *list, void (*deallocObject)(Object* object))
     }
 }
 
-void swapElements(ListIterator first, ListIterator second)
+void swapElements(ListIterator firstIt, ListIterator secondIt)
 {
-    ASSERT_CONDITION(first.list != NULL && second.list != NULL, "At least one iterator points to a NULL list");
-    ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists");
+    ASSERT_CONDITION(firstIt.list != NULL && secondIt.list != NULL, "At least one iterator points to a NULL list");
+    ASSERT_CONDITION(firstIt.list == secondIt.list, "Iterators belong to different lists");
 
-    if (first.current != NULL && second.current != NULL && first.current != second.current)
+    if (firstIt.current != NULL && secondIt.current != NULL && firstIt.current != secondIt.current)
     {
-        ListElement* firstPrevious = getPreviousElement(first);
-        ListElement* secondPrevious = getPreviousElement(second);
-        ListElement* firstNext = first.current->next;
-        ListElement* secondNext = second.current->next;
+        ListElement* firstPrevious = getPreviousElement(firstIt);
+        ListElement* secondPrevious = getPreviousElement(secondIt);
+        ListElement* firstNext = firstIt.current->next;
+        ListElement* secondNext = secondIt.current->next;
 
         if (firstPrevious != NULL)
         {
-            firstPrevious->next = second.current;
+            firstPrevious->next = secondIt.current;
         }
         if (secondPrevious != NULL)
         {
-            secondPrevious->next = first.current;
+            secondPrevious->next = firstIt.current;
         }
 
-        first.current->next = secondNext;
-        second.current->next = firstNext;
+        firstIt.current->next = secondNext;
+        secondIt.current->next = firstNext;
     }
 }
 
