@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <pthread.h>
 
 #include "sort.h"
 #include "listsortutils.h"
@@ -8,12 +9,26 @@
 #define SORT_ASCENDING 1
 #define SORT_DESCENDING 0
 
+typedef struct
+{
+    ListElement **array;
+    ListElement **auxArray;
+    size_t startIndex;
+    size_t endIndex;
+
+} MergeSortThreadInput;
+
 // these functions are supposed to be "private", should not be accessed outside this file
 void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending);
 void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
 void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
 void _doQuickSortAscendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
 void _doQuickSortDescendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
+void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending);
+void _doEnhancedMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+void _doEnhancedMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput);
+void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput);
 
 void swapElement(ListElement** first, ListElement** second)
 {
@@ -76,6 +91,16 @@ void quickSortDescendingByPriority(ListElement** array, const size_t arraySize)
     }
 }
 
+void enhancedMergeSortAscendingByPriority(ListElement** array, const size_t arraySize)
+{
+    _doEnhancedMergeSortByPriority(array, arraySize, SORT_ASCENDING);
+}
+
+void enhancedMergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
+{
+    _doEnhancedMergeSortByPriority(array, arraySize, SORT_DESCENDING);
+}
+
 // "private" functions
 void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending)
 {
@@ -92,12 +117,12 @@ void _doMergeSortByPriority(ListElement** array, const size_t arraySize, int asc
     }
 }
 
-void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
+void _doMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex)
 {
     MERGE_SORT(ASCENDING, priority, _doMergeSortAscendingByPriority);
 }
 
-void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex)
+void _doMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex)
 {
     MERGE_SORT(DESCENDING, priority, _doMergeSortDescendingByPriority);
 }
@@ -110,4 +135,51 @@ void _doQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, siz
 void _doQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
 {
     QUICK_SORT(DESCENDING, priority, _doQuickSortDescendingByPriority);
+}
+
+void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize, int ascending)
+{
+    ListElement** auxArray = (ListElement**)calloc(arraySize, sizeof(ListElement*));
+
+    if (auxArray != NULL)
+    {
+        ascending != 0 ? _doEnhancedMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1) :
+                         _doEnhancedMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+    }
+    else
+    {
+        fprintf(stderr, "Cannot perform enhanced merge sort, unable to allocate memory for the auxiliary array");
+    }
+}
+
+void _doEnhancedMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+{
+    ENHANCED_MERGE_SORT(ASCENDING, priority, &_wrapperEnhancedMergeSortAscendingByPriority)
+}
+
+void _doEnhancedMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+{
+    ENHANCED_MERGE_SORT(DESCENDING, priority, &_wrapperEnhancedMergeSortDescendingByPriority)
+}
+
+void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput)
+{
+    if (mergeSortThreadInput != NULL)
+    {
+        const MergeSortThreadInput* threadInput = (MergeSortThreadInput*)mergeSortThreadInput;
+        _doMergeSortAscendingByPriority(threadInput->array, threadInput->auxArray, threadInput->startIndex, threadInput->endIndex);
+    }
+
+    return NULL;
+}
+
+void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput)
+{
+    if (mergeSortThreadInput != NULL)
+    {
+        const MergeSortThreadInput* threadInput = (MergeSortThreadInput*)mergeSortThreadInput;
+        _doMergeSortDescendingByPriority(threadInput->array, threadInput->auxArray, threadInput->startIndex, threadInput->endIndex);
+    }
+
+    return NULL;
 }

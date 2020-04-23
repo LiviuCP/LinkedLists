@@ -17,6 +17,8 @@ void mergeSortAscendingByPriority(ListElement** array, const size_t arraySize);
 void mergeSortDescendingByPriority(ListElement** array, const size_t arraySize);
 void quickSortAscendingByPriority(ListElement** array, const size_t arraySize);
 void quickSortDescendingByPriority(ListElement** array, const size_t arraySize);
+void enhancedMergeSortAscendingByPriority(ListElement** array, const size_t arraySize);
+void enhancedMergeSortDescendingByPriority(ListElement** array, const size_t arraySize);
 
 #ifdef __cplusplus
 }
