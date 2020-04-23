@@ -550,6 +550,29 @@ void sortDescendingByPriority(List* list)
     SORT_LIST(DESCENDING , priority)
 }
 
+boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
+{
+    boolean result = FALSE;
+
+    if (list != NULL && list->first != NULL)
+    {
+        size_t arraySize = 0;
+        ListElement** array = moveListToArray(list, &arraySize);
+
+        if (array != NULL)
+        {
+            sortingAlgorithm(array, arraySize);
+            moveArrayToList(array, arraySize, list);
+            result = TRUE;
+        }
+
+        free(array);
+        array = NULL;
+    }
+
+    return result;
+}
+
 size_t getListSize(const List* list)
 {
     size_t length = 0;
@@ -885,27 +908,4 @@ boolean customCopyObject(const ListElement* source, ListElement* destination)
     }
 
     return success;
-}
-
-boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
-{
-    boolean result = FALSE;
-
-    if (list != NULL && list->first != NULL)
-    {
-        size_t arraySize = 0;
-        ListElement** array = moveListToArray(list, &arraySize);
-
-        if (array != NULL)
-        {
-            sortingAlgorithm(array, arraySize);
-            moveArrayToList(array, arraySize, list);
-            result = TRUE;
-        }
-
-        free(array);
-        array = NULL;
-    }
-
-    return result;
 }
