@@ -560,6 +560,25 @@ ListElement* getElementAtIndex(const List* list, size_t index)
     return result;
 }
 
+ListElement* getPreviousElement(const List* list, ListIterator it)
+{
+    ListElement* result = NULL;
+
+    if (list != NULL && list->first != NULL  && it.current != list->first)
+    {
+        ListElement* previousElement = list->first;
+
+        while (previousElement->next != it.current)
+        {
+            previousElement = previousElement->next;
+        }
+
+        result = previousElement;
+    }
+
+    return result;
+}
+
 ListElement* getLastElement(const List* list)
 {
     ListElement* result = NULL;

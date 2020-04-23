@@ -80,6 +80,7 @@ boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** ar
 
 size_t getListSize(const List* list);
 ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
+ListElement* getPreviousElement(const List* list, ListIterator it);
 ListElement* getLastElement(const List* list);
 boolean isElementContained(const ListElement* element, const List* list);
 boolean isSortedAscendingByPriority(const List* list);

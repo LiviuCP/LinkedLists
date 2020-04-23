@@ -39,6 +39,7 @@ private slots:
     void testIsElementContained();
     void testIsSortedAscendingByPriority();
     void testIsSortedDescendingByPriority();
+    void testGetPreviousElement();
     void testGetLastElement();
     void testMoveListToArray();
     void testMoveArrayToList();
@@ -1162,6 +1163,32 @@ void LinkedListTests::testIsSortedDescendingByPriority()
     {
         List* list = createLinkedList(std::initializer_list<size_t>{5, 5, 5, 5, 5, 5});
         QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
+    }
+}
+
+void LinkedListTests::testGetPreviousElement()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+
+        ListIterator it = lbegin(list);
+        QVERIFY2(getPreviousElement(list, it) == nullptr, "Previous list element is not correctly determined");
+
+        lnext(&it);
+        QVERIFY2(getPreviousElement(list, it)->priority == 6, "Previous list element is not correctly determined");
+
+        lnext(&it);
+        QVERIFY2(getPreviousElement(list, it)->priority == 2, "Previous list element is not correctly determined");
+
+        lnext(&it);
+        QVERIFY2(getPreviousElement(list, it)->priority == 5, "Previous list element is not correctly determined");
+    }
+
+    {
+        List* list = createList();
+        ListIterator it = lbegin(list);
+
+        QVERIFY2(getPreviousElement(list, it) == nullptr, "Previous list element is not correctly determined");
     }
 }
 
