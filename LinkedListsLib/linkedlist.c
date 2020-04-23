@@ -146,26 +146,25 @@ ListElement* createAndAppendToList(List* list, size_t priority)
 
 ListElement* createAndInsertAfter(ListIterator it, size_t priority)
 {
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
+
     ListElement* result = NULL;
 
-    if (it.list != NULL)
+    ListElement* nextElement = createListElement();
+    nextElement->priority = priority;
+
+    if (it.current != NULL)
     {
-        ListElement* nextElement = createListElement();
-        nextElement->priority = priority;
 
-        if (it.current != NULL)
+        if (nextElement != NULL)
         {
-
-            if (nextElement != NULL)
-            {
-                result = nextElement;
-                insertAfter(it, nextElement);
-            }
+            result = nextElement;
+            insertAfter(it, nextElement);
         }
-        else if (it.list->first == NULL)
-        {
-            it.list->first = nextElement;
-        }
+    }
+    else if (it.list->first == NULL)
+    {
+        it.list->first = nextElement;
     }
 
     return result;
@@ -173,7 +172,8 @@ ListElement* createAndInsertAfter(ListIterator it, size_t priority)
 
 void insertAfter(ListIterator it, ListElement* nextElement)
 {
-    if (it.list != NULL && nextElement != NULL)
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
+    if (nextElement != NULL)
     {
         ASSERT_CONDITION(nextElement->next == NULL, "Element to be inserted is linked to another element!");
 
@@ -199,18 +199,17 @@ void insertAfter(ListIterator it, ListElement* nextElement)
 
 ListElement* createAndInsertBefore(ListIterator it, size_t priority)
 {
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
+
     ListElement* result = NULL;
 
-    if (it.list != NULL)
-    {
-        ListElement* previousElement = createListElement();
-        previousElement->priority = priority;
+    ListElement* previousElement = createListElement();
+    previousElement->priority = priority;
 
-        if (previousElement != NULL)
-        {
-            result = previousElement;
-            insertBefore(it, previousElement);
-        }
+    if (previousElement != NULL)
+    {
+        result = previousElement;
+        insertBefore(it, previousElement);
     }
 
     return result;
@@ -218,7 +217,8 @@ ListElement* createAndInsertBefore(ListIterator it, size_t priority)
 
 void insertBefore(ListIterator it, ListElement* previousElement)
 {
-    if (it.list != NULL && previousElement != NULL)
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
+    if (previousElement != NULL)
     {
         ASSERT_CONDITION(previousElement->next == NULL, "Element to be inserted is linked to another element!");
 
@@ -413,9 +413,10 @@ ListElement* removeLastListElement(List* list)
 
 ListElement* removePreviousListElement(ListIterator it)
 {
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
     ListElement* result = NULL;
 
-    if (it.list != NULL && it.list->first != NULL && it.current != it.list->first)
+    if (it.list->first != NULL && it.current != it.list->first)
     {
         ListElement* currentElement = it.list->first;
         ListElement* previousElement = it.list->first;
@@ -446,9 +447,10 @@ ListElement* removePreviousListElement(ListIterator it)
 
 ListElement* removeNextListElement(ListIterator it)
 {
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
     ListElement* result = NULL;
 
-    if (it.list != NULL && it.current != NULL && it.current->next != NULL)
+    if (it.current != NULL && it.current->next != NULL)
     {
         result = it.current->next;
         it.current->next = result->next;
@@ -460,9 +462,10 @@ ListElement* removeNextListElement(ListIterator it)
 
 ListElement* removeCurrentListElement(ListIterator it)
 {
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
     ListElement* result = NULL;
 
-    if (it.list != NULL && it.current != NULL)
+    if (it.current != NULL)
     {
         lnext(&it);
         result =removePreviousListElement(it);
@@ -590,6 +593,7 @@ ListElement* getElementAtIndex(const List* list, size_t index)
 
 ListElement* getPreviousElement(const List* list, ListIterator it)
 {
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
     ListElement* result = NULL;
 
     if (list != NULL && list->first != NULL  && it.current != list->first)
@@ -660,9 +664,9 @@ boolean isSortedDescendingByPriority(const List* list)
 
 ListIterator lbegin(List* list)
 {
-    ListIterator result;
-
     ASSERT_CONDITION(list != NULL, "Attempt to get iterator from NULL list");
+
+    ListIterator result;
 
     result.list = list;
     result.current = list->first;
@@ -672,9 +676,9 @@ ListIterator lbegin(List* list)
 
 ListIterator lend(List* list)
 {
-    ListIterator result;
-
     ASSERT_CONDITION(list != NULL, "Attempt to get iterator from NULL list")
+
+    ListIterator result;
 
     result.list = list;
     result.current = NULL;
@@ -685,6 +689,7 @@ ListIterator lend(List* list)
 void lnext(ListIterator* iterator)
 {
     ASSERT_CONDITION(iterator != NULL, "Attempt to advance a NULL iterator")
+    ASSERT_CONDITION(iterator -> list != NULL, "Iterator points to NULL list");
 
     if (iterator->current != NULL)
     {
@@ -694,7 +699,9 @@ void lnext(ListIterator* iterator)
 
 boolean areIteratorsEqual(ListIterator first, ListIterator second)
 {
+    ASSERT_CONDITION(first.list != NULL && second.list != NULL, "At least one iterator points to a NULL list");
     ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists")
+
     return first.current == second.current;
 }
 
