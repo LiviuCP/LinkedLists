@@ -72,6 +72,7 @@ ListElement* removeCurrentListElement(ListIterator it);
 
 void clearList(List* list, void (*deallocObject)(Object* object));
 
+void swapElements(ListIterator first, ListIterator second);
 void reverseList(List* list);
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);

@@ -491,6 +491,34 @@ void clearList(List *list, void (*deallocObject)(Object* object))
     }
 }
 
+void swapElements(ListIterator first, ListIterator second)
+{
+    ASSERT_CONDITION(first.list != NULL && second.list != NULL, "At least one iterator points to a NULL list");
+    ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists");
+
+    const List* list = first.list;
+
+    if (first.current != NULL && second.current != NULL && first.current != second.current)
+    {
+        ListElement* firstPrevious = getPreviousElement(list, first);
+        ListElement* secondPrevious = getPreviousElement(list, second);
+        ListElement* firstNext = first.current->next;
+        ListElement* secondNext = second.current->next;
+
+        if (firstPrevious != NULL)
+        {
+            firstPrevious->next = second.current;
+        }
+        if (secondPrevious != NULL)
+        {
+            secondPrevious->next = first.current;
+        }
+
+        first.current->next = secondNext;
+        second.current->next = firstNext;
+    }
+}
+
 void reverseList(List* list)
 {
     if (list != NULL && list->first != NULL)

@@ -29,6 +29,7 @@ private slots:
     void testRemoveElementBefore();
     void testRemoveElementAfter();
     void testRemoveCurrentElement();
+    void testSwapElements();
     void testReverseList();
     void testSortAscendingByPriority();
     void testSortDescendingByPriority();
@@ -709,6 +710,40 @@ void LinkedListTests::testRemoveCurrentElement()
 
         deleteList(list, deleteObject);
         list = nullptr;
+    }
+}
+
+void LinkedListTests::testSwapElements()
+{
+    {
+        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 7});
+
+        ListIterator firstIt = lbegin(list);
+        ListIterator secondIt = firstIt;
+
+        lnext(&firstIt);
+        lnext(&secondIt);
+        lnext(&secondIt);
+        lnext(&secondIt);
+
+        swapElements(firstIt, secondIt);
+
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 &&
+                 getElementAtIndex(list, 1)->priority == 4 &&
+                 getElementAtIndex(list, 2)->priority == 5 &&
+                 getElementAtIndex(list, 3)->priority == 2 &&
+                 getElementAtIndex(list, 4)->priority == 7,   "The elements have not been correctly swapped");
+    }
+
+    {
+        List *list = createList();
+        createAndAppendToList(list, 2);
+
+        swapElements(lbegin(list), lbegin(list));
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
+
+        swapElements(lbegin(list), lend(list));
+        QVERIFY2(getElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
     }
 }
 
