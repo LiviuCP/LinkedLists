@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "linkedlist.h"
 #include "listsortutils.h"
@@ -784,6 +785,47 @@ void moveArrayToList(ListElement** array, const size_t arraySize, List* list)
         for (size_t index = 0; index < arraySize; ++index)
         {
             array[index] = NULL;
+        }
+    }
+}
+
+void printListContentToFile(const List *list, const char* outFile, const char* header)
+{
+    if (list != NULL)
+    {
+        FILE* outputFile = fopen(outFile, "w");
+        int errorNumber = 0;
+
+        if (outputFile != NULL)
+        {
+            ListElement* currentElement = list->first;
+            size_t elementIndex = 0;
+
+            fprintf(outputFile, "%s", header);
+
+            if (getListSize(list) == 0)
+            {
+                fprintf(outputFile, "EMPTY LIST");
+            }
+
+            while (currentElement != NULL)
+            {
+                fprintf(outputFile, "Element: %d\t", (int)elementIndex);
+                fprintf(outputFile, "Priority: %d\t", (int)currentElement->priority);
+                fprintf(outputFile, "Has Object: ");
+                fprintf(outputFile, currentElement->object != NULL ? "yes" : "no");
+                fprintf(outputFile, "\n");
+
+                currentElement = currentElement->next;
+                ++elementIndex;
+            }
+        }
+        else
+        {
+            errorNumber = errno;
+            fprintf(stderr, "A file opening error occurred!\n");
+            fprintf(stderr, "Error number: %d\n", errno);
+            fprintf(stderr, "Error description: %s\n", strerror(errorNumber));
         }
     }
 }

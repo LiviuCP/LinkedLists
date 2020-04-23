@@ -26,3 +26,11 @@ void printList(List* list)
         printf("The list does not exist!");
     }
 }
+
+void printListToFile(List *list)
+{
+    const char* outputFile = "/tmp/test.txt";
+    const char* header = "The list has following content:\n\n";
+
+    printListContentToFile(list, outputFile, header);
+}

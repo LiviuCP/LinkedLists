@@ -95,6 +95,7 @@ boolean areIteratorsEqual(ListIterator first, ListIterator second);
 ListElement** moveListToArray(List* list, size_t* arraySize);
 void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
 
+void printListContentToFile(const List* list, const char* outFile, const char* header);
 
 // for testing purposes only
 void customDeleteObject(Object* object);

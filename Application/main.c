@@ -40,6 +40,7 @@ int main()
 
         printf("List content: \n\n");
         printList(list);
+        printListToFile(list);
         printf("Enter the required option:\n");
         printf("1 - append element\n");
         printf("2 - prepend element\n");
