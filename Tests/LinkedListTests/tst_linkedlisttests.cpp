@@ -1008,7 +1008,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
     // quick merge sort
     {
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
-        sortByRandomAccess(list, quickSortAscendingByPriority);
+        sortByRandomAccess(list, quickMergeSortAscendingByPriority);
 
         QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");

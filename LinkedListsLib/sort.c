@@ -113,7 +113,7 @@ void enhancedMergeSortDescendingByPriority(ListElement** array, const size_t arr
     _doEnhancedMergeSortByPriority(array, arraySize, SORT_DESCENDING);
 }
 
-void quickMergeSortAscendingByPriority(ListElement **array, const size_t arraySize)
+void quickMergeSortAscendingByPriority(ListElement** array, const size_t arraySize)
 {
     _doQuickMergeSortByPriority(array, arraySize, SORT_ASCENDING);
 }

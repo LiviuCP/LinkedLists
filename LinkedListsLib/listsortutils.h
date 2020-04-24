@@ -350,7 +350,7 @@
             size_t leftIndex = beginIndex+1;                                                                                                    \
             size_t rightIndex = endIndex;                                                                                                       \
                                                                                                                                                 \
-            while (leftIndex < rightIndex)                                                                                                      \
+            while (leftIndex <= rightIndex)                                                                                                     \
             {                                                                                                                                   \
                 while ((pivot->parameter condition array[leftIndex]->parameter || pivot->parameter == array[leftIndex]->parameter) &&           \
                                                                                                             leftIndex < endIndex)               \
