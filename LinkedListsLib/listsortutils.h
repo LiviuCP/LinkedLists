@@ -322,11 +322,12 @@
                                                                                                                                                 \
             while (leftIndex < rightIndex)                                                                                                      \
             {                                                                                                                                   \
-                while (pivot->parameter condition array[leftIndex]->parameter || pivot->parameter == array[leftIndex]->parameter)               \
+                while ((pivot->parameter condition array[leftIndex]->parameter || pivot->parameter == array[leftIndex]->parameter) &&           \
+                                                                                                            leftIndex < endIndex)               \
                 {                                                                                                                               \
                     ++leftIndex;                                                                                                                \
                 }                                                                                                                               \
-                while (array[rightIndex]->parameter condition pivot->parameter)                                                                 \
+                while (array[rightIndex]->parameter condition pivot->parameter && rightIndex > beginIndex)                                      \
                 {                                                                                                                               \
                     --rightIndex;                                                                                                               \
                 }                                                                                                                               \
