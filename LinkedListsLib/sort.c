@@ -11,8 +11,8 @@
 
 typedef struct
 {
-    ListElement **array;
-    ListElement **auxArray;
+    ListElement** array;
+    ListElement** auxArray;
     size_t startIndex;
     size_t endIndex;
 
@@ -27,8 +27,8 @@ typedef struct
 
 // these functions are supposed to be "private", should not be accessed outside this file
 void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
-void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
-void _doMergeSortDescendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
+void _doMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex);
+void _doMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex);
 void _doQuickSortAscendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
 void _doQuickSortDescendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
 void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
