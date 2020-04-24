@@ -41,6 +41,8 @@ void _doQuickMergeSortAscendingByPriority(ListElement** array, ListElement** aux
 void _doQuickMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
 void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput);
 void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput);
+void _doEnhancedQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex);
+void _doEnhancedQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex);
 
 void swapElement(ListElement** first, ListElement** second)
 {
@@ -121,6 +123,22 @@ void quickMergeSortAscendingByPriority(ListElement** array, const size_t arraySi
 void quickMergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
 {
     _doQuickMergeSortByPriority(array, arraySize, SORT_DESCENDING);
+}
+
+void enhancedQuickSortAscendingByPriority(ListElement** array, const size_t arraySize)
+{
+    if (array != NULL && arraySize > 0)
+    {
+        _doEnhancedQuickSortAscendingByPriority(array, 0, arraySize-1);
+    }
+}
+
+void enhancedQuickSortDescendingByPriority(ListElement** array, const size_t arraySize)
+{
+    if (array != NULL && arraySize > 0)
+    {
+        _doEnhancedQuickSortDescendingByPriority(array, 0, arraySize-1);
+    }
 }
 
 // "private" functions
@@ -250,4 +268,15 @@ void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput)
     }
 
     return NULL;
+}
+
+void _doEnhancedQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+{
+    ENHANCED_QUICK_SORT(ASCENDING, priority, &_wrapperQuickSortAscendingByPriority, _doQuickSortAscendingByPriority)
+}
+
+
+void _doEnhancedQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+{
+    ENHANCED_QUICK_SORT(DESCENDING, priority, &_wrapperQuickSortDescendingByPriority, _doQuickSortDescendingByPriority)
 }

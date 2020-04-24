@@ -21,6 +21,8 @@ void enhancedMergeSortAscendingByPriority(ListElement** array, const size_t arra
 void enhancedMergeSortDescendingByPriority(ListElement** array, const size_t arraySize);
 void quickMergeSortAscendingByPriority(ListElement** array, const size_t arraySize);
 void quickMergeSortDescendingByPriority(ListElement** array, const size_t arraySize);
+void enhancedQuickSortAscendingByPriority(ListElement** array, const size_t arraySize);
+void enhancedQuickSortDescendingByPriority(ListElement** array, const size_t arraySize);
 
 #ifdef __cplusplus
 }
