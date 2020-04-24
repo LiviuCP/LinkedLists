@@ -18,6 +18,13 @@ typedef struct
 
 } MergeSortThreadInput;
 
+typedef struct
+{
+    ListElement** array;
+    size_t startIndex;
+    size_t endIndex;
+} QuickSortThreadInput;
+
 // these functions are supposed to be "private", should not be accessed outside this file
 void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
 void _doMergeSortAscendingByPriority(ListElement **array, ListElement **auxArray, size_t startIndex, size_t endIndex);
@@ -29,6 +36,11 @@ void _doEnhancedMergeSortAscendingByPriority(ListElement** array, ListElement** 
 void _doEnhancedMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
 void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput);
 void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput);
+void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
+void _doQuickMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+void _doQuickMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput);
+void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput);
 
 void swapElement(ListElement** first, ListElement** second)
 {
@@ -99,6 +111,16 @@ void enhancedMergeSortAscendingByPriority(ListElement** array, const size_t arra
 void enhancedMergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
 {
     _doEnhancedMergeSortByPriority(array, arraySize, SORT_DESCENDING);
+}
+
+void quickMergeSortAscendingByPriority(ListElement **array, const size_t arraySize)
+{
+    _doQuickMergeSortByPriority(array, arraySize, SORT_ASCENDING);
+}
+
+void quickMergeSortDescendingByPriority(ListElement** array, const size_t arraySize)
+{
+    _doQuickMergeSortByPriority(array, arraySize, SORT_DESCENDING);
 }
 
 // "private" functions
@@ -179,6 +201,52 @@ void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput)
     {
         const MergeSortThreadInput* threadInput = (MergeSortThreadInput*)mergeSortThreadInput;
         _doMergeSortDescendingByPriority(threadInput->array, threadInput->auxArray, threadInput->startIndex, threadInput->endIndex);
+    }
+
+    return NULL;
+}
+
+void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired)
+{
+    ListElement** auxArray = (ListElement**)calloc(arraySize, sizeof(ListElement*));
+
+    if (auxArray != NULL)
+    {
+        isAscendingOrderRequired == TRUE ? _doQuickMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1)
+                                         : _doQuickMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+    }
+    else
+    {
+        fprintf(stderr, "Cannot perform enhanced merge sort, unable to allocate memory for the auxiliary array");
+    }
+}
+
+void _doQuickMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+{
+    QUICK_MERGE_SORT(ASCENDING, priority, &_wrapperQuickSortAscendingByPriority)
+}
+
+void _doQuickMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+{
+    QUICK_MERGE_SORT(DESCENDING, priority, &_wrapperQuickSortDescendingByPriority)
+}
+
+void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput)
+{
+    if (quickSortThreadInput != NULL)
+    {
+        const QuickSortThreadInput* threadInput = (QuickSortThreadInput*)quickSortThreadInput;
+        _doQuickSortAscendingByPriority(threadInput->array, threadInput->startIndex, threadInput->endIndex);
+    }
+
+    return NULL;
+}
+void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput)
+{
+    if (quickSortThreadInput != NULL)
+    {
+        const QuickSortThreadInput* threadInput = (QuickSortThreadInput*)quickSortThreadInput;
+        _doQuickSortDescendingByPriority(threadInput->array, threadInput->startIndex, threadInput->endIndex);
     }
 
     return NULL;
