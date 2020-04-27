@@ -193,7 +193,7 @@ int main()
                 else
                 {
                     system("clear");
-                    printf("Element with index %d has priority %zu\n\n", (unsigned int)index, (size_t)getElementAtIndex(list, index)->priority);
+                    printf("Element with index %d has priority %zu\n\n", (unsigned int)index, (size_t)getListElementAtIndex(list, index)->priority);
                 }
                 break;
             default:

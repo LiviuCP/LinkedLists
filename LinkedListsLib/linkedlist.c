@@ -345,15 +345,15 @@ void clearList(List *list, void (*deallocObject)(Object* object))
     }
 }
 
-void swapElements(ListIterator firstIt, ListIterator secondIt)
+void swapListElements(ListIterator firstIt, ListIterator secondIt)
 {
     ASSERT_CONDITION(firstIt.list != NULL && secondIt.list != NULL, "At least one iterator points to a NULL list");
     ASSERT_CONDITION(firstIt.list == secondIt.list, "Iterators belong to different lists");
 
     if (firstIt.current != NULL && secondIt.current != NULL && firstIt.current != secondIt.current)
     {
-        ListElement* firstPrevious = getPreviousElement(firstIt);
-        ListElement* secondPrevious = getPreviousElement(secondIt);
+        ListElement* firstPrevious = getPreviousListElement(firstIt);
+        ListElement* secondPrevious = getPreviousListElement(secondIt);
         ListElement* firstNext = firstIt.current->next;
         ListElement* secondNext = secondIt.current->next;
 
@@ -573,7 +573,7 @@ size_t getListSize(const List* list)
     return length;
 }
 
-ListElement* getElementAtIndex(const List* list, size_t index)
+ListElement* getListElementAtIndex(const List* list, size_t index)
 {
     ListElement* result = NULL;
 
@@ -594,7 +594,7 @@ ListElement* getElementAtIndex(const List* list, size_t index)
     return result;
 }
 
-ListElement* getPreviousElement(ListIterator it)
+ListElement* getPreviousListElement(ListIterator it)
 {
     ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
     ListElement* result = NULL;
@@ -616,7 +616,7 @@ ListElement* getPreviousElement(ListIterator it)
     return result;
 }
 
-ListElement* getLastElement(const List* list)
+ListElement* getLastListElement(const List* list)
 {
     ListElement* result = NULL;
 
@@ -635,7 +635,7 @@ ListElement* getLastElement(const List* list)
     return result;
 }
 
-boolean isElementContained(const ListElement* element, const List* list)
+boolean isListElementContained(const ListElement* element, const List* list)
 {
     boolean result = FALSE;
 

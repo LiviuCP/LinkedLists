@@ -60,7 +60,7 @@ ListElement* removeNextListElement(ListIterator it);
 ListElement* removeCurrentListElement(ListIterator it);
 void clearList(List* list, void (*deallocObject)(Object* object));
 
-void swapElements(ListIterator firstIt, ListIterator secondIt);
+void swapListElements(ListIterator firstIt, ListIterator secondIt);
 void reverseList(List* list);
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);
@@ -72,10 +72,10 @@ ListElement** moveListToArray(List* list, size_t* arraySize);
 void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
 
 size_t getListSize(const List* list);
-ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
-ListElement* getPreviousElement(ListIterator it);
-ListElement* getLastElement(const List* list);
-boolean isElementContained(const ListElement* element, const List* list);
+ListElement* getListElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
+ListElement* getPreviousListElement(ListIterator it);
+ListElement* getLastListElement(const List* list);
+boolean isListElementContained(const ListElement* element, const List* list);
 boolean isSortedAscendingByPriority(const List* list);
 boolean isSortedDescendingByPriority(const List* list);
 

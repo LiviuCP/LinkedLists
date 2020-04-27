@@ -82,7 +82,7 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7});
 
         QVERIFY2(getListSize(list) == 9, "List size is not correct");
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && getElementAtIndex(list, 4)->priority == 3 && getElementAtIndex(list, 8)->priority == 7,
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 4)->priority == 3 && getListElementAtIndex(list, 8)->priority == 7,
                  "The element is not correctly retrieved based on index");
 
         clearList(list, deleteObject);
@@ -98,7 +98,7 @@ void LinkedListTests::testAppendElement()
     List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7});
     createAndAppendToList(list, 8);
 
-    QVERIFY2(getListSize(list) == 10 && getElementAtIndex(list, 0)->priority == 6 && getElementAtIndex(list, 9)->priority == 8, "Element has not been correctly created and appended");
+    QVERIFY2(getListSize(list) == 10 && getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 9)->priority == 8, "Element has not been correctly created and appended");
 
     deleteList(list, deleteObject);
     list = nullptr;
@@ -109,7 +109,7 @@ void LinkedListTests::testPrependElement()
     List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7});
     createAndPrependToList(list, 8);
 
-    QVERIFY2(getListSize(list) == 10 && getElementAtIndex(list, 0)->priority == 8 && getElementAtIndex(list, 9)->priority == 7, "Element has not been correctly created and prepended");
+    QVERIFY2(getListSize(list) == 10 && getListElementAtIndex(list, 0)->priority == 8 && getListElementAtIndex(list, 9)->priority == 7, "Element has not been correctly created and prepended");
 
     deleteList(list, deleteObject);
     list = nullptr;
@@ -120,7 +120,7 @@ void LinkedListTests::testRemoveFirstElement()
     List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 8});
     ListElement* firstElement = removeFirstListElement(list);
 
-    QVERIFY2(getListSize(list) == 8 && getElementAtIndex(list, 0)->priority == 2 && getElementAtIndex(list, 7)->priority == 8, "Element has not been correctly created and appended");
+    QVERIFY2(getListSize(list) == 8 && getListElementAtIndex(list, 0)->priority == 2 && getListElementAtIndex(list, 7)->priority == 8, "Element has not been correctly created and appended");
     QVERIFY(firstElement->next == nullptr && firstElement->priority == 6);
 
     free(firstElement);
@@ -133,7 +133,7 @@ void LinkedListTests::testRemoveLastElement()
     List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 8});
     ListElement* lastElement = removeLastListElement(list);
 
-    QVERIFY2(getListSize(list) == 8 && getElementAtIndex(list, 0)->priority == 6 && getElementAtIndex(list, 7)->priority == 9, "Element has not been correctly created and appended");
+    QVERIFY2(getListSize(list) == 8 && getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 7)->priority == 9, "Element has not been correctly created and appended");
     QVERIFY(lastElement->next == nullptr && lastElement->priority == 8);
 
     free(lastElement);
@@ -150,11 +150,11 @@ void LinkedListTests::testInsertElementBefore()
         createAndInsertBefore(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
-                 getElementAtIndex(list, 0)->priority == 10 &&
-                 getElementAtIndex(list, 1)->priority == 6 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 5 &&
-                 getElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
+                 getListElementAtIndex(list, 0)->priority == 10 &&
+                 getListElementAtIndex(list, 1)->priority == 6 &&
+                 getListElementAtIndex(list, 2)->priority == 2 &&
+                 getListElementAtIndex(list, 3)->priority == 5 &&
+                 getListElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -168,11 +168,11 @@ void LinkedListTests::testInsertElementBefore()
         createAndInsertBefore(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 10 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 5 &&
-                 getElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 10 &&
+                 getListElementAtIndex(list, 2)->priority == 2 &&
+                 getListElementAtIndex(list, 3)->priority == 5 &&
+                 getListElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -188,11 +188,11 @@ void LinkedListTests::testInsertElementBefore()
         createAndInsertBefore(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 5 &&
-                 getElementAtIndex(list, 3)->priority == 10 &&
-                 getElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 10 &&
+                 getListElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -209,11 +209,11 @@ void LinkedListTests::testInsertElementBefore()
         createAndInsertBefore(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 5 &&
-                 getElementAtIndex(list, 3)->priority == 4 &&
-                 getElementAtIndex(list, 4)->priority == 10,   "The previous element has not been correctly inserted");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4 &&
+                 getListElementAtIndex(list, 4)->priority == 10,   "The previous element has not been correctly inserted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -224,7 +224,7 @@ void LinkedListTests::testInsertElementBefore()
         ListIterator it = lbegin(list);
         createAndInsertBefore(it, 10);
 
-        QVERIFY2(getListSize(list) == 1 && getElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
+        QVERIFY2(getListSize(list) == 1 && getListElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -240,11 +240,11 @@ void LinkedListTests::testInsertElementAfter()
         createAndInsertAfter(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 10 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 5 &&
-                 getElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 10 &&
+                 getListElementAtIndex(list, 2)->priority == 2 &&
+                 getListElementAtIndex(list, 3)->priority == 5 &&
+                 getListElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -258,11 +258,11 @@ void LinkedListTests::testInsertElementAfter()
         createAndInsertAfter(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 10 &&
-                 getElementAtIndex(list, 3)->priority == 5 &&
-                 getElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 10 &&
+                 getListElementAtIndex(list, 3)->priority == 5 &&
+                 getListElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -278,11 +278,11 @@ void LinkedListTests::testInsertElementAfter()
         createAndInsertAfter(it, 10);
 
         QVERIFY2(getListSize(list) == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 5 &&
-                 getElementAtIndex(list, 3)->priority == 4 &&
-                 getElementAtIndex(list, 4)->priority == 10,   "The next element has not been correctly inserted");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4 &&
+                 getListElementAtIndex(list, 4)->priority == 10,   "The next element has not been correctly inserted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -293,7 +293,7 @@ void LinkedListTests::testInsertElementAfter()
         ListIterator it = lbegin(list);
         createAndInsertAfter(it, 10);
 
-        QVERIFY2(getListSize(list) == 1 && getElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
+        QVERIFY2(getListSize(list) == 1 && getListElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -310,10 +310,10 @@ void LinkedListTests::testMoveContentToList()
 
         QVERIFY2(getListSize(source) == 0 &&
                  getListSize(destination) == 4 &&
-                 getElementAtIndex(destination, 0)->priority == 7 &&
-                 getElementAtIndex(destination, 1)->priority == 4 &&
-                 getElementAtIndex(destination, 2)->priority == 6 &&
-                 getElementAtIndex(destination, 3)->priority == 2,   "The source list content has not been correctly moved to destination");
+                 getListElementAtIndex(destination, 0)->priority == 7 &&
+                 getListElementAtIndex(destination, 1)->priority == 4 &&
+                 getListElementAtIndex(destination, 2)->priority == 6 &&
+                 getListElementAtIndex(destination, 3)->priority == 2,   "The source list content has not been correctly moved to destination");
 
         deleteList(source, deleteObject);
         source = nullptr;
@@ -329,8 +329,8 @@ void LinkedListTests::testMoveContentToList()
 
         QVERIFY2(getListSize(source) == 0 &&
                  getListSize(destination) == 2 &&
-                 getElementAtIndex(destination, 0)->priority == 7 &&
-                 getElementAtIndex(destination, 1)->priority == 4,   "The source list content has not been correctly moved to destination");
+                 getListElementAtIndex(destination, 0)->priority == 7 &&
+                 getListElementAtIndex(destination, 1)->priority == 4,   "The source list content has not been correctly moved to destination");
 
         deleteList(source, deleteObject);
         source = nullptr;
@@ -346,8 +346,8 @@ void LinkedListTests::testMoveContentToList()
 
         QVERIFY2(getListSize(source) == 0 &&
                  getListSize(destination) == 2 &&
-                 getElementAtIndex(destination, 0)->priority == 6 &&
-                 getElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly moved to destination");
+                 getListElementAtIndex(destination, 0)->priority == 6 &&
+                 getListElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly moved to destination");
 
         deleteList(source, deleteObject);
         source = nullptr;
@@ -366,10 +366,10 @@ void LinkedListTests::testCopyContentToList()
 
         QVERIFY2(getListSize(source) == 2 &&
                  getListSize(destination) == 4 &&
-                 getElementAtIndex(destination, 0)->priority == 7 &&
-                 getElementAtIndex(destination, 1)->priority == 4 &&
-                 getElementAtIndex(destination, 2)->priority == 6 &&
-                 getElementAtIndex(destination, 3)->priority == 2,   "The source list content has not been correctly copied to destination");
+                 getListElementAtIndex(destination, 0)->priority == 7 &&
+                 getListElementAtIndex(destination, 1)->priority == 4 &&
+                 getListElementAtIndex(destination, 2)->priority == 6 &&
+                 getListElementAtIndex(destination, 3)->priority == 2,   "The source list content has not been correctly copied to destination");
 
         deleteList(source, deleteObject);
         source = nullptr;
@@ -385,8 +385,8 @@ void LinkedListTests::testCopyContentToList()
 
         QVERIFY2(getListSize(source) == 0 &&
                  getListSize(destination) == 2 &&
-                 getElementAtIndex(destination, 0)->priority == 7 &&
-                 getElementAtIndex(destination, 1)->priority == 4,   "The source list content has not been correctly copied to destination");
+                 getListElementAtIndex(destination, 0)->priority == 7 &&
+                 getListElementAtIndex(destination, 1)->priority == 4,   "The source list content has not been correctly copied to destination");
 
         deleteList(source, deleteObject);
         source = nullptr;
@@ -402,8 +402,8 @@ void LinkedListTests::testCopyContentToList()
 
         QVERIFY2(getListSize(source) == 2 &&
                  getListSize(destination) == 2 &&
-                 getElementAtIndex(destination, 0)->priority == 6 &&
-                 getElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly copied to destination");
+                 getListElementAtIndex(destination, 0)->priority == 6 &&
+                 getListElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly copied to destination");
 
         deleteList(source, deleteObject);
         source = nullptr;
@@ -422,22 +422,22 @@ void LinkedListTests::testCopyContentToList()
 
         copyContentToList(source, destination, customCopyObject, customDeleteObject);
 
-        const Segment* copiedSegment = static_cast<Segment*>(getElementAtIndex(destination, 3)->object->payload);
-        const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getElementAtIndex(destination, 4)->object->payload);
+        const Segment* copiedSegment = static_cast<Segment*>(getListElementAtIndex(destination, 3)->object->payload);
+        const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getListElementAtIndex(destination, 4)->object->payload);
 
         QVERIFY2(getListSize(source) == 2 &&
                  getListSize(destination) == 5 &&
-                 getElementAtIndex(destination, 0)->priority == 5 &&
-                 getElementAtIndex(destination, 0)->object == nullptr &&
-                 getElementAtIndex(destination, 1)->priority == 4 &&
-                 getElementAtIndex(destination, 1)->object == nullptr &&
-                 getElementAtIndex(destination, 2)->priority == 3 &&
-                 getElementAtIndex(destination, 2)->object == nullptr &&
-                 getElementAtIndex(destination, 3)->priority == 6 &&
-                 strcmp(getElementAtIndex(destination, 3)->object->type, "Segment") == 0 &&
+                 getListElementAtIndex(destination, 0)->priority == 5 &&
+                 getListElementAtIndex(destination, 0)->object == nullptr &&
+                 getListElementAtIndex(destination, 1)->priority == 4 &&
+                 getListElementAtIndex(destination, 1)->object == nullptr &&
+                 getListElementAtIndex(destination, 2)->priority == 3 &&
+                 getListElementAtIndex(destination, 2)->object == nullptr &&
+                 getListElementAtIndex(destination, 3)->priority == 6 &&
+                 strcmp(getListElementAtIndex(destination, 3)->object->type, "Segment") == 0 &&
                  copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
-                 getElementAtIndex(destination, 4)->priority == 2 &&
-                 strcmp(getElementAtIndex(destination, 4)->object->type, "LocalConditions") == 0 &&
+                 getListElementAtIndex(destination, 4)->priority == 2 &&
+                 strcmp(getListElementAtIndex(destination, 4)->object->type, "LocalConditions") == 0 &&
                  copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 && copiedConditions->humidity == 12.8,
                  "The source list content has not been correctly copied to destination");
 
@@ -458,10 +458,10 @@ void LinkedListTests::testRemoveElementBefore()
 
         QVERIFY2(getListSize(list) == 4 &&
                  removedElement == nullptr &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 5 &&
-                 getElementAtIndex(list, 3)->priority == 4,   "The previous element removal does not work correctly");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4,   "The previous element removal does not work correctly");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -476,9 +476,9 @@ void LinkedListTests::testRemoveElementBefore()
 
         QVERIFY2(getListSize(list) == 3 &&
                  removedElement->priority == 6 &&
-                 getElementAtIndex(list, 0)->priority == 2 &&
-                 getElementAtIndex(list, 1)->priority == 5 &&
-                 getElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 2 &&
+                 getListElementAtIndex(list, 1)->priority == 5 &&
+                 getListElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -496,9 +496,9 @@ void LinkedListTests::testRemoveElementBefore()
 
         QVERIFY2(getListSize(list) == 3 &&
                  removedElement->priority == 2 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 5 &&
-                 getElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 5 &&
+                 getListElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -517,9 +517,9 @@ void LinkedListTests::testRemoveElementBefore()
 
         QVERIFY2(getListSize(list) == 3 &&
                  removedElement->priority == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -539,9 +539,9 @@ void LinkedListTests::testRemoveElementBefore()
 
         QVERIFY2(getListSize(list) == 3 &&
                  removedElement->priority == 4 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 5,   "The previous element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5,   "The previous element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -555,7 +555,7 @@ void LinkedListTests::testRemoveElementBefore()
         ListIterator it = lbegin(list);
         ListElement* removedElement = removePreviousListElement(it);
 
-        QVERIFY2(getListSize(list) == 1 && removedElement == nullptr && getElementAtIndex(list, 0)->priority == 5, "The previous element removal does not work correctly");
+        QVERIFY2(getListSize(list) == 1 && removedElement == nullptr && getListElementAtIndex(list, 0)->priority == 5, "The previous element removal does not work correctly");
 
         lnext(&it);
         removedElement = removePreviousListElement(it);
@@ -579,9 +579,9 @@ void LinkedListTests::testRemoveElementAfter()
 
         QVERIFY2(getListSize(list) == 3 &&
                  removedElement->priority == 2 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 5 &&
-                 getElementAtIndex(list, 2)->priority == 4,   "The next element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 5 &&
+                 getListElementAtIndex(list, 2)->priority == 4,   "The next element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -598,9 +598,9 @@ void LinkedListTests::testRemoveElementAfter()
 
         QVERIFY2(getListSize(list) == 3 &&
                  removedElement->priority == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 4,   "The next element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 4,   "The next element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -619,10 +619,10 @@ void LinkedListTests::testRemoveElementAfter()
 
         QVERIFY2(getListSize(list) == 4 &&
                  removedElement == nullptr &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2 &&
-                 getElementAtIndex(list, 2)->priority == 5 &&
-                 getElementAtIndex(list, 3)->priority == 4,   "The next element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4,   "The next element has not been correctly removed");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -634,7 +634,7 @@ void LinkedListTests::testRemoveElementAfter()
         ListIterator it = lbegin(list);
         ListElement* removedElement = removeNextListElement(it);
 
-        QVERIFY2(getListSize(list) == 1 && removedElement == nullptr && getElementAtIndex(list, 0)->priority == 5, "The only existing list element has not been correctly removed");
+        QVERIFY2(getListSize(list) == 1 && removedElement == nullptr && getListElementAtIndex(list, 0)->priority == 5, "The only existing list element has not been correctly removed");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -651,8 +651,8 @@ void LinkedListTests::testRemoveCurrentElement()
 
         QVERIFY2(getListSize(list) == 2 &&
                  removedElement->priority == 6 &&
-                 getElementAtIndex(list, 0)->priority == 2 &&
-                 getElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 2 &&
+                 getListElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -669,8 +669,8 @@ void LinkedListTests::testRemoveCurrentElement()
 
         QVERIFY2(getListSize(list) == 2 &&
                  removedElement->priority == 2 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -688,8 +688,8 @@ void LinkedListTests::testRemoveCurrentElement()
 
         QVERIFY2(getListSize(list) == 2 &&
                  removedElement->priority == 5 &&
-                 getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 2,   "The current element has not been correctly removed");
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2,   "The current element has not been correctly removed");
 
         free(removedElement);
         removedElement = nullptr;
@@ -727,24 +727,24 @@ void LinkedListTests::testSwapElements()
         lnext(&secondIt);
         lnext(&secondIt);
 
-        swapElements(firstIt, secondIt);
+        swapListElements(firstIt, secondIt);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 &&
-                 getElementAtIndex(list, 1)->priority == 4 &&
-                 getElementAtIndex(list, 2)->priority == 5 &&
-                 getElementAtIndex(list, 3)->priority == 2 &&
-                 getElementAtIndex(list, 4)->priority == 7,   "The elements have not been correctly swapped");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 4 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 2 &&
+                 getListElementAtIndex(list, 4)->priority == 7,   "The elements have not been correctly swapped");
     }
 
     {
         List *list = createList();
         createAndAppendToList(list, 2);
 
-        swapElements(lbegin(list), lbegin(list));
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
+        swapListElements(lbegin(list), lbegin(list));
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
 
-        swapElements(lbegin(list), lend(list));
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
+        swapListElements(lbegin(list), lend(list));
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
     }
 }
 
@@ -755,10 +755,10 @@ void LinkedListTests::testReverseList()
         reverseList(list);
 
         QVERIFY2(getListSize(list) == 4 &&
-                 getElementAtIndex(list, 0)->priority == 4 &&
-                 getElementAtIndex(list, 1)->priority == 5 &&
-                 getElementAtIndex(list, 2)->priority == 2 &&
-                 getElementAtIndex(list, 3)->priority == 6,   "The list has not been correctly reversed");
+                 getListElementAtIndex(list, 0)->priority == 4 &&
+                 getListElementAtIndex(list, 1)->priority == 5 &&
+                 getListElementAtIndex(list, 2)->priority == 2 &&
+                 getListElementAtIndex(list, 3)->priority == 6,   "The list has not been correctly reversed");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -769,8 +769,8 @@ void LinkedListTests::testReverseList()
         reverseList(list);
 
         QVERIFY2(getListSize(list) == 2 &&
-                 getElementAtIndex(list, 0)->priority == 2 &&
-                 getElementAtIndex(list, 1)->priority == 6,   "The list has not been correctly reversed");
+                 getListElementAtIndex(list, 0)->priority == 2 &&
+                 getListElementAtIndex(list, 1)->priority == 6,   "The list has not been correctly reversed");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -781,7 +781,7 @@ void LinkedListTests::testReverseList()
         createAndAppendToList(list, 2);
         reverseList(list);
 
-        QVERIFY2(getListSize(list) == 1 && getElementAtIndex(list, 0)->priority == 2, "The list has not been correctly reversed");
+        QVERIFY2(getListSize(list) == 1 && getListElementAtIndex(list, 0)->priority == 2, "The list has not been correctly reversed");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -804,7 +804,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -814,7 +814,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -824,7 +824,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -834,7 +834,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -844,7 +844,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 1, 2, 6, 5}); // random
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -854,7 +854,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 5});
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 5 && getElementAtIndex(list, 1)->priority == 6, "The list hasn't been correctly sorted ");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 5 && getListElementAtIndex(list, 1)->priority == 6, "The list hasn't been correctly sorted ");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -864,7 +864,7 @@ void LinkedListTests::testSortAscendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{1});
         sortAscendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -877,7 +877,7 @@ void LinkedListTests::testSortDescendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
         sortDescendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -887,7 +887,7 @@ void LinkedListTests::testSortDescendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
         sortDescendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -897,7 +897,7 @@ void LinkedListTests::testSortDescendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
         sortDescendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -907,7 +907,7 @@ void LinkedListTests::testSortDescendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
         sortDescendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -917,7 +917,7 @@ void LinkedListTests::testSortDescendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 1, 2, 6, 5}); // random
         sortDescendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -927,7 +927,7 @@ void LinkedListTests::testSortDescendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{5, 6});
         sortDescendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && getElementAtIndex(list, 1)->priority == 5, "The list hasn't been correctly sorted ");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 1)->priority == 5, "The list hasn't been correctly sorted ");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -937,7 +937,7 @@ void LinkedListTests::testSortDescendingByPriority()
         List* list = createLinkedList(std::initializer_list<size_t>{1});
         sortDescendingByPriority(list);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -951,7 +951,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
         sortByRandomAccess(list, insertionSortAscendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -963,7 +963,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
         sortByRandomAccess(list, heapSortAscendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -975,7 +975,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
         sortByRandomAccess(list, mergeSortAscendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -987,7 +987,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
         sortByRandomAccess(list, quickSortAscendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -999,7 +999,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
         sortByRandomAccess(list, enhancedMergeSortAscendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1011,7 +1011,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
         sortByRandomAccess(list, quickMergeSortAscendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1023,7 +1023,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
         sortByRandomAccess(list, enhancedQuickSortAscendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1038,7 +1038,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1050,7 +1050,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1062,7 +1062,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1074,7 +1074,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1086,7 +1086,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
         sortByRandomAccess(list, enhancedMergeSortDescendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1098,7 +1098,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
         sortByRandomAccess(list, quickMergeSortDescendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1110,7 +1110,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
         sortByRandomAccess(list, enhancedQuickSortDescendingByPriority);
 
-        QVERIFY2(getElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
+        QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
                  "The list hasn't been correctly sorted");
 
         deleteList(list, deleteObject);
@@ -1183,8 +1183,8 @@ void LinkedListTests::testAssignRemoveObject()
     lnext(&it);
     QVERIFY2(strcmp(it.current->object->type, "angle") == 0 && *(static_cast<float*>(it.current->object->payload)) == 1.25f, "Object has been incorrectly assigned");
 
-    Object* removedObject = static_cast<Object*>(removeObjectFromListElement(getElementAtIndex(list, 2)));
-    QVERIFY2(getElementAtIndex(list, 2)->object == nullptr && (strcmp(removedObject->type, "distance") == 0) && (*(static_cast<int*>(removedObject->payload)) == 5),
+    Object* removedObject = static_cast<Object*>(removeObjectFromListElement(getListElementAtIndex(list, 2)));
+    QVERIFY2(getListElementAtIndex(list, 2)->object == nullptr && (strcmp(removedObject->type, "distance") == 0) && (*(static_cast<int*>(removedObject->payload)) == 5),
              "Incorrect object removal from list element");
 
     free(removedObject);
@@ -1207,8 +1207,8 @@ void LinkedListTests::testIsElementContained()
     createAndAppendToList(list, 5);
     createAndPrependToList(list, 4);
 
-    QVERIFY2(isElementContained(firstElement, list), "Element is marked as not contained in the list (should be");
-    QVERIFY2(!isElementContained(secondElement, list), "Element is marked as contained in the list (should NOT be");
+    QVERIFY2(isListElementContained(firstElement, list), "Element is marked as not contained in the list (should be");
+    QVERIFY2(!isListElementContained(secondElement, list), "Element is marked as contained in the list (should NOT be");
 
     deleteList(list, deleteObject);
     free(secondElement);
@@ -1256,23 +1256,23 @@ void LinkedListTests::testGetPreviousElement()
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
 
         ListIterator it = lbegin(list);
-        QVERIFY2(getPreviousElement(it) == nullptr, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousListElement(it) == nullptr, "Previous list element is not correctly determined");
 
         lnext(&it);
-        QVERIFY2(getPreviousElement(it)->priority == 6, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousListElement(it)->priority == 6, "Previous list element is not correctly determined");
 
         lnext(&it);
-        QVERIFY2(getPreviousElement(it)->priority == 2, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousListElement(it)->priority == 2, "Previous list element is not correctly determined");
 
         lnext(&it);
-        QVERIFY2(getPreviousElement(it)->priority == 5, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousListElement(it)->priority == 5, "Previous list element is not correctly determined");
     }
 
     {
         List* list = createList();
         ListIterator it = lbegin(list);
 
-        QVERIFY2(getPreviousElement(it) == nullptr, "Previous list element is not correctly determined");
+        QVERIFY2(getPreviousListElement(it) == nullptr, "Previous list element is not correctly determined");
     }
 }
 
@@ -1281,7 +1281,7 @@ void LinkedListTests::testGetLastElement()
     {
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 9});
 
-        QVERIFY2(getLastElement(list)->priority == 9, "The last list element is not correctly retrieved");
+        QVERIFY2(getLastListElement(list)->priority == 9, "The last list element is not correctly retrieved");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -1290,7 +1290,7 @@ void LinkedListTests::testGetLastElement()
     {
         List* list = createList();
 
-        QVERIFY2(getLastElement(list) == nullptr, "The last list element is not correctly retrieved");
+        QVERIFY2(getLastListElement(list) == nullptr, "The last list element is not correctly retrieved");
 
         deleteList(list, deleteObject);
         list = nullptr;
@@ -1337,10 +1337,10 @@ void LinkedListTests::testMoveArrayToList()
              array[2] == nullptr &&
              array[3] == nullptr &&
              getListSize(list) == 4 &&
-             getElementAtIndex(list, 0)->priority == 6 &&
-             getElementAtIndex(list, 1)->priority == 2 &&
-             getElementAtIndex(list, 2)->priority == 5 &&
-             getElementAtIndex(list, 3)->priority == 9, "The array content has been incorrectly moved to list");
+             getListElementAtIndex(list, 0)->priority == 6 &&
+             getListElementAtIndex(list, 1)->priority == 2 &&
+             getListElementAtIndex(list, 2)->priority == 5 &&
+             getListElementAtIndex(list, 3)->priority == 9, "The array content has been incorrectly moved to list");
 
     free(array);
     array = nullptr;
@@ -1356,17 +1356,17 @@ void LinkedListTests::testPrintListElementsToFile()
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 5;
     point->y = 7;
-    assignObjectToListElement(getElementAtIndex(list, 0), "coordinates", static_cast<void*>(point));
+    assignObjectToListElement(getListElementAtIndex(list, 0), "coordinates", static_cast<void*>(point));
     point = nullptr;
 
     int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 4;
-    assignObjectToListElement(getElementAtIndex(list, 2), "distance", static_cast<void*>(distance));
+    assignObjectToListElement(getListElementAtIndex(list, 2), "distance", static_cast<void*>(distance));
     distance = nullptr;
 
     float* angle = static_cast<float*>(malloc(sizeof(float)));
     *angle = 1.44f;
-    assignObjectToListElement(getElementAtIndex(list, 3), "angle", static_cast<void*>(angle));
+    assignObjectToListElement(getListElementAtIndex(list, 3), "angle", static_cast<void*>(angle));
     angle = nullptr;
 
     printListContentToFile(list, testDataFile, "");
@@ -1401,7 +1401,7 @@ size_t LinkedListTests::_getSumOfPriorities(List *list)
     {
         for (size_t index{0}; index < getListSize(list); ++index)
         {
-            sum = sum + getElementAtIndex(list, index)->priority;
+            sum = sum + getListElementAtIndex(list, index)->priority;
         }
     }
 
