@@ -789,7 +789,7 @@ void moveArrayToList(ListElement** array, const size_t arraySize, List* list)
     }
 }
 
-void printListContentToFile(const List *list, const char* outFile, const char* header)
+void printListContentToFile(const List* list, const char* outFile, const char* header)
 {
     if (list != NULL)
     {

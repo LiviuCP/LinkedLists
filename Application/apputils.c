@@ -27,7 +27,7 @@ void printList(List* list)
     }
 }
 
-void printListToFile(List *list)
+void printListToFile(List* list)
 {
     const char* outputFile = "/tmp/test.txt";
     const char* header = "The list has following content:\n\n";

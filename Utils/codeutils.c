@@ -3,7 +3,7 @@
 
 #include "codeutils.h"
 
-char *getLine()
+char* getLine()
 {
     const size_t c_InitialBufferSize = 10;
     size_t bufferSize = c_InitialBufferSize;
