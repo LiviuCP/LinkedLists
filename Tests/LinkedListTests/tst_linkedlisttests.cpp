@@ -5,6 +5,7 @@
 #include "../../LinkedListsLib/linkedlist.h"
 #include "../../LinkedListsLib/sort.h"
 #include "../../Utils/codeutils.h"
+#include "../../Utils/testobjects.h"
 
 class LinkedListTests : public QObject
 {

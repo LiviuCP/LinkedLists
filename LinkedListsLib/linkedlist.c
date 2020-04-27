@@ -6,6 +6,7 @@
 #include "listsortutils.h"
 
 #include "../Utils/error.h"
+#include "../Utils/testobjects.h"
 
 List* createList()
 {

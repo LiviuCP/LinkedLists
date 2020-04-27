@@ -26,13 +26,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         utils.cpp \
-        codeutils.c
+        codeutils.c \
+        testobjects.c
 
 HEADERS += \
         utils.h \
         utils_global.h \
         codeutils.h \
-        error.h
+        error.h \
+        testobjects.h
 
 unix {
     target.path = /usr/lib
