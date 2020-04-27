@@ -9,7 +9,7 @@ int main()
 {
     size_t priority = 0;
     size_t index = 0;
-    List* list = (List*)malloc(sizeof(List));
+    List* list = createList();
     printf("Let's enter the elements (enter 0 to finish)!\n");
     for (;;)
     {
