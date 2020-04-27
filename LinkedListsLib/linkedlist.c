@@ -543,12 +543,12 @@ void reverseList(List* list)
 
 void sortAscendingByPriority(List* list)
 {
-    SORT_LIST(ASCENDING , priority)
+    BUBBLE_SORT(ASCENDING , priority)
 }
 
 void sortDescendingByPriority(List* list)
 {
-    SORT_LIST(DESCENDING , priority)
+    BUBBLE_SORT(DESCENDING , priority)
 }
 
 boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))

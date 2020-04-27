@@ -6,7 +6,7 @@
 #define ASCENDING >
 #define DESCENDING <
 
-#define SORT_LIST(condition, parameter)                                                                                                         \
+#define BUBBLE_SORT(condition, parameter)                                                                                                       \
 {                                                                                                                                               \
     if (list != NULL && list->first != NULL && list->first->next != NULL)                                                                       \
     {                                                                                                                                           \
@@ -58,34 +58,6 @@
             }                                                                                                                                   \
         }                                                                                                                                       \
     }                                                                                                                                           \
-}
-
-#define CHECK_IF_SORTED(condition, parameter)                                                                                                   \
-{                                                                                                                                               \
-    boolean isSorted = TRUE;                                                                                                                    \
-                                                                                                                                                \
-    if (list!= NULL)                                                                                                                            \
-    {                                                                                                                                           \
-        if (list->first != NULL)                                                                                                                \
-        {                                                                                                                                       \
-            ListElement* currentElement = list->first;                                                                                          \
-            while (currentElement->next != NULL)                                                                                                \
-            {                                                                                                                                   \
-                if (currentElement->parameter condition currentElement->next->parameter)                                                        \
-                {                                                                                                                               \
-                    isSorted = 0;                                                                                                               \
-                    break;                                                                                                                      \
-                }                                                                                                                               \
-                currentElement = currentElement->next;                                                                                          \
-            }                                                                                                                                   \
-        }                                                                                                                                       \
-    }                                                                                                                                           \
-    else                                                                                                                                        \
-    {                                                                                                                                           \
-        isSorted = FALSE;                                                                                                                       \
-    }                                                                                                                                           \
-                                                                                                                                                \
-    return isSorted;                                                                                                                            \
 }
 
 #define INSERTION_SORT(condition, parameter)                                                                                                    \
@@ -234,7 +206,7 @@
     }                                                                                                                                           \
 }
 
-#define MERGE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                          \
+#define MERGE_THE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                      \
 {                                                                                                                                               \
     size_t firstIndex = startIndex;                                                                                                             \
     size_t secondIndex = midIndex + 1;                                                                                                          \
@@ -304,7 +276,7 @@
         pthread_join(threadSortFirstHalf, NULL);                                                                                                \
         pthread_join(threadSortSecondHalf, NULL);                                                                                               \
                                                                                                                                                 \
-        MERGE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                          \
+        MERGE_THE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                      \
     }                                                                                                                                           \
 }
 
@@ -329,7 +301,7 @@
         pthread_join(threadSortFirstHalf, NULL);                                                                                                \
         pthread_join(threadSortSecondHalf, NULL);                                                                                               \
                                                                                                                                                 \
-        MERGE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                          \
+        MERGE_THE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                      \
     }                                                                                                                                           \
 }
 
@@ -455,6 +427,34 @@
             }                                                                                                                                   \
         }                                                                                                                                       \
     }                                                                                                                                           \
+}
+
+#define CHECK_IF_SORTED(condition, parameter)                                                                                                   \
+{                                                                                                                                               \
+    boolean isSorted = TRUE;                                                                                                                    \
+                                                                                                                                                \
+    if (list!= NULL)                                                                                                                            \
+    {                                                                                                                                           \
+        if (list->first != NULL)                                                                                                                \
+        {                                                                                                                                       \
+            ListElement* currentElement = list->first;                                                                                          \
+            while (currentElement->next != NULL)                                                                                                \
+            {                                                                                                                                   \
+                if (currentElement->parameter condition currentElement->next->parameter)                                                        \
+                {                                                                                                                               \
+                    isSorted = 0;                                                                                                               \
+                    break;                                                                                                                      \
+                }                                                                                                                               \
+                currentElement = currentElement->next;                                                                                          \
+            }                                                                                                                                   \
+        }                                                                                                                                       \
+    }                                                                                                                                           \
+    else                                                                                                                                        \
+    {                                                                                                                                           \
+        isSorted = FALSE;                                                                                                                       \
+    }                                                                                                                                           \
+                                                                                                                                                \
+    return isSorted;                                                                                                                            \
 }
 
 #endif // LISTUTILS_H
