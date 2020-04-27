@@ -813,13 +813,28 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
                 fprintf(outputFile, "Element: %d\t", (int)elementIndex);
                 fprintf(outputFile, "Priority: %d\t", (int)currentElement->priority);
                 fprintf(outputFile, "Has Object: ");
-                fprintf(outputFile, currentElement->object != NULL ? "yes" : "no");
+                if (currentElement->object != NULL)
+                {
+                    fprintf(outputFile, "yes\t");
+                    fprintf(outputFile, "Object type: ");
+                    if (currentElement->object->type != NULL)
+                    {
+                        fprintf(outputFile, "%s", currentElement->object->type != NULL ? strlen(currentElement->object->type) == 0 ? "empty"
+                                                                                                                                   : currentElement->object->type
+                                                                                       : "NULL");
+                    }
+                }
+                else
+                {
+                    fprintf(outputFile, "no");
+                }
                 fprintf(outputFile, "\n");
 
                 currentElement = currentElement->next;
                 ++elementIndex;
             }
             fclose(outputFile);
+            outputFile = NULL;
         }
         else
         {

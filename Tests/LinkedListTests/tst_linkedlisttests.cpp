@@ -44,6 +44,7 @@ private slots:
     void testGetLastElement();
     void testMoveListToArray();
     void testMoveArrayToList();
+    void testPrintListElementsToFile();
 private:
     size_t _getSumOfPriorities(List* list);
 };
@@ -1343,6 +1344,51 @@ void LinkedListTests::testMoveArrayToList()
 
     free(array);
     array = nullptr;
+    deleteList(list, deleteObject);
+    list = nullptr;
+}
+
+void LinkedListTests::testPrintListElementsToFile()
+{
+    List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 5, 9, 4});
+    const char* testDataFile = "/tmp/test.txt";
+
+    Point* point = static_cast<Point*>(malloc(sizeof(Point)));
+    point->x = 5;
+    point->y = 7;
+    assignObjectToListElement(getElementAtIndex(list, 0), "coordinates", static_cast<void*>(point));
+    point = nullptr;
+
+    int* distance = static_cast<int*>(malloc(sizeof(int)));
+    *distance = 4;
+    assignObjectToListElement(getElementAtIndex(list, 2), "distance", static_cast<void*>(distance));
+    distance = nullptr;
+
+    float* angle = static_cast<float*>(malloc(sizeof(float)));
+    *angle = 1.44f;
+    assignObjectToListElement(getElementAtIndex(list, 3), "angle", static_cast<void*>(angle));
+    angle = nullptr;
+
+    printListContentToFile(list, testDataFile, "");
+
+    char* buffer = static_cast<char*>(malloc(100));
+    FILE* readTestData = fopen(testDataFile, "r");
+
+    fgets(buffer, 100, readTestData);
+    QVERIFY2(strcmp(buffer, "Element: 0\tPriority: 3\tHas Object: yes\tObject type: coordinates\n") == 0, "First element is not printed correctly");
+    fgets(buffer, 100, readTestData);
+    QVERIFY2(strcmp(buffer, "Element: 1\tPriority: 2\tHas Object: no\n") == 0, "Second element is not printed correctly");
+    fgets(buffer, 100, readTestData);
+    QVERIFY2(strcmp(buffer, "Element: 2\tPriority: 5\tHas Object: yes\tObject type: distance\n") == 0, "Third element is not printed correctly");
+    fgets(buffer, 100, readTestData);
+    QVERIFY2(strcmp(buffer, "Element: 3\tPriority: 9\tHas Object: yes\tObject type: angle\n") == 0, "Fourth element is not printed correctly");
+    fgets(buffer, 100, readTestData);
+    QVERIFY2(strcmp(buffer, "Element: 4\tPriority: 4\tHas Object: no"), "Fifth element is not printed correctly");
+
+    fclose(readTestData);
+    readTestData = nullptr;
+    free(buffer);
+    buffer = nullptr;
     deleteList(list, deleteObject);
     list = nullptr;
 }
