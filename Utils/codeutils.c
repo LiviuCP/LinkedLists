@@ -50,9 +50,9 @@ char* getLine()
     return buffer;
 }
 
-int isUnsignedLong(const char *input)
+boolean isUnsignedLong(const char *input)
 {
-    int isValid = 1;
+    boolean isValid = TRUE;
 
     if (input != NULL && strlen(input) != 0)
     {
@@ -74,7 +74,7 @@ int isUnsignedLong(const char *input)
             case '9':
                 break;
             default:
-                isValid = 0;
+                isValid = FALSE;
             }
 
             ++currentPos;
@@ -87,16 +87,16 @@ int isUnsignedLong(const char *input)
     }
     else
     {
-        isValid = 0;
+        isValid = FALSE;
     }
 
     return isValid;
 }
 
-int readUnsignedLong(size_t* number)
+boolean readUnsignedLong(size_t* number)
 {
     char* input = getLine();
-    int isValidInt = isUnsignedLong(input);
+    boolean isValidInt = isUnsignedLong(input);
 
     if(isValidInt)
     {

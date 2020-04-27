@@ -13,8 +13,8 @@ extern "C"{
 #endif
 
 char* getLine();
-int readUnsignedLong(size_t* number);
-int isUnsignedLong(const char* input);
+boolean readUnsignedLong(size_t* number);
+boolean isUnsignedLong(const char* input);
 
 #ifdef __cplusplus
 }
