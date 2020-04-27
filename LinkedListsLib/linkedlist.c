@@ -819,6 +819,7 @@ void printListContentToFile(const List *list, const char* outFile, const char* h
                 currentElement = currentElement->next;
                 ++elementIndex;
             }
+            fclose(outputFile);
         }
         else
         {
