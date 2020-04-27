@@ -735,6 +735,9 @@ void LinkedListTests::testSwapElements()
                  getListElementAtIndex(list, 2)->priority == 5 &&
                  getListElementAtIndex(list, 3)->priority == 2 &&
                  getListElementAtIndex(list, 4)->priority == 7,   "The elements have not been correctly swapped");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 
     {
@@ -746,6 +749,9 @@ void LinkedListTests::testSwapElements()
 
         swapListElements(lbegin(list), lend(list));
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 }
 
@@ -1188,7 +1194,7 @@ void LinkedListTests::testAssignRemoveObject()
     QVERIFY2(getListElementAtIndex(list, 2)->object == nullptr && (strcmp(removedObject->type, "distance") == 0) && (*(static_cast<int*>(removedObject->payload)) == 5),
              "Incorrect object removal from list element");
 
-    free(removedObject);
+    deleteObject(removedObject);
     removedObject = nullptr;
     deleteList(list, deleteObject);
     list = nullptr;
@@ -1220,16 +1226,25 @@ void LinkedListTests::testIsSortedAscendingByPriority()
     {
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3});
         QVERIFY2(!isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 
     {
         List* list = createLinkedList(std::initializer_list<size_t>{1, 2, 2, 3, 5, 6});
         QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 
     {
         List* list = createLinkedList(std::initializer_list<size_t>{5, 5, 5, 5, 5, 5});
         QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 }
 
@@ -1238,16 +1253,25 @@ void LinkedListTests::testIsSortedDescendingByPriority()
     {
         List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3});
         QVERIFY2(!isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 
     {
         List* list = createLinkedList(std::initializer_list<size_t>{6, 5, 4, 2, 2, 1});
         QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 
     {
         List* list = createLinkedList(std::initializer_list<size_t>{5, 5, 5, 5, 5, 5});
         QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 }
 
@@ -1267,6 +1291,9 @@ void LinkedListTests::testGetPreviousElement()
 
         lnext(&it);
         QVERIFY2(getPreviousListElement(it)->priority == 5, "Previous list element is not correctly determined");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 
     {
@@ -1274,6 +1301,9 @@ void LinkedListTests::testGetPreviousElement()
         ListIterator it = lbegin(list);
 
         QVERIFY2(getPreviousListElement(it) == nullptr, "Previous list element is not correctly determined");
+
+        deleteList(list, deleteObject);
+        list = nullptr;
     }
 }
 
@@ -1313,6 +1343,11 @@ void LinkedListTests::testMoveListToArray()
 
     deleteList(list, deleteObject);
     list = nullptr;
+    for (size_t index = 0; index < arraySize; ++index)
+    {
+        free(array[index]);
+        array[index] = nullptr;
+    }
     free(array);
     array = nullptr;
 }
