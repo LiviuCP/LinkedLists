@@ -41,43 +41,35 @@ extern "C"{
 
 List* createList();
 void deleteList(List* list, void (*deallocObject)(Object* object));
-void deleteObject(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
-
-boolean copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
 
 ListElement* createListElement();
 
-void prependToList(List* list, ListElement* newElement);
+ListElement* createAndAppendToList(List* list, size_t priority);
 void appendToList(List* list, ListElement* newElement);
 ListElement* createAndPrependToList(List* list, size_t priority);
-ListElement* createAndAppendToList(List* list, size_t priority);
-
+void prependToList(List* list, ListElement* newElement);
 ListElement* createAndInsertAfter(ListIterator it, size_t priority);
 void insertAfter(ListIterator it, ListElement* nextElement);
 ListElement* createAndInsertBefore(ListIterator it, size_t priority);
 void insertBefore(ListIterator it, ListElement* previousElement);
-
-void moveContentToList(List* source, List* destination);
-ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination),
-                               void (*deallocObject)(Object* object));
-
-void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
-Object* removeObjectFromListElement(ListElement* element);
 
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
 ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
 ListElement* removeCurrentListElement(ListIterator it);
-
 void clearList(List* list, void (*deallocObject)(Object* object));
 
 void swapElements(ListIterator firstIt, ListIterator secondIt);
 void reverseList(List* list);
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);
-
 boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
+
+void moveContentToList(List* source, List* destination);
+ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination), void (*deallocObject)(Object* object));
+ListElement** moveListToArray(List* list, size_t* arraySize);
+void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
 
 size_t getListSize(const List* list);
 ListElement* getElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
@@ -92,10 +84,12 @@ ListIterator lend(List* list);
 void lnext(ListIterator* iterator);
 boolean areIteratorsEqual(ListIterator first, ListIterator second);
 
-ListElement** moveListToArray(List* list, size_t* arraySize);
-void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
-
 void printListContentToFile(const List* list, const char* outFile, const char* header);
+
+void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
+Object* removeObjectFromListElement(ListElement* element);
+void deleteObject(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
+boolean copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
 
 // for testing purposes only
 void customDeleteObject(Object* object);

@@ -32,41 +32,6 @@ void deleteList(List* list, void (*deallocObject)(Object* object))
     }
 }
 
-// user should pass a custom deleter for objects with payloads containing pointers to allocated heap memory
-void deleteObject(Object *object)
-{
-    if (object != NULL)
-    {
-        if (object->type != NULL)
-        {
-            free(object->type);
-            object->type = NULL;
-        }
-        if (object->payload != NULL)
-        {
-            free(object->payload);
-            object->payload = NULL;
-        }
-    }
-    free(object);
-    object = NULL;
-}
-
-/* This function is just added for having a default value to be passed to the copyContentToList() function as deep copying function pointer.
-   User is responsible to pass a custom deep copying function with this signature if any list element contains an non-NULL Object.
-*/
-boolean copyObject(const ListElement* source, ListElement* destination)
-{
-    boolean success = FALSE;
-
-    if (source != NULL && destination != NULL)
-    {
-        success = TRUE;
-    }
-
-    return success;
-}
-
 ListElement* createListElement()
 {
     ListElement* result = (ListElement*)malloc(sizeof(ListElement));
@@ -81,15 +46,20 @@ ListElement* createListElement()
     return result;
 }
 
-void prependToList(List* list, ListElement* newElement)
+ListElement* createAndAppendToList(List* list, size_t priority)
 {
-    if (list != NULL && newElement != NULL)
-    {
-        ASSERT_CONDITION(newElement->next == NULL, "Element to be inserted is linked to another element!");
+    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
 
-        newElement->next = list->first;
-        list->first = newElement;
+    if (element != NULL)
+    {
+        element->object = NULL;
+        element->priority = priority;
+        element->next = NULL;
+
+        appendToList(list, element);
     }
+
+    return element;
 }
 
 void appendToList(List* list, ListElement* newElement)
@@ -129,20 +99,15 @@ ListElement* createAndPrependToList(List* list, size_t priority)
     return element;
 }
 
-ListElement* createAndAppendToList(List* list, size_t priority)
+void prependToList(List* list, ListElement* newElement)
 {
-    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
-
-    if (element != NULL)
+    if (list != NULL && newElement != NULL)
     {
-        element->object = NULL;
-        element->priority = priority;
-        element->next = NULL;
+        ASSERT_CONDITION(newElement->next == NULL, "Element to be inserted is linked to another element!");
 
-        appendToList(list, element);
+        newElement->next = list->first;
+        list->first = newElement;
     }
-
-    return element;
 }
 
 ListElement* createAndInsertAfter(ListIterator it, size_t priority)
@@ -246,121 +211,6 @@ void insertBefore(ListIterator it, ListElement* previousElement)
             appendToList(it.list, previousElement);
         }
     }
-}
-
-void moveContentToList(List* source, List* destination)
-{
-    if (source != NULL && destination != NULL && source != destination && source->first != NULL)
-    {
-        appendToList(destination, source->first);
-        source->first = NULL;
-    }
-}
-
-/* The objects of the source list will not be copied into the destination list. This is because without knowing the object types the only way to achieve this is by
-   shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, the objects will not be copied at all so the new elements of the
-   destination list will contain NULL objects
-*/
-ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination),
-                               void (*deallocObject)(Object* object))
-{
-    ListElement* result = NULL;
-
-    if (source != NULL && destination != NULL && source != destination && source->first != NULL)
-    {
-        List* temp = createList();
-
-        if (temp != NULL)
-        {
-            ListElement* currentSourceElement = source->first;
-            // use createAndAppendToList() only once to avoid overhead of finding last list element
-            ListElement* lastAppendedElement = createAndAppendToList(temp, currentSourceElement->priority);
-
-            if (lastAppendedElement != NULL && copyObjectToElement(currentSourceElement, lastAppendedElement))
-            {
-                currentSourceElement = currentSourceElement->next;
-
-                while (currentSourceElement != NULL)
-                {
-                    ListElement* elementToAppend = createListElement();
-
-                    if (elementToAppend != NULL && copyObjectToElement(currentSourceElement, elementToAppend))
-                    {
-                        elementToAppend->priority = currentSourceElement->priority;
-                        lastAppendedElement->next = elementToAppend;
-                        lastAppendedElement = elementToAppend;
-                        currentSourceElement = currentSourceElement->next;
-                    }
-                    else
-                    {
-                        // abort operation if a single additional element cannot be created
-                        deleteList(temp, deallocObject);
-                        temp = NULL;
-                        break;
-                    }
-                }
-
-                if (temp != NULL)
-                {
-                    result = temp->first;
-                    moveContentToList(temp, destination);
-                    deleteList(temp, deallocObject);
-                    temp = NULL;
-                }
-            }
-            else {
-                // abort operation if the first copied element cannot be created
-                deleteList(temp, deallocObject);
-                temp = NULL;
-            }
-        }
-    }
-
-    return result;
-}
-
-void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
-{
-    if (element != NULL && objectPayload != NULL && objectType != NULL)
-    {
-        ASSERT_CONDITION(element->object == NULL, "Attempt to assign object without freeing the existing one first!");
-
-        element->object = (Object*)malloc(sizeof (Object));
-
-        if (element->object != NULL)
-        {
-            element->object->type = (char*)malloc(strlen(objectType) + 1);
-
-            if (element->object->type == NULL)
-            {
-                fprintf(stderr, "Unable to allocate memory for object type. Object cannot be assigned!");
-                free(element->object);
-                element->object = NULL;
-            }
-            else
-            {
-                strcpy(element->object->type, objectType);
-                element->object->payload= objectPayload;
-            }
-        }
-        else
-        {
-            fprintf(stderr, "Unable to allocate memory for object. Object cannot be assigned!");
-        }
-    }
-}
-
-Object* removeObjectFromListElement(ListElement* element)
-{
-    Object* result = NULL;
-
-    if (element != NULL && element->object != NULL)
-    {
-        result  = element->object;
-        element->object = NULL;
-    }
-
-    return result;
 }
 
 ListElement* removeFirstListElement(List* list)
@@ -574,6 +424,137 @@ boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** ar
     return result;
 }
 
+void moveContentToList(List* source, List* destination)
+{
+    if (source != NULL && destination != NULL && source != destination && source->first != NULL)
+    {
+        appendToList(destination, source->first);
+        source->first = NULL;
+    }
+}
+
+/* The objects of the source list will not be copied into the destination list. This is because without knowing the object types the only way to achieve this is by
+   shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, the objects will not be copied at all so the new elements of the
+   destination list will contain NULL objects
+*/
+ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+                               void (*deallocObject)(Object* object))
+{
+    ListElement* result = NULL;
+
+    if (source != NULL && destination != NULL && source != destination && source->first != NULL)
+    {
+        List* temp = createList();
+
+        if (temp != NULL)
+        {
+            ListElement* currentSourceElement = source->first;
+            // use createAndAppendToList() only once to avoid overhead of finding last list element
+            ListElement* lastAppendedElement = createAndAppendToList(temp, currentSourceElement->priority);
+
+            if (lastAppendedElement != NULL && copyObjectToElement(currentSourceElement, lastAppendedElement))
+            {
+                currentSourceElement = currentSourceElement->next;
+
+                while (currentSourceElement != NULL)
+                {
+                    ListElement* elementToAppend = createListElement();
+
+                    if (elementToAppend != NULL && copyObjectToElement(currentSourceElement, elementToAppend))
+                    {
+                        elementToAppend->priority = currentSourceElement->priority;
+                        lastAppendedElement->next = elementToAppend;
+                        lastAppendedElement = elementToAppend;
+                        currentSourceElement = currentSourceElement->next;
+                    }
+                    else
+                    {
+                        // abort operation if a single additional element cannot be created
+                        deleteList(temp, deallocObject);
+                        temp = NULL;
+                        break;
+                    }
+                }
+
+                if (temp != NULL)
+                {
+                    result = temp->first;
+                    moveContentToList(temp, destination);
+                    deleteList(temp, deallocObject);
+                    temp = NULL;
+                }
+            }
+            else {
+                // abort operation if the first copied element cannot be created
+                deleteList(temp, deallocObject);
+                temp = NULL;
+            }
+        }
+    }
+
+    return result;
+}
+
+ListElement** moveListToArray(List* list, size_t* arraySize)
+{
+    ListElement** result = NULL;
+    *arraySize = 0;
+
+    if (list != NULL && list->first != NULL)
+    {
+        const size_t nrOfElements = getListSize(list);
+
+        ListElement** array = (ListElement**)calloc(nrOfElements, sizeof(ListElement*));
+
+        if (array != NULL)
+        {
+            ListElement* currentElement = list->first;
+            ListElement** currentArrayElement = array;
+
+            while (currentElement != NULL)
+            {
+                *currentArrayElement = currentElement;
+                currentElement = currentElement->next;
+                (*currentArrayElement)->next = NULL; // decouple the list elements, array will now maintain cohesion and order
+                ++currentArrayElement;
+            }
+
+            list->first = NULL;
+            *arraySize = nrOfElements;
+            result = array;
+            array = NULL;
+        }
+    }
+
+    return result;
+}
+
+void moveArrayToList(ListElement** array, const size_t arraySize, List* list)
+{
+    if (array != NULL && arraySize > 0 && list != NULL)
+    {
+        ASSERT_CONDITION(list->first == NULL, "Attempt to move pointers array to unempty list");
+        ListElement** currentArrayElement = array;
+        ASSERT_CONDITION(*array != NULL, "NULL value array element identified");
+        list->first = *currentArrayElement;
+        ListElement* currentListElement = list->first;
+
+        for (size_t index = 1; index < arraySize; ++index)
+        {
+            currentListElement->next = array[index];
+            ASSERT_CONDITION(array[index] != NULL, "NULL value array element identified");
+            currentListElement = currentListElement->next;
+        }
+
+        // ensure the list is correctly closed and the array loses ownership of the elements
+        array[arraySize-1]->next = NULL;
+        for (size_t index = 0; index < arraySize; ++index)
+        {
+            array[index] = NULL;
+        }
+    }
+}
+
 size_t getListSize(const List* list)
 {
     size_t length = 0;
@@ -729,66 +710,6 @@ boolean areIteratorsEqual(ListIterator first, ListIterator second)
     return first.current == second.current;
 }
 
-ListElement** moveListToArray(List* list, size_t* arraySize)
-{
-    ListElement** result = NULL;
-    *arraySize = 0;
-
-    if (list != NULL && list->first != NULL)
-    {
-        const size_t nrOfElements = getListSize(list);
-
-        ListElement** array = (ListElement**)calloc(nrOfElements, sizeof(ListElement*));
-
-        if (array != NULL)
-        {
-            ListElement* currentElement = list->first;
-            ListElement** currentArrayElement = array;
-
-            while (currentElement != NULL)
-            {
-                *currentArrayElement = currentElement;
-                currentElement = currentElement->next;
-                (*currentArrayElement)->next = NULL; // decouple the list elements, array will now maintain cohesion and order
-                ++currentArrayElement;
-            }
-
-            list->first = NULL;
-            *arraySize = nrOfElements;
-            result = array;
-            array = NULL;
-        }
-    }
-
-    return result;
-}
-
-void moveArrayToList(ListElement** array, const size_t arraySize, List* list)
-{
-    if (array != NULL && arraySize > 0 && list != NULL)
-    {
-        ASSERT_CONDITION(list->first == NULL, "Attempt to move pointers array to unempty list");
-        ListElement** currentArrayElement = array;
-        ASSERT_CONDITION(*array != NULL, "NULL value array element identified");
-        list->first = *currentArrayElement;
-        ListElement* currentListElement = list->first;
-
-        for (size_t index = 1; index < arraySize; ++index)
-        {
-            currentListElement->next = array[index];
-            ASSERT_CONDITION(array[index] != NULL, "NULL value array element identified");
-            currentListElement = currentListElement->next;
-        }
-
-        // ensure the list is correctly closed and the array loses ownership of the elements
-        array[arraySize-1]->next = NULL;
-        for (size_t index = 0; index < arraySize; ++index)
-        {
-            array[index] = NULL;
-        }
-    }
-}
-
 void printListContentToFile(const List* list, const char* outFile, const char* header)
 {
     if (list != NULL)
@@ -844,6 +765,85 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
             fprintf(stderr, "Error description: %s\n", strerror(errorNumber));
         }
     }
+}
+
+void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
+{
+    if (element != NULL && objectPayload != NULL && objectType != NULL)
+    {
+        ASSERT_CONDITION(element->object == NULL, "Attempt to assign object without freeing the existing one first!");
+
+        element->object = (Object*)malloc(sizeof (Object));
+
+        if (element->object != NULL)
+        {
+            element->object->type = (char*)malloc(strlen(objectType) + 1);
+
+            if (element->object->type == NULL)
+            {
+                fprintf(stderr, "Unable to allocate memory for object type. Object cannot be assigned!");
+                free(element->object);
+                element->object = NULL;
+            }
+            else
+            {
+                strcpy(element->object->type, objectType);
+                element->object->payload= objectPayload;
+            }
+        }
+        else
+        {
+            fprintf(stderr, "Unable to allocate memory for object. Object cannot be assigned!");
+        }
+    }
+}
+
+Object* removeObjectFromListElement(ListElement* element)
+{
+    Object* result = NULL;
+
+    if (element != NULL && element->object != NULL)
+    {
+        result  = element->object;
+        element->object = NULL;
+    }
+
+    return result;
+}
+
+// user should pass a custom deleter for objects with payloads containing pointers to allocated heap memory
+void deleteObject(Object *object)
+{
+    if (object != NULL)
+    {
+        if (object->type != NULL)
+        {
+            free(object->type);
+            object->type = NULL;
+        }
+        if (object->payload != NULL)
+        {
+            free(object->payload);
+            object->payload = NULL;
+        }
+    }
+    free(object);
+    object = NULL;
+}
+
+/* This function is just added for having a default value to be passed to the copyContentToList() function as deep copying function pointer.
+   User is responsible to pass a custom deep copying function with this signature if any list element contains an non-NULL Object.
+*/
+boolean copyObject(const ListElement* source, ListElement* destination)
+{
+    boolean success = FALSE;
+
+    if (source != NULL && destination != NULL)
+    {
+        success = TRUE;
+    }
+
+    return success;
 }
 
 /* These two functions are just for illustrating the creation of custom deallocator and custom deep copy function */
