@@ -150,6 +150,9 @@ void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean
     {
         isAscendingOrderRequired == TRUE ? _doMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1) :
                          _doMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+
+        free(auxArray);
+        auxArray = NULL;
     }
     else
     {
@@ -185,6 +188,9 @@ void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize,
     {
         isAscendingOrderRequired == TRUE ? _doEnhancedMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1) :
                          _doEnhancedMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+
+        free(auxArray);
+        auxArray = NULL;
     }
     else
     {
@@ -232,6 +238,9 @@ void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, bo
     {
         isAscendingOrderRequired == TRUE ? _doQuickMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1)
                                          : _doQuickMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+
+        free(auxArray);
+        auxArray = NULL;
     }
     else
     {
