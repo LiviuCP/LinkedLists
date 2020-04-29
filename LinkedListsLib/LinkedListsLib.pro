@@ -27,14 +27,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         linkedlistslib.cpp \
         linkedlist.c \
-        sort.c
+        sort.c \
+        hashtable.c
 
 HEADERS += \
         linkedlistslib.h \
         linkedlistslib_global.h \
         linkedlist.h \
         listsortutils.h \
-        sort.h
+        sort.h \
+        hashtable.h
 
 
 unix {
