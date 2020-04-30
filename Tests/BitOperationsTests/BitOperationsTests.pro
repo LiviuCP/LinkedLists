@@ -10,7 +10,7 @@ QMAKE_CFLAGS += -std=c11
 TEMPLATE = app
 
 SOURCES += \
-    tst_othertests.cpp
+    tst_bitoperationstests.cpp
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
