@@ -76,6 +76,22 @@ byte_t swapBits(const byte_t byte, const size_t firstBitIndex, const size_t seco
     return result;
 }
 
+byte_t reverseBits(const byte_t byte)
+{
+    byte_t result = byte;
+    byte_t leftMask = 128u;
+    byte_t rightMask = 1u;
+
+    for (size_t bitIndex = 0; bitIndex < BYTE_SIZE; ++bitIndex)
+    {
+        result =(byte & rightMask) == 0u ? result & (~leftMask) : result | leftMask;
+        leftMask = leftMask >> 1;
+        rightMask = (byte_t)(rightMask << 1);
+    }
+
+    return result;
+}
+
 byte_t retrieveSingleBitMask(const size_t bitIndex)
 {
     ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");
