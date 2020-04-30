@@ -92,6 +92,14 @@ byte_t reverseBits(const byte_t byte)
     return result;
 }
 
+byte_t swapNibbles(const byte_t byte)
+{
+    byte_t leftNibble = (byte_t)(byte << 4);
+    byte_t rightNibble = byte >> 4;
+
+    return (0u | leftNibble) | rightNibble;
+}
+
 byte_t retrieveSingleBitMask(const size_t bitIndex)
 {
     ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");

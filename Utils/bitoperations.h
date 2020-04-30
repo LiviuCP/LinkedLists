@@ -15,6 +15,7 @@ byte_t rotateLeft(const byte_t byte, const size_t nrOfRotations);
 byte_t rotateRight(const byte_t byte, const size_t nrOfRotations);
 byte_t swapBits(const byte_t byte, const size_t firstBitIndex, const size_t secondBitIndex);
 byte_t reverseBits(const byte_t byte);
+byte_t swapNibbles(const byte_t byte);
 
 byte_t retrieveSingleBitMask(const size_t bitIndex);
 byte_t setBit(const byte_t byte, const size_t bitIndex);
