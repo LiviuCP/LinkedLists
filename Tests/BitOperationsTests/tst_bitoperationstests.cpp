@@ -18,6 +18,7 @@ private slots:
     void testSwapBytes();
     void testCountNrOfSetBits();
     void testCountMinNrOfRequiredBits();
+    void testIsPalyndrome();
 };
 
 BitOperationsTests::BitOperationsTests()
@@ -95,6 +96,12 @@ void BitOperationsTests::testCountMinNrOfRequiredBits()
     QVERIFY(getMinNrOfRequiredBits(0b00100110) == 6);
     QVERIFY(getMinNrOfRequiredBits(0b00000111) == 3);
     QVERIFY(getMinNrOfRequiredBits(0xFF) == 8);
+}
+
+void BitOperationsTests::testIsPalyndrome()
+{
+    QVERIFY(isPalyndrome(0b10011001));
+    QVERIFY(!isPalyndrome(0b10010001));
 }
 
 QTEST_APPLESS_MAIN(BitOperationsTests)

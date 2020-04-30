@@ -147,3 +147,27 @@ size_t getMinNrOfRequiredBits(const byte_t byte)
 
     return result;
 }
+
+boolean isPalyndrome(const byte_t byte)
+{
+    boolean status = TRUE;
+
+    size_t leftIndex = BYTE_SIZE - 1;
+    size_t rightIndex = 0;
+
+    while (leftIndex > rightIndex)
+    {
+        if (((byte & (LSB_MASK << leftIndex)) >> (leftIndex - rightIndex)) ^ (byte & (LSB_MASK << rightIndex)))
+        {
+            status = FALSE;
+            break;
+        }
+        else
+        {
+            --leftIndex;
+            ++rightIndex;
+        }
+    }
+
+    return status;
+}

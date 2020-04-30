@@ -20,6 +20,7 @@ void swapBytes(byte_t* firstByte, byte_t* secondByte);
 
 size_t getNumberOfSetBits(const byte_t byte);
 size_t getMinNrOfRequiredBits(const byte_t byte);
+boolean isPalyndrome(const byte_t byte);
 
 #ifdef __cplusplus
 }
