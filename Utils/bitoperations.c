@@ -100,6 +100,24 @@ byte_t swapNibbles(const byte_t byte)
     return (0u | leftNibble) | rightNibble;
 }
 
+void swapBytes(byte_t* firstByte, byte_t* secondByte)
+{
+    if (firstByte != NULL && secondByte != NULL && firstByte != secondByte)
+    {
+        byte_t bitMask = 1;
+
+        for (size_t bitIndex = 0; bitIndex < BYTE_SIZE; ++bitIndex)
+        {
+            if ((bitMask & *firstByte) ^ (bitMask & *secondByte))
+            {
+                *firstByte = (~(*firstByte) & bitMask) | ((*firstByte) & (~bitMask));
+                *secondByte = ((~*secondByte) & bitMask) | ((*secondByte) & (~bitMask));
+                bitMask = (byte_t)(bitMask << 1);
+            }
+        }
+    }
+}
+
 byte_t retrieveSingleBitMask(const size_t bitIndex)
 {
     ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");

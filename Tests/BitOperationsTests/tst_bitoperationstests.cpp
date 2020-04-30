@@ -15,6 +15,7 @@ private slots:
     void testSwapBits();
     void testReverseBits();
     void testSwapNibbles();
+    void testSwapBytes();
     void testRotations();
     void testCountNumberOfSetBits();
     void testMinimumRequiredBits();
@@ -68,6 +69,16 @@ void BitOperationsTests::testSwapNibbles()
     QVERIFY2(swapNibbles(0b01000010) == 0b00100100, "The nibbles are not correctly swapped");
     QVERIFY2(swapNibbles(0b10101010) == 0b10101010, "The nibbles are not correctly swapped");
     QVERIFY2(swapNibbles(0xFF) == 0xFF, "The nibbles are not correctly swapped");
+}
+
+void BitOperationsTests::testSwapBytes()
+{
+    byte_t first{0b00100001};
+    byte_t second{0b00100010};
+
+    swapBytes(&first, &second);
+
+    QVERIFY2(first == 0b00100010 && second == 0b00100001, "The two bytes have not been correctly swapped by bitwise operation");
 }
 
 void BitOperationsTests::testRotations()
