@@ -2,6 +2,7 @@
 #include "error.h"
 
 #define BYTE_SIZE 8
+#define NIBBLE_SIZE BYTE_SIZE/2
 
 byte_t rotateLeft(const byte_t byte, const size_t nrOfRotations)
 {
@@ -92,10 +93,7 @@ byte_t reverseBits(const byte_t byte)
 
 byte_t swapNibbles(const byte_t byte)
 {
-    byte_t leftNibble = (byte_t)(byte << 4);
-    byte_t rightNibble = byte >> 4;
-
-    return (0u | leftNibble) | rightNibble;
+    return (0u | ((byte_t)(byte << NIBBLE_SIZE))) | (byte >> NIBBLE_SIZE);
 }
 
 void swapBytes(byte_t* firstByte, byte_t* secondByte)
