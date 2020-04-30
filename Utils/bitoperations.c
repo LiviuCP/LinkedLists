@@ -45,23 +45,22 @@ unsigned char invertBit(const unsigned char byte, const unsigned char bitIndex)
     return isBitSet(byte, bitIndex) ? resetBit(byte, bitIndex) : setBit(byte, bitIndex);
 }
 
-size_t getNumberOfSetBits(const unsigned char number)
+size_t getNumberOfSetBits(const unsigned char byte)
 {
-    unsigned int numberCopy = number;
-    const unsigned int one = 1u;
-    const size_t totalNrOfBits = 8 * sizeof (unsigned int);
-    size_t nrOfOnes = 0;
+    size_t result = 0;
+    unsigned int temp = byte;
+    const unsigned int lsbMask = 1u;
 
-    for (size_t bitNumber = 0; bitNumber < totalNrOfBits; ++bitNumber)
+    for (size_t bitNumber = 0; bitNumber < BYTE_SIZE; ++bitNumber)
     {
-        if ((numberCopy & one) == one)
+        if ((temp & lsbMask) == lsbMask)
         {
-            ++nrOfOnes;
+            ++result;
         }
-        numberCopy = numberCopy >> 1;
+        temp = temp >> 1;
     }
 
-    return nrOfOnes;
+    return result;
 }
 
 size_t getMinimumNrOfBits(const unsigned char byte)
@@ -85,4 +84,3 @@ boolean isBitSet(const unsigned char byte, const unsigned char bitIndex)
     ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");
     return (byte & retrieveSingleBitMask(bitIndex));
 }
-
