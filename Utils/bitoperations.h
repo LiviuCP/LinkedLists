@@ -5,22 +5,24 @@
 
 #include "codeutils.h"
 
+typedef unsigned char byte_t;
+
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-unsigned char rotateLeft(const unsigned char byte, const size_t nrOfRotations);
-unsigned char rotateRight(const unsigned char byte, const size_t nrOfRotations);
-unsigned char swapBits(const unsigned char byte, const unsigned char firstBitIndex, const unsigned char secondBitIndex);
+byte_t rotateLeft(const byte_t byte, const size_t nrOfRotations);
+byte_t rotateRight(const byte_t byte, const size_t nrOfRotations);
+byte_t swapBits(const byte_t byte, const size_t firstBitIndex, const size_t secondBitIndex);
 
-unsigned char retrieveSingleBitMask(const unsigned char bitIndex);
-unsigned char setBit(const unsigned char byte, const unsigned char bitIndex);
-unsigned char resetBit(const unsigned char byte, const unsigned char bitIndex);
-unsigned char invertBit(const unsigned char byte, const unsigned char bitIndex);
+byte_t retrieveSingleBitMask(const size_t bitIndex);
+byte_t setBit(const byte_t byte, const size_t bitIndex);
+byte_t resetBit(const byte_t byte, const size_t bitIndex);
+byte_t invertBit(const byte_t byte, const size_t bitIndex);
 
-size_t getNumberOfSetBits(const unsigned char byte);
-size_t getMinimumNrOfBits(const unsigned char byte);
-boolean isBitSet(const unsigned char byte, const unsigned char bitIndex);
+size_t getNumberOfSetBits(const byte_t byte);
+size_t getMinimumNrOfBits(const byte_t byte);
+boolean isBitSet(const byte_t byte, const size_t bitIndex);
 
 #ifdef __cplusplus
 }

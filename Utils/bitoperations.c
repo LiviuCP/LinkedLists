@@ -3,19 +3,19 @@
 
 #define BYTE_SIZE 8
 
-unsigned char rotateLeft(const unsigned char byte, const size_t nrOfRotations)
+byte_t rotateLeft(const byte_t byte, const size_t nrOfRotations)
 {
-    unsigned char result = byte;
+    byte_t result = byte;
 
     if (nrOfRotations > 0)
     {
         size_t remainingRotations = nrOfRotations % BYTE_SIZE;
-        const unsigned char lsbMask = retrieveSingleBitMask(0);
+        const byte_t lsbMask = retrieveSingleBitMask(0);
 
         while (remainingRotations > 0)
         {
             boolean firstBitSetBeforeShift = isBitSet(result, BYTE_SIZE - 1);
-            result = (unsigned char)(result << 1);
+            result = (byte_t)(result << 1);
 
             if (firstBitSetBeforeShift)
             {
@@ -29,14 +29,14 @@ unsigned char rotateLeft(const unsigned char byte, const size_t nrOfRotations)
     return result;
 }
 
-unsigned char rotateRight(const unsigned char byte, const size_t nrOfRotations)
+byte_t rotateRight(const byte_t byte, const size_t nrOfRotations)
 {
-    unsigned char result = byte;
+    byte_t result = byte;
 
     if (nrOfRotations > 0)
     {
         size_t remainingRotations = nrOfRotations % BYTE_SIZE;
-        const unsigned char msbMask = retrieveSingleBitMask(BYTE_SIZE - 1);
+        const byte_t msbMask = retrieveSingleBitMask(BYTE_SIZE - 1);
 
         while (remainingRotations > 0)
         {
@@ -55,9 +55,9 @@ unsigned char rotateRight(const unsigned char byte, const size_t nrOfRotations)
     return result;
 }
 
-unsigned char swapBits(const unsigned char byte, const unsigned char firstBitIndex, const unsigned char secondBitIndex)
+byte_t swapBits(const byte_t byte, const size_t firstBitIndex, const size_t secondBitIndex)
 {
-    unsigned char result = byte;
+    byte_t result = byte;
 
     if (firstBitIndex != secondBitIndex)
     {
@@ -76,32 +76,32 @@ unsigned char swapBits(const unsigned char byte, const unsigned char firstBitInd
     return result;
 }
 
-unsigned char retrieveSingleBitMask(const unsigned char bitIndex)
+byte_t retrieveSingleBitMask(const size_t bitIndex)
 {
     ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");
-    return (unsigned char)(1 << bitIndex);
+    return (byte_t)(1 << bitIndex);
 }
 
-unsigned char setBit(const unsigned char byte, const unsigned char bitIndex)
+byte_t setBit(const byte_t byte, const size_t bitIndex)
 {
     return byte | retrieveSingleBitMask(bitIndex);
 }
 
-unsigned char resetBit(const unsigned char byte, const unsigned char bitIndex)
+byte_t resetBit(const byte_t byte, const size_t bitIndex)
 {
     return byte & (~retrieveSingleBitMask(bitIndex));
 }
 
-unsigned char invertBit(const unsigned char byte, const unsigned char bitIndex)
+byte_t invertBit(const byte_t byte, const size_t bitIndex)
 {
     return isBitSet(byte, bitIndex) ? resetBit(byte, bitIndex) : setBit(byte, bitIndex);
 }
 
-size_t getNumberOfSetBits(const unsigned char byte)
+size_t getNumberOfSetBits(const byte_t byte)
 {
     size_t result = 0;
-    unsigned int temp = byte;
-    const unsigned int lsbMask = 1u;
+    byte_t temp = byte;
+    const byte_t lsbMask = 1u;
 
     for (size_t bitNumber = 0; bitNumber < BYTE_SIZE; ++bitNumber)
     {
@@ -115,10 +115,10 @@ size_t getNumberOfSetBits(const unsigned char byte)
     return result;
 }
 
-size_t getMinimumNrOfBits(const unsigned char byte)
+size_t getMinimumNrOfBits(const byte_t byte)
 {
     size_t result = 0;
-    unsigned char temp = byte;
+    byte_t temp = byte;
 
     do
     {
@@ -131,7 +131,7 @@ size_t getMinimumNrOfBits(const unsigned char byte)
     return result;
 }
 
-boolean isBitSet(const unsigned char byte, const unsigned char bitIndex)
+boolean isBitSet(const byte_t byte, const size_t bitIndex)
 {
     ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");
     return (byte & retrieveSingleBitMask(bitIndex));
