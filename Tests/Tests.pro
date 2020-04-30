@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     LinkedListTests \
-    HashTableTests
+    HashTableTests \
+    OtherTests
