@@ -9,6 +9,8 @@
 extern "C"{
 #endif
 
+unsigned char rotateLeft(const unsigned char byte, const size_t nrOfRotations);
+unsigned char rotateRight(const unsigned char byte, const size_t nrOfRotations);
 unsigned char swapBits(const unsigned char byte, const unsigned char firstBitIndex, const unsigned char secondBitIndex);
 
 unsigned char retrieveSingleBitMask(const unsigned char bitIndex);

@@ -13,6 +13,7 @@ public:
 private slots:
     void testSingleBitOperations();
     void testSwapBits();
+    void testRotations();
     void testCountNumberOfSetBits();
     void testMinimumRequiredBits();
 
@@ -32,10 +33,13 @@ void OtherTests::testSingleBitOperations()
 {
     QVERIFY2(setBit(0b01001001, 5) == 0b01101001, "The bit is not correctly set");
     QVERIFY2(setBit(0b01001001, 3) == 0b01001001, "The bit is not correctly set");
+
     QVERIFY2(resetBit(0b01001001, 5) == 0b01001001, "The bit is not correctly set");
     QVERIFY2(resetBit(0b01001001, 3) == 0b01000001, "The bit is not correctly set");
+
     QVERIFY2(invertBit(0b01001001, 5) == 0b01101001, "The bit is not correctly inverted");
     QVERIFY2(invertBit(0b01001001, 3) == 0b01000001, "The bit is not correctly inverted");
+
     QVERIFY(!isBitSet(0b01001001, 5));
     QVERIFY(isBitSet(0b01001001, 3));
 }
@@ -47,6 +51,23 @@ void OtherTests::testSwapBits()
     QVERIFY2(swapBits(0b01001001, 1, 5) == 0b01001001, "The bits are not correctly swapped");
     QVERIFY2(swapBits(0b01001001, 3, 6) == 0b01001001, "The bits are not correctly swapped");
     QVERIFY2(swapBits(0b01001001, 3, 3) == 0b01001001, "The bits are not correctly swapped");
+}
+
+void OtherTests::testRotations()
+{
+    QVERIFY2(rotateLeft(0b01001001, 0) == 0b01001001, "The bits are not correctly left rotated");
+    QVERIFY2(rotateLeft(0b01001001, 1) == 0b10010010, "The bits are not correctly left rotated");
+    QVERIFY2(rotateLeft(0b01001001, 4) == 0b10010100, "The bits are not correctly left rotated");
+    QVERIFY2(rotateLeft(0b01001001, 7) == 0b10100100, "The bits are not correctly left rotated");
+    QVERIFY2(rotateLeft(0b01001001, 8) == 0b01001001, "The bits are not correctly left rotated");
+    QVERIFY2(rotateLeft(0b01001001, 11) == 0b01001010, "The bits are not correctly left rotated");
+
+    QVERIFY2(rotateRight(0b01001001, 0) == 0b01001001, "The bits are not correctly right rotated");
+    QVERIFY2(rotateRight(0b01001001, 1) == 0b10100100, "The bits are not correctly right rotated");
+    QVERIFY2(rotateRight(0b01001001, 4) == 0b10010100, "The bits are not correctly right rotated");
+    QVERIFY2(rotateRight(0b01001001, 7) == 0b10010010, "The bits are not correctly right rotated");
+    QVERIFY2(rotateRight(0b01001001, 8) == 0b01001001, "The bits are not correctly right rotated");
+    QVERIFY2(rotateRight(0b01001001, 11) == 0b00101001, "The bits are not correctly right rotated");
 }
 
 void OtherTests::testCountNumberOfSetBits()

@@ -3,6 +3,58 @@
 
 #define BYTE_SIZE 8
 
+unsigned char rotateLeft(const unsigned char byte, const size_t nrOfRotations)
+{
+    unsigned char result = byte;
+
+    if (nrOfRotations > 0)
+    {
+        size_t remainingRotations = nrOfRotations % BYTE_SIZE;
+        const unsigned char lsbMask = retrieveSingleBitMask(0);
+
+        while (remainingRotations > 0)
+        {
+            boolean firstBitSetBeforeShift = isBitSet(result, BYTE_SIZE - 1);
+            result = (unsigned char)(result << 1);
+
+            if (firstBitSetBeforeShift)
+            {
+                result = result | lsbMask;
+            }
+
+            --remainingRotations;
+        }
+    }
+
+    return result;
+}
+
+unsigned char rotateRight(const unsigned char byte, const size_t nrOfRotations)
+{
+    unsigned char result = byte;
+
+    if (nrOfRotations > 0)
+    {
+        size_t remainingRotations = nrOfRotations % BYTE_SIZE;
+        const unsigned char msbMask = retrieveSingleBitMask(BYTE_SIZE - 1);
+
+        while (remainingRotations > 0)
+        {
+            boolean lastBitSetBeforeShift = isBitSet(result, 0);
+            result = result >> 1;
+
+            if (lastBitSetBeforeShift)
+            {
+                result = result | msbMask;
+            }
+
+            --remainingRotations;
+        }
+    }
+
+    return result;
+}
+
 unsigned char swapBits(const unsigned char byte, const unsigned char firstBitIndex, const unsigned char secondBitIndex)
 {
     unsigned char result = byte;
