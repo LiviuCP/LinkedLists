@@ -3,6 +3,8 @@
 
 #define BYTE_SIZE 8
 #define NIBBLE_SIZE BYTE_SIZE/2
+#define LSB_MASK 1u
+#define MSB_MASK 128u
 
 byte_t rotateLeft(const byte_t byte, const size_t nrOfRotations)
 {
@@ -11,16 +13,15 @@ byte_t rotateLeft(const byte_t byte, const size_t nrOfRotations)
     if (nrOfRotations > 0)
     {
         size_t remainingRotations = nrOfRotations % BYTE_SIZE;
-        const byte_t lsbMask = retrieveSingleBitMask(0);
 
         while (remainingRotations > 0)
         {
-            boolean firstBitSetBeforeShift = isBitSet(result, BYTE_SIZE - 1);
+            byte_t maskedFirstBitBeforeShift = result & MSB_MASK;
             result = (byte_t)(result << 1);
 
-            if (firstBitSetBeforeShift)
+            if (maskedFirstBitBeforeShift != 0u)
             {
-                result = result | lsbMask;
+                result = result | LSB_MASK;
             }
 
             --remainingRotations;
@@ -37,16 +38,15 @@ byte_t rotateRight(const byte_t byte, const size_t nrOfRotations)
     if (nrOfRotations > 0)
     {
         size_t remainingRotations = nrOfRotations % BYTE_SIZE;
-        const byte_t msbMask = retrieveSingleBitMask(BYTE_SIZE - 1);
 
         while (remainingRotations > 0)
         {
-            boolean lastBitSetBeforeShift = isBitSet(result, 0);
+            boolean maskedLastBitBeforeShift = result & LSB_MASK;
             result = result >> 1;
 
-            if (lastBitSetBeforeShift)
+            if (maskedLastBitBeforeShift != 0u)
             {
-                result = result | msbMask;
+                result = result | MSB_MASK;
             }
 
             --remainingRotations;
