@@ -61,15 +61,13 @@ byte_t swapBits(const byte_t byte, const size_t firstBitIndex, const size_t seco
 
     if (firstBitIndex != secondBitIndex)
     {
-        if (isBitSet(byte, firstBitIndex) && !isBitSet(byte, secondBitIndex))
+        const byte_t firstBitMask = (byte_t)(1 << firstBitIndex);
+        const byte_t secondBitMask = (byte_t)(1 << secondBitIndex);
+
+        if (((byte & firstBitMask) >> firstBitIndex) ^ ((byte & secondBitMask) >> secondBitIndex))
         {
-            result = resetBit(result, firstBitIndex);
-            result = setBit(result, secondBitIndex);
-        }
-        else if (!isBitSet(byte, firstBitIndex) && isBitSet(byte, secondBitIndex))
-        {
-            result = setBit(result, firstBitIndex);
-            result = resetBit(result, secondBitIndex);
+            result = (~result & firstBitMask) | (result & ~firstBitMask);   // invert first bit
+            result = (~result & secondBitMask) | (result & ~secondBitMask); // invert second bit
         }
     }
 
