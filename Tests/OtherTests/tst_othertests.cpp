@@ -14,6 +14,7 @@ private slots:
     void testSingleBitOperations();
     void testSwapBits();
     void testCountNumberOfSetBits();
+    void testMinimumRequiredBits();
 
 };
 
@@ -53,6 +54,14 @@ void OtherTests::testCountNumberOfSetBits()
     QVERIFY(getNumberOfSetBits('m') == 5);
     QVERIFY(getNumberOfSetBits(0xFF) == 8);
     QVERIFY(getNumberOfSetBits(0x00) == 0);
+}
+
+void OtherTests::testMinimumRequiredBits()
+{
+    QVERIFY(getMinimumNrOfBits(0x00) == 1);
+    QVERIFY(getMinimumNrOfBits(0b00100110) == 6);
+    QVERIFY(getMinimumNrOfBits(0b00000111) == 3);
+    QVERIFY(getMinimumNrOfBits(0xFF) == 8);
 }
 
 QTEST_APPLESS_MAIN(OtherTests)

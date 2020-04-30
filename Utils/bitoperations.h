@@ -17,6 +17,7 @@ unsigned char resetBit(const unsigned char byte, const unsigned char bitIndex);
 unsigned char invertBit(const unsigned char byte, const unsigned char bitIndex);
 
 size_t getNumberOfSetBits(const unsigned char number);
+size_t getMinimumNrOfBits(const unsigned char byte);
 boolean isBitSet(const unsigned char byte, const unsigned char bitIndex);
 
 #ifdef __cplusplus

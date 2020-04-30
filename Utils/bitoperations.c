@@ -64,6 +64,22 @@ size_t getNumberOfSetBits(const unsigned char number)
     return nrOfOnes;
 }
 
+size_t getMinimumNrOfBits(const unsigned char byte)
+{
+    size_t result = 0;
+    unsigned char temp = byte;
+
+    do
+    {
+        ++result;
+        temp = temp >> 1;
+
+    }
+    while (temp > 0);
+
+    return result;
+}
+
 boolean isBitSet(const unsigned char byte, const unsigned char bitIndex)
 {
     ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");
