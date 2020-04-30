@@ -45,7 +45,7 @@ unsigned char invertBit(const unsigned char byte, const unsigned char bitIndex)
     return isBitSet(byte, bitIndex) ? resetBit(byte, bitIndex) : setBit(byte, bitIndex);
 }
 
-size_t getNumberOfOnes(const unsigned int number)
+size_t getNumberOfSetBits(const unsigned char number)
 {
     unsigned int numberCopy = number;
     const unsigned int one = 1u;

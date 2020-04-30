@@ -16,7 +16,7 @@ unsigned char setBit(const unsigned char byte, const unsigned char bitIndex);
 unsigned char resetBit(const unsigned char byte, const unsigned char bitIndex);
 unsigned char invertBit(const unsigned char byte, const unsigned char bitIndex);
 
-size_t getNumberOfOnes(const unsigned int number);
+size_t getNumberOfSetBits(const unsigned char number);
 boolean isBitSet(const unsigned char byte, const unsigned char bitIndex);
 
 #ifdef __cplusplus

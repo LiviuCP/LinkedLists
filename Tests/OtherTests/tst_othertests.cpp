@@ -50,20 +50,9 @@ void OtherTests::testSwapBits()
 
 void OtherTests::testCountNumberOfSetBits()
 {
-    if (sizeof(unsigned int) == 4)
-    {
-        qInfo("Unsigned int has 4 bytes");
-        QVERIFY(getNumberOfOnes(0b11001000000101001111000011010000) == 12);
-        QVERIFY(getNumberOfOnes(0xFFFFFFFF) == 32);
-    }
-
-    QVERIFY(getNumberOfOnes(0b0011010000111010) == 7);
-    QVERIFY(getNumberOfOnes(0xFFFF) == 16);
-    QVERIFY(getNumberOfOnes('m') == 5);
-    QVERIFY(getNumberOfOnes(0xFF) == 8);
-    QVERIFY(getNumberOfOnes(0u) == 0);
-
-
+    QVERIFY(getNumberOfSetBits('m') == 5);
+    QVERIFY(getNumberOfSetBits(0xFF) == 8);
+    QVERIFY(getNumberOfSetBits(0x00) == 0);
 }
 
 QTEST_APPLESS_MAIN(OtherTests)
