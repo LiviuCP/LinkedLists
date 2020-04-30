@@ -11,7 +11,6 @@ public:
     ~BitOperationsTests();
 
 private slots:
-    void testSingleBitOperations();
     void testSwapBits();
     void testReverseBits();
     void testSwapNibbles();
@@ -29,21 +28,6 @@ BitOperationsTests::BitOperationsTests()
 BitOperationsTests::~BitOperationsTests()
 {
 
-}
-
-void BitOperationsTests::testSingleBitOperations()
-{
-    QVERIFY2(setBit(0b01001001, 5) == 0b01101001, "The bit is not correctly set");
-    QVERIFY2(setBit(0b01001001, 3) == 0b01001001, "The bit is not correctly set");
-
-    QVERIFY2(resetBit(0b01001001, 5) == 0b01001001, "The bit is not correctly set");
-    QVERIFY2(resetBit(0b01001001, 3) == 0b01000001, "The bit is not correctly set");
-
-    QVERIFY2(invertBit(0b01001001, 5) == 0b01101001, "The bit is not correctly inverted");
-    QVERIFY2(invertBit(0b01001001, 3) == 0b01000001, "The bit is not correctly inverted");
-
-    QVERIFY(!isBitSet(0b01001001, 5));
-    QVERIFY(isBitSet(0b01001001, 3));
 }
 
 void BitOperationsTests::testSwapBits()

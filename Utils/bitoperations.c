@@ -100,7 +100,7 @@ void swapBytes(byte_t* firstByte, byte_t* secondByte)
 {
     if (firstByte != NULL && secondByte != NULL && firstByte != secondByte)
     {
-        byte_t bitMask = 1;
+        byte_t bitMask = LSB_MASK;
 
         for (size_t bitIndex = 0; bitIndex < BYTE_SIZE; ++bitIndex)
         {
@@ -112,27 +112,6 @@ void swapBytes(byte_t* firstByte, byte_t* secondByte)
             }
         }
     }
-}
-
-byte_t retrieveSingleBitMask(const size_t bitIndex)
-{
-    ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");
-    return (byte_t)(1 << bitIndex);
-}
-
-byte_t setBit(const byte_t byte, const size_t bitIndex)
-{
-    return byte | retrieveSingleBitMask(bitIndex);
-}
-
-byte_t resetBit(const byte_t byte, const size_t bitIndex)
-{
-    return byte & (~retrieveSingleBitMask(bitIndex));
-}
-
-byte_t invertBit(const byte_t byte, const size_t bitIndex)
-{
-    return isBitSet(byte, bitIndex) ? resetBit(byte, bitIndex) : setBit(byte, bitIndex);
 }
 
 size_t getNumberOfSetBits(const byte_t byte)
@@ -167,10 +146,4 @@ size_t getMinimumNrOfBits(const byte_t byte)
     while (temp > 0);
 
     return result;
-}
-
-boolean isBitSet(const byte_t byte, const size_t bitIndex)
-{
-    ASSERT_CONDITION(bitIndex < BYTE_SIZE, "Bit number out of range");
-    return (byte & retrieveSingleBitMask(bitIndex));
 }

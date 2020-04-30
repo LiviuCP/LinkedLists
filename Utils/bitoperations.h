@@ -18,14 +18,8 @@ byte_t reverseBits(const byte_t byte);
 byte_t swapNibbles(const byte_t byte);
 void swapBytes(byte_t* firstByte, byte_t* secondByte);
 
-byte_t retrieveSingleBitMask(const size_t bitIndex);
-byte_t setBit(const byte_t byte, const size_t bitIndex);
-byte_t resetBit(const byte_t byte, const size_t bitIndex);
-byte_t invertBit(const byte_t byte, const size_t bitIndex);
-
 size_t getNumberOfSetBits(const byte_t byte);
 size_t getMinimumNrOfBits(const byte_t byte);
-boolean isBitSet(const byte_t byte, const size_t bitIndex);
 
 #ifdef __cplusplus
 }
