@@ -305,7 +305,7 @@ HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char* key)
 
             HashEntry* currentHashEntry = (HashEntry*)currentBucketEntry->object->payload;
 
-            ASSERT_CONDITION(currentHashEntry->key != NULL & currentHashEntry->value != NULL && strlen(currentHashEntry->key) > 0 && strlen(currentHashEntry->value) > 0, "Invalid key-value pair");
+            ASSERT_CONDITION(currentHashEntry->key != NULL && currentHashEntry->value != NULL && strlen(currentHashEntry->key) > 0 && strlen(currentHashEntry->value) > 0, "Invalid key-value pair");
 
             if (strcmp(currentHashEntry->key, key) == 0)
             {
