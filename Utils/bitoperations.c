@@ -56,6 +56,22 @@ byte_t rotateRight(const byte_t byte, const size_t nrOfRotations)
     return result;
 }
 
+byte_t reverseBits(const byte_t byte)
+{
+    byte_t result = byte;
+    byte_t leftMask = 128u;
+    byte_t rightMask = 1u;
+
+    for (size_t bitIndex = 0; bitIndex < BYTE_SIZE; ++bitIndex)
+    {
+        result =(byte & rightMask) == 0u ? result & (~leftMask) : result | leftMask;
+        leftMask = leftMask >> 1;
+        rightMask = (byte_t)(rightMask << 1);
+    }
+
+    return result;
+}
+
 byte_t swapBits(const byte_t byte, const size_t firstBitIndex, const size_t secondBitIndex)
 {
     byte_t result = byte;
@@ -70,22 +86,6 @@ byte_t swapBits(const byte_t byte, const size_t firstBitIndex, const size_t seco
             result = (~result & firstBitMask) | (result & ~firstBitMask);   // invert first bit
             result = (~result & secondBitMask) | (result & ~secondBitMask); // invert second bit
         }
-    }
-
-    return result;
-}
-
-byte_t reverseBits(const byte_t byte)
-{
-    byte_t result = byte;
-    byte_t leftMask = 128u;
-    byte_t rightMask = 1u;
-
-    for (size_t bitIndex = 0; bitIndex < BYTE_SIZE; ++bitIndex)
-    {
-        result =(byte & rightMask) == 0u ? result & (~leftMask) : result | leftMask;
-        leftMask = leftMask >> 1;
-        rightMask = (byte_t)(rightMask << 1);
     }
 
     return result;
@@ -132,7 +132,7 @@ size_t getNumberOfSetBits(const byte_t byte)
     return result;
 }
 
-size_t getMinimumNrOfBits(const byte_t byte)
+size_t getMinNrOfRequiredBits(const byte_t byte)
 {
     size_t result = 0;
     byte_t temp = byte;
