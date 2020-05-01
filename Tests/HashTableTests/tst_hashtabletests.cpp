@@ -93,11 +93,11 @@ void HashTableTests::testEntryIsCorrectlyInserted()
 
     QVERIFY2(getHashTableEntriesCount(hashTable) == 5, "The total number of hash table entries is not correct");
     QVERIFY2(getHashIndexesCount(hashTable) == 7, "The total number of hash table entries is not correct");
-    QVERIFY2(strcmp(getHashEntryValue(hashTable, "Andrei"), "engineer") == 0 &&
-             strcmp(getHashEntryValue(hashTable, "Ion"), "IT manager") == 0 &&
-             strcmp(getHashEntryValue(hashTable, "Schweinsteiger"), "footballer") == 0 &&
-             strcmp(getHashEntryValue(hashTable, "Roberto"), "developer") == 0 &&
-             strcmp(getHashEntryValue(hashTable, "Bobita"), "bartender") == 0,   "The entries have not been correctly inserted");
+    QVERIFY2(strcmp(getHashEntryValue("Andrei", hashTable), "engineer") == 0 &&
+             strcmp(getHashEntryValue("Ion", hashTable), "IT manager") == 0 &&
+             strcmp(getHashEntryValue("Schweinsteiger", hashTable), "footballer") == 0 &&
+             strcmp(getHashEntryValue("Roberto", hashTable), "developer") == 0 &&
+             strcmp(getHashEntryValue("Bobita", hashTable), "bartender") == 0,   "The entries have not been correctly inserted");
 
     deleteHashTable(hashTable);
     hashTable = nullptr;
@@ -116,8 +116,8 @@ void HashTableTests::testEntryIsCorrectlyErased()
 
         QVERIFY2(getHashTableEntriesCount(hashTable) == 2 &&
                  getHashIndexesCount(hashTable) == 5 &&
-                 strcmp(getHashEntryValue(hashTable, "Andrei"), "engineer") == 0 &&
-                 strcmp(getHashEntryValue(hashTable, "Ionica"), "footballer") == 0 , "The entry has not been correctly erased");
+                 strcmp(getHashEntryValue("Andrei", hashTable), "engineer") == 0 &&
+                 strcmp(getHashEntryValue("Ionica", hashTable), "footballer") == 0 , "The entry has not been correctly erased");
 
         eraseHashEntry("Ion", hashTable);
         QVERIFY(getHashTableEntriesCount(hashTable) == 2);
@@ -150,8 +150,8 @@ void HashTableTests::testEntryValueIsCorrectlyUpdated()
 
     QVERIFY2(getHashTableEntriesCount(hashTable) == 2, "The total number of hash table entries after updated is not correct");
     QVERIFY2(getHashIndexesCount(hashTable) == 7, "The total number of hash table entries after update is not correct");
-    QVERIFY2(strcmp(getHashEntryValue(hashTable, "Roberto"), "project manager") == 0 &&
-             strcmp(getHashEntryValue(hashTable, "Andrei"), "engineer") == 0,            "The entry has not been correctly updated");
+    QVERIFY2(strcmp(getHashEntryValue("Roberto", hashTable), "project manager") == 0 &&
+             strcmp(getHashEntryValue("Andrei", hashTable), "engineer") == 0,            "The entry has not been correctly updated");
 
     deleteHashTable(hashTable);
     hashTable = nullptr;

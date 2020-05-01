@@ -85,37 +85,37 @@ boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable
 {
     boolean success = FALSE;
 
-    if (key != NULL && value != NULL && hashTable != NULL && strlen(key) > 0 && strlen(value) > 0 && hashTable->hashSize > 0)
+    if (key != NULL && value != NULL && hashTable != NULL && strlen(key) > 0 && strlen(value) > 0)
     {
+        ASSERT_CONDITION(hashTable->hashSize > 0 && hashTable->hashBuckets != NULL, "Invalid hash table")
+
         size_t hashIndex;
+        _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+//        fprintf(stderr, "key %s, hash index: %d\n", key, (int)hashIndex);
 
-        if (_retrieveHashIndex(key, &hashIndex, hashTable->hashSize))
+        List* currentBucket = hashTable->hashBuckets[hashIndex];
+        ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
+
+        HashEntry* matchingKeyHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
+
+        if (matchingKeyHashEntry != NULL)
         {
-//            fprintf(stderr, "key %s, hash index: %d\n", key, (int)hashIndex);
-            List* currentBucket = hashTable->hashBuckets[hashIndex];
-            ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
-
-            HashEntry* matchingKeyHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
-
-            if (matchingKeyHashEntry != NULL)
+            if (strcmp(matchingKeyHashEntry->value, value) != 0)
             {
-                if (strcmp(matchingKeyHashEntry->value, value) != 0)
-                {
-                    success = _updateHashEntry(matchingKeyHashEntry, value);
-                }
+                success = _updateHashEntry(matchingKeyHashEntry, value);
             }
-            else
-            {
-                HashEntry* newHashEntry = _createHashEntry(key, value);
+        }
+        else
+        {
+            HashEntry* newHashEntry = _createHashEntry(key, value);
 
-                if (newHashEntry != NULL)
+            if (newHashEntry != NULL)
+            {
+                ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
+                if (newElement != NULL)
                 {
-                    ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
-                    if (newElement != NULL)
-                    {
-                        assignObjectToListElement(newElement, "HashEntry", newHashEntry);
-                        success = TRUE;
-                    }
+                    assignObjectToListElement(newElement, "HashEntry", newHashEntry);
+                    success = TRUE;
                 }
             }
         }
@@ -170,18 +170,14 @@ void deleteHashEntry(Object* object)
 {
     if (object != NULL)
     {
-        if (object->payload != NULL)
-        {
-            ASSERT_CONDITION(object->type != NULL, "Null object type when payload is not null"); // object should have both type and payload
-            ASSERT_CONDITION(strcmp(object->type,"HashEntry") == 0, "The object type is not HashEntry");
+        ASSERT_CONDITION(object->payload != NULL && object->type != NULL && strcmp(object->type,"HashEntry") == 0,
+                         "Invalid hash entry, deleter cannot be applied")
 
-            HashEntry* entry = (HashEntry*)object->payload;
-            free(entry->key);
-            entry->key = NULL;
-            free(entry->value);
-            entry->value = NULL;
-        }
-
+        HashEntry* entry = (HashEntry*)object->payload;
+        free(entry->key);
+        entry->key = NULL;
+        free(entry->value);
+        entry->value = NULL;
         free(object->payload);
         object->payload = NULL;
         free(object->type);
@@ -191,25 +187,25 @@ void deleteHashEntry(Object* object)
     }
 }
 
-const char* getHashEntryValue(const HashTable* hashTable, const char* key)
+const char* getHashEntryValue(const char* key, const HashTable* hashTable)
 {
     char* result = NULL;
 
-    if (hashTable != NULL && hashTable->hashSize > 0 && key != NULL && strlen(key) != 0)
+    if (key != NULL && strlen(key) != 0 && hashTable != NULL)
     {
+        ASSERT_CONDITION(hashTable->hashSize > 0 && hashTable->hashBuckets != NULL, "Invalid hash table")
+
         size_t hashIndex;
+        _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
 
-        if (_retrieveHashIndex(key, &hashIndex, hashTable->hashSize))
+        List* currentBucket = hashTable->hashBuckets[hashIndex];
+        ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
+
+        HashEntry* matchingHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
+
+        if (matchingHashEntry != NULL)
         {
-            List* currentBucket = hashTable->hashBuckets[hashIndex];
-            ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
-
-            HashEntry* matchingHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
-
-            if (matchingHashEntry != NULL)
-            {
-                result = matchingHashEntry->value;
-            }
+            result = matchingHashEntry->value;
         }
     }
 

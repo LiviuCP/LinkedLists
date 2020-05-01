@@ -25,7 +25,7 @@ boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable
 void eraseHashEntry(const char* key, HashTable* hashTable);
 void deleteHashEntry(Object* object);
 
-const char* getHashEntryValue(const HashTable* hashTable, const char* key);
+const char* getHashEntryValue(const char* key, const HashTable* hashTable);
 size_t getHashTableEntriesCount(const HashTable* hashTable);
 size_t getHashIndexesCount(const HashTable* hashTable);
 
