@@ -8,6 +8,13 @@ typedef unsigned int boolean;
 #define TRUE 1u
 #define FALSE 0u
 
+typedef struct
+{
+    char* type;
+    void* payload;
+}
+Object;
+
 #ifdef __cplusplus
 extern "C"{
 #endif

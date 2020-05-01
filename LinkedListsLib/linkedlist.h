@@ -5,13 +5,6 @@
 
 #include "../Utils/codeutils.h"
 
-typedef struct
-{
-    char* type;
-    void* payload;
-}
-Object;
-
 struct ListElement
 {
     Object* object;

@@ -1,6 +1,8 @@
 #include <string.h>
 
 #include "hashtable.h"
+#include "linkedlist.h"
+
 #include "../Utils/error.h"
 
 // "private" (supporting) functions
@@ -8,6 +10,7 @@ boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hash
 HashEntry* _createHashEntry(const char* key, const char* value);
 boolean _updateHashEntry(HashEntry* hashEntry, const char* value);
 HashEntry* _getMatchingKeyHashEntry(const List *currentBucket, const char* key);
+void _deleteHashEntry(Object* object); // custom deleter for hash table
 
 HashTable* createHashTable(const size_t hashSize)
 {
@@ -37,7 +40,7 @@ HashTable* createHashTable(const size_t hashSize)
 
                 if (hashTable != NULL)
                 {
-                    hashTable->hashBuckets = hashBuckets;
+                    hashTable->hashBuckets = (void*)hashBuckets;
                     hashTable->hashSize = hashSize;
                     result = hashTable;
                 }
@@ -71,7 +74,7 @@ void deleteHashTable(HashTable* hashTable)
     {
         for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
         {
-            deleteList(hashTable->hashBuckets[hashIndex], deleteHashEntry);
+            deleteList((List*)(hashTable->hashBuckets)[hashIndex], _deleteHashEntry);
         }
     }
 
@@ -93,7 +96,7 @@ boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable
         _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
 //        fprintf(stderr, "key %s, hash index: %d\n", key, (int)hashIndex);
 
-        List* currentBucket = hashTable->hashBuckets[hashIndex];
+        List* currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
         ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
 
         HashEntry* matchingKeyHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
@@ -133,7 +136,7 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
         size_t hashIndex;
         _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
 
-        List* currentBucket = (hashTable->hashBuckets)[hashIndex];
+        List* currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
         ASSERT_CONDITION(currentBucket != NULL, "NULL bucket detected in hash table")
 
         ListElement* removedElement = NULL;
@@ -157,7 +160,7 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
 
         if (removedElement != NULL)
         {
-            deleteHashEntry(removedElement->object);
+            _deleteHashEntry(removedElement->object);
             removedElement->object = NULL;
             free(removedElement);
             removedElement = NULL;
@@ -165,8 +168,7 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
     }
 }
 
-// custom deleter for hash table
-void deleteHashEntry(Object* object)
+void _deleteHashEntry(Object* object)
 {
     if (object != NULL)
     {
@@ -198,7 +200,7 @@ const char* getHashEntryValue(const char* key, const HashTable* hashTable)
         size_t hashIndex;
         _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
 
-        List* currentBucket = hashTable->hashBuckets[hashIndex];
+        List* currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
         ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
 
         HashEntry* matchingHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
@@ -220,7 +222,7 @@ size_t getHashTableEntriesCount(const HashTable* hashTable)
     {
         for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
         {
-            hashTableEntriesCount += getListSize((hashTable->hashBuckets)[hashIndex]);
+            hashTableEntriesCount += getListSize((List*)(hashTable->hashBuckets)[hashIndex]);
         }
     }
 

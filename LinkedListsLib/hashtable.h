@@ -1,7 +1,8 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-#include "linkedlist.h"
+#include <stdlib.h>
+#include "../Utils/codeutils.h"
 
 typedef struct
 {
@@ -11,7 +12,7 @@ typedef struct
 
 typedef struct
 {
-    List** hashBuckets;
+    void** hashBuckets;
     size_t hashSize;
 } HashTable;
 
@@ -23,7 +24,6 @@ HashTable* createHashTable(const size_t hashSize);
 void deleteHashTable(HashTable* hashTable);
 boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable);
 void eraseHashEntry(const char* key, HashTable* hashTable);
-void deleteHashEntry(Object* object);
 
 const char* getHashEntryValue(const char* key, const HashTable* hashTable);
 size_t getHashTableEntriesCount(const HashTable* hashTable);
