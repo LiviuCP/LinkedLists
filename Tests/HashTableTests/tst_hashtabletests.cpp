@@ -16,6 +16,7 @@ private slots:
     void testHashTableIsCorrectlyCreated();
     void testHashIndexesAreCorrectlyRetrieved();
     void testEntryIsCorrectlyInserted();
+    void testEntryIsCorrectlyErased();
     void testEntryValueIsCorrectlyUpdated();
 };
 
@@ -100,6 +101,43 @@ void HashTableTests::testEntryIsCorrectlyInserted()
 
     deleteHashTable(hashTable);
     hashTable = nullptr;
+}
+
+void HashTableTests::testEntryIsCorrectlyErased()
+{
+    {
+        HashTable* hashTable = createHashTable(5);
+
+        insertHashEntry("Andrei", "engineer", hashTable);
+        insertHashEntry("Ion", "IT manager", hashTable);
+        insertHashEntry("Ionica", "footballer", hashTable);
+
+        eraseHashEntry("Ion", hashTable);
+
+        QVERIFY2(getHashTableEntriesCount(hashTable) == 2 &&
+                 getHashIndexesCount(hashTable) == 5 &&
+                 strcmp(getHashEntryValue(hashTable, "Andrei"), "engineer") == 0 &&
+                 strcmp(getHashEntryValue(hashTable, "Ionica"), "footballer") == 0 , "The entry has not been correctly erased");
+
+        eraseHashEntry("Ion", hashTable);
+        QVERIFY(getHashTableEntriesCount(hashTable) == 2);
+
+        eraseHashEntry("Petre", hashTable);
+        QVERIFY(getHashTableEntriesCount(hashTable) == 2);
+
+        deleteHashTable(hashTable);
+        hashTable = nullptr;
+    }
+
+    {
+        HashTable* hashTable = createHashTable(5);
+        eraseHashEntry("Petre", hashTable);
+
+        QVERIFY(getHashTableEntriesCount(hashTable) == 0 && getHashIndexesCount(hashTable) == 5);
+
+        deleteHashTable(hashTable);
+        hashTable = nullptr;
+    }
 }
 
 void HashTableTests::testEntryValueIsCorrectlyUpdated()

@@ -124,6 +124,47 @@ boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable
     return success;
 }
 
+void eraseHashEntry(const char* key, HashTable* hashTable)
+{
+    if (key!= NULL && strlen(key) > 0 && hashTable != NULL)
+    {
+        ASSERT_CONDITION(hashTable->hashSize > 0 && hashTable->hashBuckets != NULL, "Invalid hash table")
+
+        size_t hashIndex;
+        _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+
+        List* currentBucket = (hashTable->hashBuckets)[hashIndex];
+        ASSERT_CONDITION(currentBucket != NULL, "NULL bucket detected in hash table")
+
+        ListElement* removedElement = NULL;
+        ListIterator it = lbegin(currentBucket);
+
+        while (!areIteratorsEqual(it, lend(currentBucket)))
+        {
+            ASSERT_CONDITION(it.current->object != NULL && strcmp(it.current->object->type, "HashEntry") == 0 && it.current->object->payload != NULL,
+                             "Invalid list element object detected in hash table")
+
+            HashEntry* currentHashEntry = (HashEntry*)it.current->object->payload;
+
+            if (strcmp(currentHashEntry->key, key) == 0)
+            {
+                removedElement = removeCurrentListElement(it);
+                break;
+            }
+
+            lnext(&it);
+        }
+
+        if (removedElement != NULL)
+        {
+            deleteHashEntry(removedElement->object);
+            removedElement->object = NULL;
+            free(removedElement);
+            removedElement = NULL;
+        }
+    }
+}
+
 // custom deleter for hash table
 void deleteHashEntry(Object* object)
 {

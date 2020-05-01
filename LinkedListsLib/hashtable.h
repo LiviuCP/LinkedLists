@@ -22,6 +22,7 @@ extern "C" {
 HashTable* createHashTable(const size_t hashSize);
 void deleteHashTable(HashTable* hashTable);
 boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable);
+void eraseHashEntry(const char* key, HashTable* hashTable);
 void deleteHashEntry(Object* object);
 
 const char* getHashEntryValue(const HashTable* hashTable, const char* key);
