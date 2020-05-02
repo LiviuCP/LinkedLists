@@ -108,8 +108,9 @@ void swapBytes(byte_t* firstByte, byte_t* secondByte)
             {
                 *firstByte = (~(*firstByte) & bitMask) | ((*firstByte) & (~bitMask));
                 *secondByte = ((~*secondByte) & bitMask) | ((*secondByte) & (~bitMask));
-                bitMask = (byte_t)(bitMask << 1);
             }
+
+            bitMask = (byte_t)(bitMask << 1);
         }
     }
 }

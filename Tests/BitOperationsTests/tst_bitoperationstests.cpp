@@ -75,12 +75,44 @@ void BitOperationsTests::testSwapNibbles()
 
 void BitOperationsTests::testSwapBytes()
 {
-    byte_t first{0b00100001};
-    byte_t second{0b00100010};
+    {
+        byte_t first{0b00100001};
+        byte_t second{0b01000010};
 
-    swapBytes(&first, &second);
+        swapBytes(&first, &second);
 
-    QVERIFY2(first == 0b00100010 && second == 0b00100001, "The two bytes have not been correctly swapped by bitwise operation");
+        QVERIFY2(first == 0b01000010 && second == 0b00100001, "The two bytes have not been correctly swapped by bitwise operation");
+    }
+
+    {
+        byte_t first{'m'};
+        byte_t second{'n'};
+
+        swapBytes(&first, &second);
+
+        QVERIFY2(first == 'n' && second == 'm', "The two bytes have not been correctly swapped by bitwise operation");
+    }
+
+    {   // swap signed bytes using the bitwise swap operation
+        char first{static_cast<char>(0b10100101)};
+        char second{static_cast<char>(0b00101010)};
+
+        swapBytes(reinterpret_cast<byte_t*>(&first), reinterpret_cast<byte_t*>(&second));
+
+        QVERIFY(first == static_cast<char>(0b00101010) && second == static_cast<char>(0b10100101));
+    }
+
+    {   // swap signed int using the bitwise swap operation
+        int first{-10};
+        int second{5};
+
+        for (size_t byteIndex = 0; byteIndex < sizeof(int); ++byteIndex)
+        {
+            swapBytes(reinterpret_cast<byte_t*>(&first) + byteIndex, reinterpret_cast<byte_t*>(&second) + byteIndex);
+        }
+
+        QVERIFY(first == 5 && second == -10);
+    }
 }
 
 void BitOperationsTests::testCountNrOfSetBits()
