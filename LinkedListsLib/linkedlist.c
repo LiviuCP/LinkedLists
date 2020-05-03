@@ -847,39 +847,7 @@ boolean copyObject(const ListElement* source, ListElement* destination)
     return success;
 }
 
-/* These two functions are just for illustrating the creation of custom deallocator and custom deep copy function */
-void customDeleteObject(Object* object)
-{
-    if (object != NULL)
-    {
-        if (object->payload != NULL)
-        {
-            ASSERT_CONDITION(object->type != NULL, "Null object type when payload is not null"); // object should have both type and payload
-            if (strcmp(object->type,"Segment") == 0)
-            {
-                Segment* segment = (Segment*)object->payload;
-                free(segment->start);
-                segment->start = NULL;
-                free(segment->stop);
-                segment->stop = NULL;
-            }
-            else if (strcmp(object->type, "LocalConditions") == 0)
-            {
-                LocalConditions* conditions = (LocalConditions*)object->payload;
-                free(conditions->position);
-                conditions->position = NULL;
-            }
-        }
-
-        free(object->payload);
-        object->payload = NULL;
-        free(object->type);
-        object->type = NULL;
-        free(object);
-        object = NULL;
-    }
-}
-
+/* This function is just for illustrating the creation of custom deep copy function */
 boolean customCopyObject(const ListElement* source, ListElement* destination)
 {
     boolean success = FALSE;

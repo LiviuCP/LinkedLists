@@ -421,7 +421,7 @@ void LinkedListTests::testCopyContentToList()
         lnext(&it);
         assignObjectToListElement(it.current, "LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8));
 
-        copyContentToList(source, destination, customCopyObject, customDeleteObject);
+        copyContentToList(source, destination, customCopyObject, deleteTestObject);
 
         const Segment* copiedSegment = static_cast<Segment*>(getListElementAtIndex(destination, 3)->object->payload);
         const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getListElementAtIndex(destination, 4)->object->payload);
@@ -442,9 +442,9 @@ void LinkedListTests::testCopyContentToList()
                  copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 && copiedConditions->humidity == 12.8,
                  "The source list content has not been correctly copied to destination");
 
-        deleteList(source, customDeleteObject);
+        deleteList(source, deleteTestObject);
         source = nullptr;
-        deleteList(destination, customDeleteObject);
+        deleteList(destination, deleteTestObject);
         destination = nullptr;
     }
 }

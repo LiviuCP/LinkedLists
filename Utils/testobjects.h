@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#include "codeutils.h"
+
 typedef struct {
     int x;
     int y;
@@ -25,6 +27,8 @@ extern "C"{
 
 Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY);
 LocalConditions* createLocalConditionsPayload(int coordinateX, int coordinateY, int temperature, double humidity);
+
+void deleteTestObject(Object* object);
 
 #ifdef __cplusplus
 }

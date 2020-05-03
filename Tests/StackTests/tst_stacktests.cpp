@@ -72,11 +72,11 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
              secondPoppedObjectPayload->stop->y == 11,   "Object has not been correctly popped from list");
     QVERIFY(isEmptyStack(stack));
 
-    customDeleteObject(firstPoppedObject);
+    deleteTestObject(firstPoppedObject);
     firstPoppedObject = nullptr;
-    customDeleteObject(secondPoppedObject);
+    deleteTestObject(secondPoppedObject);
     secondPoppedObject = nullptr;
-    deleteStack(stack, customDeleteObject);
+    deleteStack(stack, deleteTestObject);
     stack = nullptr;
 }
 

@@ -1,4 +1,7 @@
+#include <string.h>
+
 #include "testobjects.h"
+#include "error.h"
 
 Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY)
 {
@@ -55,4 +58,36 @@ LocalConditions* createLocalConditionsPayload(int positionX, int positionY, int 
     }
 
     return result;
+}
+
+void deleteTestObject(Object* object)
+{
+    if (object != NULL)
+    {
+        if (object->payload != NULL)
+        {
+            ASSERT_CONDITION(object->type != NULL, "Null object type when payload is not null"); // object should have both type and payload
+            if (strcmp(object->type,"Segment") == 0)
+            {
+                Segment* segment = (Segment*)object->payload;
+                free(segment->start);
+                segment->start = NULL;
+                free(segment->stop);
+                segment->stop = NULL;
+            }
+            else if (strcmp(object->type, "LocalConditions") == 0)
+            {
+                LocalConditions* conditions = (LocalConditions*)object->payload;
+                free(conditions->position);
+                conditions->position = NULL;
+            }
+        }
+
+        free(object->payload);
+        object->payload = NULL;
+        free(object->type);
+        object->type = NULL;
+        free(object);
+        object = NULL;
+    }
 }

@@ -85,7 +85,6 @@ void deleteObject(Object* object); // default object deallocator, only works for
 boolean copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
 
 // for testing purposes only
-void customDeleteObject(Object* object);
 boolean customCopyObject(const ListElement* source, ListElement* destination);
 
 #ifdef __cplusplus
