@@ -19,6 +19,8 @@ Object;
 extern "C"{
 #endif
 
+Object* createObject(const char* type, void *payload);
+
 char* getLine();
 boolean readUnsignedLong(size_t* number);
 boolean isUnsignedLong(const char* input);

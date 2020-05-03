@@ -31,17 +31,10 @@ StackTests::~StackTests()
 void StackTests::testElementsAreCorrectlyPushedAndPopped()
 {
     // first push
-    Object* segment = (Object*)(malloc(sizeof (Object)));
-    segment->type = (char*)malloc(strlen("Segment") + 1);
-    strcpy(segment->type, "Segment");
-    segment->payload = createSegmentPayload(2, 5, 4, 11);
-
-    Object* localConditions = (Object*)(malloc(sizeof (Object)));
-    localConditions->type = (char*)malloc(strlen("LocalConditions") + 1);
-    strcpy(localConditions->type, "LocalConditions");
-    localConditions->payload = createLocalConditionsPayload(7, -5, 10, 12.8);
-
     Stack* stack = createStack();
+
+    Object* segment = createObject("Segment", createSegmentPayload(2, 5, 4, 11));
+    Object* localConditions = createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8));
 
     pushToStack(stack, segment);
     segment = nullptr;
