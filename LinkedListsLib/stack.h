@@ -18,6 +18,8 @@ void deleteStack(Stack* stack, void (*deallocObject)(Object* object));
 boolean pushToStack(Stack* stack, Object* object);
 Object* popFromStack(Stack* stack);
 
+void clearStack(Stack* stack, void (*deallocObject)(Object* object));
+
 boolean isEmptyStack(const Stack* stack);
 
 #ifdef __cplusplus

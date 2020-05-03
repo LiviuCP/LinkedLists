@@ -81,9 +81,15 @@ Object* popFromStack(Stack* stack)
     return result;
 }
 
+void clearStack(Stack* stack, void (*deallocObject)(Object* object))
+{
+    if (stack != NULL && stack->container != NULL)
+    {
+        clearList((List*)stack->container, deallocObject);
+    }
+}
+
 boolean isEmptyStack(const Stack* stack)
 {
     return (getListSize((List*)stack->container) == 0);
 }
-
-

@@ -15,7 +15,7 @@ public:
 
 private slots:
     void testElementsAreCorrectlyPushedAndPopped();
-
+    void testClearStack();
 };
 
 StackTests::StackTests()
@@ -33,16 +33,11 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
     // first push
     Stack* stack = createStack();
 
-    Object* segment = createObject("Segment", createSegmentPayload(2, 5, 4, 11));
-    Object* localConditions = createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8));
-
-    pushToStack(stack, segment);
-    segment = nullptr;
+    pushToStack(stack, createObject("Segment", createSegmentPayload(2, 5, 4, 11)));
 
     QVERIFY2(!isEmptyStack(stack), "The stack is empty, no element has been pushed");
 
-    pushToStack(stack, localConditions);
-    localConditions = nullptr;
+    pushToStack(stack, createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8)));
 
     // then pop
     Object* firstPoppedObject = popFromStack(stack);
@@ -69,6 +64,25 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
     firstPoppedObject = nullptr;
     deleteTestObject(secondPoppedObject);
     secondPoppedObject = nullptr;
+    deleteStack(stack, deleteTestObject);
+    stack = nullptr;
+}
+
+void StackTests::testClearStack()
+{
+    Stack* stack = createStack();
+
+    pushToStack(stack, createObject("Segment", createSegmentPayload(2, 5, 4, 11)));
+    pushToStack(stack, createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8)));
+
+    clearStack(stack, deleteTestObject);
+
+    QVERIFY2(isEmptyStack(stack), "The stack has not been correctly emptied");
+
+    pushToStack(stack, createObject("Segment", createSegmentPayload(4, 2, 5, 10)));
+
+    QVERIFY(!isEmptyStack(stack));
+
     deleteStack(stack, deleteTestObject);
     stack = nullptr;
 }
