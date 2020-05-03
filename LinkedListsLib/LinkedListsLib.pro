@@ -28,7 +28,8 @@ SOURCES += \
         linkedlistslib.cpp \
         linkedlist.c \
         sort.c \
-        hashtable.c
+        hashtable.c \
+        stack.c
 
 HEADERS += \
         linkedlistslib.h \
@@ -36,7 +37,8 @@ HEADERS += \
         linkedlist.h \
         listsortutils.h \
         sort.h \
-        hashtable.h
+        hashtable.h \
+        stack.h
 
 
 unix {
