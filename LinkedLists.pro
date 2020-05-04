@@ -2,6 +2,7 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     Application \
+    BoundedBuffer \
     LinkedListsLib \
     Utils \
     Tests
