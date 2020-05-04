@@ -1,14 +1,13 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    Application \
-    BoundedBuffer \
     LinkedListsLib \
     Utils \
-    Tests
+    Tests \
+    Applications
 
-Application.depends = LinkedListsLib
-Application.depends = Utils
+Applications.depends = LinkedListsLib
+Applications.depends = Utils
 LinkedListsLib.depends = Utils
 Tests.depends = LinkedListsLib
 Tests.depends = Utils

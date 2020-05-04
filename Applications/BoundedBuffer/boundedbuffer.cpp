@@ -1,5 +1,5 @@
 #include "boundedbuffer.h"
-#include "../Utils/error.h"
+#include "../../Utils/error.h"
 
 BoundedBuffer::BoundedBuffer(size_t bufferCapacity)
     : m_BufferCapacity{bufferCapacity}

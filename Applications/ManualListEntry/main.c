@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #include "apputils.h"
-#include "../LinkedListsLib/linkedlist.h"
-#include "../Utils/codeutils.h"
+#include "../../LinkedListsLib/linkedlist.h"
+#include "../../Utils/codeutils.h"
 
 int main()
 {
