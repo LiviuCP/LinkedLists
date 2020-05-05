@@ -8,7 +8,7 @@
 #include "../Utils/error.h"
 #include "../Utils/testobjects.h"
 
-List* createList()
+List* createEmptyList()
 {
     List* list = (List*)malloc(sizeof(List));
 
@@ -445,7 +445,7 @@ ListElement* copyContentToList(const List* source, List* destination, boolean (*
 
     if (source != NULL && destination != NULL && source != destination && source->first != NULL)
     {
-        List* temp = createList();
+        List* temp = createEmptyList();
 
         if (temp != NULL)
         {

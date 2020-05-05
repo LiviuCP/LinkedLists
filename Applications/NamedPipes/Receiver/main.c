@@ -11,7 +11,7 @@ void fillListFromPipe(List* list, const char* pipeName, size_t* nrOfBytes, size_
 
 int main()
 {
-    List* receiverList = createList();
+    List* receiverList = createEmptyList();
     const char* fifoName = "/tmp/linkedlistpipe";
 
     printf("Reading bytes from the pipe. Please wait...\n\n");

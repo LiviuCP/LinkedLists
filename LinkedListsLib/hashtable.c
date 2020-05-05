@@ -26,7 +26,7 @@ HashTable* createHashTable(const size_t hashSize)
 
             for (size_t index = 0; index < hashSize; ++index)
             {
-                hashBuckets[index] = createList();
+                hashBuckets[index] = createEmptyList();
                 if (hashBuckets[index] == NULL)
                 {
                     allListsCreated = FALSE;

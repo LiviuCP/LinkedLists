@@ -12,7 +12,7 @@ Stack* createStack()
 
     if (stack != NULL)
     {
-        List* stackContainer = createList();
+        List* stackContainer = createEmptyList();
 
         if (stackContainer != NULL)
         {

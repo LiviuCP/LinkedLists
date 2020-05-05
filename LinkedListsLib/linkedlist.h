@@ -32,7 +32,7 @@ ListIterator;
 extern "C"{
 #endif
 
-List* createList();
+List* createEmptyList();
 void deleteList(List* list, void (*deallocObject)(Object* object));
 
 ListElement* createListElement();

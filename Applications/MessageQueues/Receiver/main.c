@@ -12,7 +12,7 @@ void fillListFromQueue(List* list, const size_t expectedElementsNr, const size_t
 
 int main()
 {
-    List* receiverList = createList();
+    List* receiverList = createEmptyList();
     const size_t expectedElementsNr = 6;
     const size_t expectedPriorityTypes[] = {3, 2, 1, 3, 2, 1};
 

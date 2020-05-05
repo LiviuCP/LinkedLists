@@ -56,7 +56,7 @@ LinkedListTests::LinkedListTests()
 
 List* LinkedListTests::createLinkedList(std::initializer_list<size_t> priorities)
 {
-    List* list = createList();
+    List* list = createEmptyList();
 
     if (list != nullptr)
     {
@@ -221,7 +221,7 @@ void LinkedListTests::testInsertElementBefore()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         ListIterator it = lbegin(list);
         createAndInsertBefore(it, 10);
 
@@ -290,7 +290,7 @@ void LinkedListTests::testInsertElementAfter()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         ListIterator it = lbegin(list);
         createAndInsertAfter(it, 10);
 
@@ -323,7 +323,7 @@ void LinkedListTests::testMoveContentToList()
     }
 
     {
-        List* source = createList();
+        List* source = createEmptyList();
         List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
 
         moveContentToList(source, destination);
@@ -341,7 +341,7 @@ void LinkedListTests::testMoveContentToList()
 
     {
         List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
-        List* destination = createList();
+        List* destination = createEmptyList();
 
         moveContentToList(source, destination);
 
@@ -379,7 +379,7 @@ void LinkedListTests::testCopyContentToList()
     }
 
     {
-        List* source = createList();
+        List* source = createEmptyList();
         List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
 
         copyContentToList(source, destination, copyObject, deleteObject);
@@ -397,7 +397,7 @@ void LinkedListTests::testCopyContentToList()
 
     {
         List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
-        List* destination = createList();
+        List* destination = createEmptyList();
 
         copyContentToList(source, destination, copyObject, deleteObject);
 
@@ -551,7 +551,7 @@ void LinkedListTests::testRemoveElementBefore()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         createAndAppendToList(list, 5);
         ListIterator it = lbegin(list);
         ListElement* removedElement = removePreviousListElement(it);
@@ -630,7 +630,7 @@ void LinkedListTests::testRemoveElementAfter()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         createAndAppendToList(list, 5);
         ListIterator it = lbegin(list);
         ListElement* removedElement = removeNextListElement(it);
@@ -741,7 +741,7 @@ void LinkedListTests::testSwapElements()
     }
 
     {
-        List *list = createList();
+        List *list = createEmptyList();
         createAndAppendToList(list, 2);
 
         swapListElements(lbegin(list), lbegin(list));
@@ -784,7 +784,7 @@ void LinkedListTests::testReverseList()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         createAndAppendToList(list, 2);
         reverseList(list);
 
@@ -795,7 +795,7 @@ void LinkedListTests::testReverseList()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         reverseList(list);
 
         QVERIFY2(getListSize(list) == 0, "The list has not been correctly reversed");
@@ -1147,7 +1147,7 @@ void LinkedListTests::testIterators()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         ListIterator it = lbegin(list);
         QVERIFY2(areIteratorsEqual(it, lend(list)), "The list is empty but the begin and end iterators are not equal");
         lnext(&it);
@@ -1160,7 +1160,7 @@ void LinkedListTests::testIterators()
 
 void LinkedListTests::testAssignRemoveObject()
 {
-    List* list = createList();
+    List* list = createEmptyList();
     // Point
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 3;
@@ -1208,7 +1208,7 @@ void LinkedListTests::testIsElementContained()
     ListElement* secondElement = createListElement();
     secondElement->priority = 10;
 
-    List* list = createList();
+    List* list = createEmptyList();
     createAndAppendToList(list, 7);
     appendToList(list, firstElement);
     createAndAppendToList(list, 5);
@@ -1297,7 +1297,7 @@ void LinkedListTests::testGetPreviousElement()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
         ListIterator it = lbegin(list);
 
         QVERIFY2(getPreviousListElement(it) == nullptr, "Previous list element is not correctly determined");
@@ -1319,7 +1319,7 @@ void LinkedListTests::testGetLastElement()
     }
 
     {
-        List* list = createList();
+        List* list = createEmptyList();
 
         QVERIFY2(getLastListElement(list) == nullptr, "The last list element is not correctly retrieved");
 
@@ -1354,7 +1354,7 @@ void LinkedListTests::testMoveListToArray()
 
 void LinkedListTests::testMoveArrayToList()
 {
-    List* list = createList();
+    List* list = createEmptyList();
     ListElement** array = static_cast<ListElement**>(calloc(4, sizeof(ListElement*)));
 
     array[0] = createListElement();

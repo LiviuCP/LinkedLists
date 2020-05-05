@@ -7,7 +7,7 @@ BoundedBuffer::BoundedBuffer(size_t bufferCapacity)
 {
     ASSERT_CONDITION(m_BufferCapacity > 0, "Requested capacity of the bounded buffer is 0");
 
-    m_Container = createList();
+    m_Container = createEmptyList();
 
     if (m_Container != nullptr)
     {

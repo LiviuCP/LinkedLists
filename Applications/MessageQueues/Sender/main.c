@@ -19,7 +19,7 @@ int main()
 
     createQueueFile();
 
-    List* senderList = createList();
+    List* senderList = createEmptyList();
     addElementsToList(senderList, priorities, 6);
 
     printf("The sender list has following elements:\n\n");

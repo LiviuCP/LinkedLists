@@ -17,7 +17,7 @@ int main()
     const size_t priorities[] = {5, 2, 7, 3, 4};
     const char* fifoName = "/tmp/linkedlistpipe";
 
-    List* senderList = createList();
+    List* senderList = createEmptyList();
     addElementsToList(senderList, priorities, 5);
 
     printf("The sender list has following elements:\n\n");
