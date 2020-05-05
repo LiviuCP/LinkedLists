@@ -9,7 +9,6 @@
 #include "../../../LinkedListsLib/linkedlist.h"
 #include "../../ManualListEntry/apputils.h"
 
-void addElementsToList(List* list, const size_t* priorities, const size_t elementsCount);
 size_t makePipeAndSend(const char *pipeName, const size_t* priorities, const size_t elementsCount);
 
 int main()
@@ -17,8 +16,7 @@ int main()
     const size_t priorities[] = {5, 2, 7, 3, 4};
     const char* fifoName = "/tmp/linkedlistpipe";
 
-    List* senderList = createEmptyList();
-    addElementsToList(senderList, priorities, 5);
+    List* senderList = createListFromPrioritiesArray(priorities, 5);
 
     printf("The sender list has following elements:\n\n");
     printList(senderList);
@@ -32,17 +30,6 @@ int main()
     deleteList(senderList, deleteObject);
     senderList = NULL;
     return 0;
-}
-
-void addElementsToList(List* list, const size_t* priorities, const size_t elementsCount)
-{
-    if (list != NULL && priorities != NULL && elementsCount > 0)
-    {
-        for (size_t index = 0; index < elementsCount; ++index)
-        {
-            createAndAppendToList(list, priorities[index]);
-        }
-    }
 }
 
 size_t makePipeAndSend(const char* pipeName, const size_t* priorities, const size_t elementsCount)

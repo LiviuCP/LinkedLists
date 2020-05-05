@@ -8,7 +8,6 @@
 #include "../../../LinkedListsLib/linkedlist.h"
 #include "../../ManualListEntry/apputils.h"
 
-void addElementsToList(List* list, const size_t* priorities, const size_t elementsCount);
 void createQueueFile(void);
 void sendToQueue(const size_t* priorities, const size_t *priorityTypes, const size_t elementsCount);
 
@@ -19,8 +18,7 @@ int main()
 
     createQueueFile();
 
-    List* senderList = createEmptyList();
-    addElementsToList(senderList, priorities, 6);
+    List* senderList = createListFromPrioritiesArray(priorities, 6);
 
     printf("The sender list has following elements:\n\n");
     printList(senderList);
@@ -33,17 +31,6 @@ int main()
     senderList = NULL;
 
     return 0;
-}
-
-void addElementsToList(List* list, const size_t* priorities, const size_t elementsCount)
-{
-    if (list != NULL && priorities != NULL && elementsCount > 0)
-    {
-        for (size_t index = 0; index < elementsCount; ++index)
-        {
-            createAndAppendToList(list, priorities[index]);
-        }
-    }
 }
 
 void createQueueFile()

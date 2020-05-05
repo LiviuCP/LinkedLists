@@ -20,6 +20,40 @@ List* createEmptyList()
     return list;
 }
 
+List* createListFromPrioritiesArray(const size_t* priorityArray, const size_t arraySize)
+{
+    List* result = NULL;
+
+    if (priorityArray != NULL && arraySize > 0)
+    {
+        List* list = createEmptyList();
+
+        boolean success = TRUE;
+
+        for (size_t index = 0; index < arraySize; ++index)
+        {
+            if (!createAndPrependToList(list, priorityArray[arraySize-1-index])) // use prepend to avoid list "walk-through" operations
+            {
+                success = FALSE;
+                break;
+            }
+        }
+
+        if (success)
+        {
+            result = list;
+        }
+        else
+        {
+            deleteList(list, deleteObject);
+        }
+
+        list = NULL;
+    }
+
+    return result;
+}
+
 // user is responsible for de-allocating the Object of each element prior to erasing the list
 void deleteList(List* list, void (*deallocObject)(Object* object))
 {

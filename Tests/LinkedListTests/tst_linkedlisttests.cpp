@@ -13,8 +13,6 @@ class LinkedListTests : public QObject
 
 public:
     LinkedListTests();
-
-    List* createLinkedList(std::initializer_list<size_t> priorities);
     ~LinkedListTests();
 
 private slots:
@@ -54,25 +52,6 @@ LinkedListTests::LinkedListTests()
 {
 }
 
-List* LinkedListTests::createLinkedList(std::initializer_list<size_t> priorities)
-{
-    List* list = createEmptyList();
-
-    if (list != nullptr)
-    {
-        for (auto priority : priorities)
-        {
-            createAndAppendToList(list, priority);
-        }
-    }
-    else
-    {
-        qWarning("The list could not be created");
-    }
-
-    return list;
-}
-
 LinkedListTests::~LinkedListTests()
 {
 }
@@ -80,7 +59,8 @@ LinkedListTests::~LinkedListTests()
 void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7});
+        const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 9);
 
         QVERIFY2(getListSize(list) == 9, "List size is not correct");
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 4)->priority == 3 && getListElementAtIndex(list, 8)->priority == 7,
@@ -96,7 +76,8 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
 
 void LinkedListTests::testAppendElement()
 {
-    List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7});
+    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
+    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
     createAndAppendToList(list, 8);
 
     QVERIFY2(getListSize(list) == 10 && getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 9)->priority == 8, "Element has not been correctly created and appended");
@@ -107,7 +88,8 @@ void LinkedListTests::testAppendElement()
 
 void LinkedListTests::testPrependElement()
 {
-    List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7});
+    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
+    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
     createAndPrependToList(list, 8);
 
     QVERIFY2(getListSize(list) == 10 && getListElementAtIndex(list, 0)->priority == 8 && getListElementAtIndex(list, 9)->priority == 7, "Element has not been correctly created and prepended");
@@ -118,7 +100,8 @@ void LinkedListTests::testPrependElement()
 
 void LinkedListTests::testRemoveFirstElement()
 {
-    List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 8});
+    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 8};
+    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
     ListElement* firstElement = removeFirstListElement(list);
 
     QVERIFY2(getListSize(list) == 8 && getListElementAtIndex(list, 0)->priority == 2 && getListElementAtIndex(list, 7)->priority == 8, "Element has not been correctly created and appended");
@@ -131,7 +114,8 @@ void LinkedListTests::testRemoveFirstElement()
 
 void LinkedListTests::testRemoveLastElement()
 {
-    List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 8});
+    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 8};
+    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
     ListElement* lastElement = removeLastListElement(list);
 
     QVERIFY2(getListSize(list) == 8 && getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 7)->priority == 9, "Element has not been correctly created and appended");
@@ -144,8 +128,10 @@ void LinkedListTests::testRemoveLastElement()
 
 void LinkedListTests::testInsertElementBefore()
 {
+    const size_t prioritiesArray[4]{6, 2, 5, 4};
+
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         createAndInsertBefore(it, 10);
@@ -162,7 +148,7 @@ void LinkedListTests::testInsertElementBefore()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -180,7 +166,7 @@ void LinkedListTests::testInsertElementBefore()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -200,7 +186,7 @@ void LinkedListTests::testInsertElementBefore()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -234,8 +220,10 @@ void LinkedListTests::testInsertElementBefore()
 
 void LinkedListTests::testInsertElementAfter()
 {
+    const size_t prioritiesArray[4]{6, 2, 5, 4};
+
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         createAndInsertAfter(it, 10);
@@ -252,7 +240,7 @@ void LinkedListTests::testInsertElementAfter()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -270,7 +258,7 @@ void LinkedListTests::testInsertElementAfter()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -303,9 +291,12 @@ void LinkedListTests::testInsertElementAfter()
 
 void LinkedListTests::testMoveContentToList()
 {
+    const size_t firstPrioritiesArray[2]{6, 2,};
+    const size_t secondPrioritiesArray[2]{7, 4};
+
     {
-        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
-        List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
+        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
+        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
 
         moveContentToList(source, destination);
 
@@ -324,7 +315,7 @@ void LinkedListTests::testMoveContentToList()
 
     {
         List* source = createEmptyList();
-        List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
+        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
 
         moveContentToList(source, destination);
 
@@ -340,7 +331,7 @@ void LinkedListTests::testMoveContentToList()
     }
 
     {
-        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
+        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
         List* destination = createEmptyList();
 
         moveContentToList(source, destination);
@@ -359,9 +350,13 @@ void LinkedListTests::testMoveContentToList()
 
 void LinkedListTests::testCopyContentToList()
 {
+    const size_t firstPrioritiesArray[2]{6, 2,};
+    const size_t secondPrioritiesArray[2]{7, 4};
+    const size_t thirdPriorityArray[3]{5, 4, 3};
+
     {
-        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
-        List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
+        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
+        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
 
         copyContentToList(source, destination, copyObject, deleteObject);
 
@@ -380,7 +375,7 @@ void LinkedListTests::testCopyContentToList()
 
     {
         List* source = createEmptyList();
-        List* destination = createLinkedList(std::initializer_list<size_t>{7, 4});
+        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
 
         copyContentToList(source, destination, copyObject, deleteObject);
 
@@ -396,7 +391,7 @@ void LinkedListTests::testCopyContentToList()
     }
 
     {
-        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
+        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
         List* destination = createEmptyList();
 
         copyContentToList(source, destination, copyObject, deleteObject);
@@ -413,8 +408,8 @@ void LinkedListTests::testCopyContentToList()
     }
 
     {
-        List* source = createLinkedList(std::initializer_list<size_t>{6, 2});
-        List* destination = createLinkedList(std::initializer_list<size_t>{5, 4, 3});
+        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
+        List* destination = createListFromPrioritiesArray(thirdPriorityArray, 3);
 
         ListIterator it = lbegin(source);
         assignObjectToListElement(it.current, "Segment", createSegmentPayload(2, 5, 4, 11));
@@ -451,8 +446,10 @@ void LinkedListTests::testCopyContentToList()
 
 void LinkedListTests::testRemoveElementBefore()
 {
+    const size_t prioritiesArray[4]{6, 2, 5, 4};
+
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         ListElement* removedElement = removePreviousListElement(it);
@@ -469,7 +466,7 @@ void LinkedListTests::testRemoveElementBefore()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -488,7 +485,7 @@ void LinkedListTests::testRemoveElementBefore()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -508,7 +505,7 @@ void LinkedListTests::testRemoveElementBefore()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -529,7 +526,7 @@ void LinkedListTests::testRemoveElementBefore()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -572,8 +569,10 @@ void LinkedListTests::testRemoveElementBefore()
 
 void LinkedListTests::testRemoveElementAfter()
 {
+    const size_t prioritiesArray[4]{6, 2, 5, 4};
+
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         ListElement* removedElement = removeNextListElement(it);
@@ -591,7 +590,7 @@ void LinkedListTests::testRemoveElementAfter()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -610,7 +609,7 @@ void LinkedListTests::testRemoveElementAfter()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -644,8 +643,9 @@ void LinkedListTests::testRemoveElementAfter()
 
 void LinkedListTests::testRemoveCurrentElement()
 {
+    const size_t prioritiesArray[3]{6, 2, 5};
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
 
         ListIterator it = lbegin(list);
         ListElement* removedElement = removeCurrentListElement(it);
@@ -662,7 +662,7 @@ void LinkedListTests::testRemoveCurrentElement()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -680,7 +680,7 @@ void LinkedListTests::testRemoveCurrentElement()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -699,7 +699,7 @@ void LinkedListTests::testRemoveCurrentElement()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
 
         ListIterator it = lbegin(list);
         lnext(&it);
@@ -718,7 +718,8 @@ void LinkedListTests::testRemoveCurrentElement()
 void LinkedListTests::testSwapElements()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4, 7});
+        const size_t prioritiesArray[5]{6, 2, 5, 4, 7};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 5);
 
         ListIterator firstIt = lbegin(list);
         ListIterator secondIt = firstIt;
@@ -757,8 +758,11 @@ void LinkedListTests::testSwapElements()
 
 void LinkedListTests::testReverseList()
 {
+    const size_t firstPrioritiesArray[4]{6, 2, 5, 4};
+    const size_t secondPrioritiesArray[2]{6, 2};
+
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 4});
+        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 4);
         reverseList(list);
 
         QVERIFY2(getListSize(list) == 4 &&
@@ -772,7 +776,7 @@ void LinkedListTests::testReverseList()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2});
+        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 2);
         reverseList(list);
 
         QVERIFY2(getListSize(list) == 2 &&
@@ -808,7 +812,8 @@ void LinkedListTests::testReverseList()
 void LinkedListTests::testSortAscendingByPriority()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
+        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item first
         sortAscendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
@@ -818,7 +823,8 @@ void LinkedListTests::testSortAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
+        const size_t prioritiesArray[6]{3, 2, 1, 5, 2, 6};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item last
         sortAscendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
@@ -828,7 +834,8 @@ void LinkedListTests::testSortAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
+        const size_t prioritiesArray[6]{1, 6, 2, 5, 3, 2};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item first
         sortAscendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
@@ -838,7 +845,8 @@ void LinkedListTests::testSortAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
+        const size_t prioritiesArray[6]{2, 3, 5, 2, 6, 1};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item last
         sortAscendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
@@ -848,7 +856,8 @@ void LinkedListTests::testSortAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 1, 2, 6, 5}); // random
+        const size_t prioritiesArray[6]{2, 3, 1, 2, 6, 5};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // random
         sortAscendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
@@ -858,7 +867,8 @@ void LinkedListTests::testSortAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 5});
+        const size_t prioritiesArray[2]{6, 5};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
         sortAscendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 5 && getListElementAtIndex(list, 1)->priority == 6, "The list hasn't been correctly sorted ");
@@ -868,7 +878,9 @@ void LinkedListTests::testSortAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{1});
+        List* list = createEmptyList();
+        createAndAppendToList(list, 1);
+
         sortAscendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
@@ -881,7 +893,8 @@ void LinkedListTests::testSortAscendingByPriority()
 void LinkedListTests::testSortDescendingByPriority()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3}); // highest prio item first
+        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item first
         sortDescendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
@@ -891,7 +904,8 @@ void LinkedListTests::testSortDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 1, 5, 2, 6}); // highest prio item last
+        const size_t prioritiesArray[6]{3, 2, 1, 5, 2, 6};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item last
         sortDescendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
@@ -901,7 +915,8 @@ void LinkedListTests::testSortDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{1, 6, 2, 5, 3, 2}); // lowest prio item first
+        const size_t prioritiesArray[6]{1, 6, 2, 5, 3, 2};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item first
         sortDescendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
@@ -911,7 +926,8 @@ void LinkedListTests::testSortDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1}); // lowest prio item last
+        const size_t prioritiesArray[6]{2, 3, 5, 2, 6, 1};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item last
         sortDescendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
@@ -921,7 +937,8 @@ void LinkedListTests::testSortDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 1, 2, 6, 5}); // random
+        const size_t prioritiesArray[6]{2, 3, 1, 2, 6, 5};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // random
         sortDescendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
@@ -931,7 +948,8 @@ void LinkedListTests::testSortDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{5, 6});
+        const size_t prioritiesArray[2]{5, 6};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
         sortDescendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 1)->priority == 5, "The list hasn't been correctly sorted ");
@@ -941,7 +959,9 @@ void LinkedListTests::testSortDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{1});
+        List* list = createEmptyList();
+        createAndAppendToList(list, 1);
+
         sortDescendingByPriority(list);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
@@ -953,9 +973,13 @@ void LinkedListTests::testSortDescendingByPriority()
 
 void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 {
+    const size_t firstPrioritiesArray[6]{2, 3, 5, 2, 6, 1};
+    const size_t secondPrioritiesArray[8]{2, 3, 5, 2, 6, 1, 8, 7};
+    const size_t thirdPrioritiesArray[12]{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6};
+
     // insertion sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
+        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
         sortByRandomAccess(list, insertionSortAscendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
@@ -967,7 +991,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 
     // heap sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
+        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
         sortByRandomAccess(list, heapSortAscendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
@@ -979,7 +1003,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 
     // merge sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
+        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
         sortByRandomAccess(list, mergeSortAscendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
@@ -991,7 +1015,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 
     // quick sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
+        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
         sortByRandomAccess(list, quickSortAscendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
@@ -1003,7 +1027,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 
     // enhanced merge sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
+        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
         sortByRandomAccess(list, enhancedMergeSortAscendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
@@ -1015,7 +1039,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 
     // quick merge sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
+        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
         sortByRandomAccess(list, quickMergeSortAscendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
@@ -1027,7 +1051,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 
     // enhanced quick sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
+        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
         sortByRandomAccess(list, enhancedQuickSortAscendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
@@ -1040,9 +1064,13 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 
 void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 {
+    const size_t firstPrioritiesArray[6]{2, 3, 5, 2, 6, 1};
+    const size_t secondPrioritiesArray[8]{2, 3, 5, 2, 6, 1, 8, 7};
+    const size_t thirdPrioritiesArray[12]{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6};
+
     // insertion sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
+        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
@@ -1054,7 +1082,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 
     // heap sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1});
+        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
@@ -1066,7 +1094,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 
     // merge sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
+        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
@@ -1078,7 +1106,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 
     // quick sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 6, 1, 8, 7});
+        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
         sortByRandomAccess(list, insertionSortDescendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
@@ -1090,7 +1118,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 
     // enhanced merge sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
+        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
         sortByRandomAccess(list, enhancedMergeSortDescendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
@@ -1102,7 +1130,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 
     // quick merge sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
+        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
         sortByRandomAccess(list, quickMergeSortDescendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
@@ -1114,7 +1142,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 
     // enhanced quick sort
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6});
+        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
         sortByRandomAccess(list, enhancedQuickSortDescendingByPriority);
 
         QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
@@ -1128,8 +1156,10 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 void LinkedListTests::testIterators()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 9});
+        const size_t prioritiesArray[4]{6, 2, 5, 9};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
         ListIterator it = lbegin(list);
+
         QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 6, "The begin iterator is not correctly generated");
         lnext(&it);
         QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 2, "The iterator is not correctly incremented");
@@ -1224,7 +1254,9 @@ void LinkedListTests::testIsElementContained()
 void LinkedListTests::testIsSortedAscendingByPriority()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3});
+        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+
         QVERIFY2(!isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
 
         deleteList(list, deleteObject);
@@ -1232,7 +1264,9 @@ void LinkedListTests::testIsSortedAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{1, 2, 2, 3, 5, 6});
+        const size_t prioritiesArray[6]{1, 2, 2, 3, 5, 6};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+
         QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
 
         deleteList(list, deleteObject);
@@ -1240,7 +1274,9 @@ void LinkedListTests::testIsSortedAscendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{5, 5, 5, 5, 5, 5});
+        const size_t prioritiesArray[6]{5, 5, 5, 5, 5, 5};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+
         QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
 
         deleteList(list, deleteObject);
@@ -1251,7 +1287,8 @@ void LinkedListTests::testIsSortedAscendingByPriority()
 void LinkedListTests::testIsSortedDescendingByPriority()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 1, 2, 3});
+        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
         QVERIFY2(!isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
 
         deleteList(list, deleteObject);
@@ -1259,7 +1296,8 @@ void LinkedListTests::testIsSortedDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 5, 4, 2, 2, 1});
+        const size_t prioritiesArray[6]{6, 5, 4, 2, 2, 1};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
         QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
 
         deleteList(list, deleteObject);
@@ -1267,7 +1305,8 @@ void LinkedListTests::testIsSortedDescendingByPriority()
     }
 
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{5, 5, 5, 5, 5, 5});
+        const size_t prioritiesArray[6]{5, 5, 5, 5, 5, 5};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
         QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
 
         deleteList(list, deleteObject);
@@ -1278,7 +1317,8 @@ void LinkedListTests::testIsSortedDescendingByPriority()
 void LinkedListTests::testGetPreviousElement()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5});
+        const size_t prioritiesArray[3]{6, 2, 5};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
 
         ListIterator it = lbegin(list);
         QVERIFY2(getPreviousListElement(it) == nullptr, "Previous list element is not correctly determined");
@@ -1310,7 +1350,8 @@ void LinkedListTests::testGetPreviousElement()
 void LinkedListTests::testGetLastElement()
 {
     {
-        List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 9});
+        const size_t prioritiesArray[4]{6, 2, 5, 9};
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
 
         QVERIFY2(getLastListElement(list)->priority == 9, "The last list element is not correctly retrieved");
 
@@ -1330,7 +1371,8 @@ void LinkedListTests::testGetLastElement()
 
 void LinkedListTests::testMoveListToArray()
 {
-    List* list = createLinkedList(std::initializer_list<size_t>{6, 2, 5, 9});
+    const size_t prioritiesArray[4]{6, 2, 5, 9};
+    List* list = createListFromPrioritiesArray(prioritiesArray, 4);
     size_t arraySize;
     ListElement** array = moveListToArray(list, &arraySize);
 
@@ -1386,7 +1428,9 @@ void LinkedListTests::testMoveArrayToList()
 
 void LinkedListTests::testPrintListElementsToFile()
 {
-    List* list = createLinkedList(std::initializer_list<size_t>{3, 2, 5, 9, 4});
+    const size_t prioritiesArray[5]{3, 2, 5, 9, 4};
+    List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+
     const char* testDataFile = "/tmp/test.txt";
 
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));

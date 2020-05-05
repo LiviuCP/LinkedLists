@@ -33,6 +33,7 @@ extern "C"{
 #endif
 
 List* createEmptyList();
+List* createListFromPrioritiesArray(const size_t *priorityArray, const size_t arraySize);
 void deleteList(List* list, void (*deallocObject)(Object* object));
 
 ListElement* createListElement();
