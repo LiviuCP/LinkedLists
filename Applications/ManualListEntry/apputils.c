@@ -9,7 +9,7 @@ void printList(List* list)
         int currentElementIndex = 0;
         for (ListIterator it = lbegin(list); !areIteratorsEqual(it, lend(list)); lnext(&it))
         {
-            printf("Index: %d\t Priority: %lu\n", currentElementIndex+1, it.current->priority);
+            printf("Element number: %d\t Priority: %lu\n", currentElementIndex+1, it.current->priority);
             ++currentElementIndex;
         }
         if (currentElementIndex == 0)

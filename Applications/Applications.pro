@@ -4,4 +4,5 @@ SUBDIRS += \
     ManualListEntry \
     BoundedBuffer \
     NamedPipes \
-    MessageQueues
+    MessageQueues \
+    Sockets
