@@ -18,7 +18,7 @@ void printList(List* list)
         }
         else
         {
-            printf("\nThe list has %d elements\n\n", (int)getListSize(list));
+            printf("\nThe list has %d elements\n", (int)getListSize(list));
         }
     }
     else

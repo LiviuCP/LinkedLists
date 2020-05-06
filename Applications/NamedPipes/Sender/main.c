@@ -21,11 +21,11 @@ int main()
     printf("The sender list has following elements:\n\n");
     printList(senderList);
 
-    printf("Now we will send the priorities through a named pipe. Waiting for receiver to respond...\n\n");
+    printf("Now we will send the priorities through a named pipe.\n\n");
 
     size_t bytesSent = makePipeAndSend(fifoName, priorities, 5);
 
-    printf("Done! %d bytes sent through the named pipe\n", (int)bytesSent);
+    printf("\n%d bytes sent through the named pipe\n", (int)bytesSent);
 
     deleteList(senderList, deleteObject);
     senderList = NULL;
@@ -40,8 +40,13 @@ size_t makePipeAndSend(const char* pipeName, const size_t* priorities, const siz
     {
         const size_t nrOfBytes = elementsCount * sizeof (size_t);
 
+        printf("Creating named pipe\n");
         mkfifo(pipeName, 0666);
+        printf("Done creating pipe\n");
 
+        sleep(1);
+
+        printf("\nOpening pipe for writing (open function returns once the receiver opens the pipe for reading)\n");
         int fDescriptor = open(pipeName, O_CREAT | O_WRONLY);
 
         if (fDescriptor < 0)
@@ -49,8 +54,16 @@ size_t makePipeAndSend(const char* pipeName, const size_t* priorities, const siz
             perror("Error! Named pipe cannot be opened for writing\n");
             exit(-1);
         }
+        else
+        {
+            printf("Pipe opened for writing\n");
+        }
 
+        sleep(1);
+
+        printf("\nWriting to pipe\n");
         write(fDescriptor, priorities, nrOfBytes);
+        printf("Done writing to pipe\n");
 
         close(fDescriptor);
         unlink(pipeName);
