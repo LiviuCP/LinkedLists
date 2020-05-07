@@ -11,71 +11,116 @@
 
 #include "../../../LinkedListsLib/linkedlist.h"
 #include "../../ManualListEntry/apputils.h"
+#include "../../../Utils/codeutils.h"
 
 #define PORT_NUMBER         9801
 #define MAX_CONNECTS        4
 #define BUFFER_SIZE         512
 #define HOSTNAME            "localhost"
 
-static const size_t requestedNrOfElementPriorities = 5; // hard-coded for the moment, might change in a future commit
+static const size_t availabilityRequestCode = 0; // used for querying server about the maximum number of retrievable priorities
 
 void establishServerSocketConnection(const int* fileDescriptor);
+size_t retrieveRequestedNrOfPriorities(void);
 
 int main()
 {
+    char buffer[BUFFER_SIZE+1];
     const int fileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
+
     if (fileDescriptor < 0)
     {
         perror("Error when creating socket file descriptor");
         exit(-1);
     }
 
-    printf("Connecting to server...\n");
-    establishServerSocketConnection(&fileDescriptor);
-    printf("Connection established\n\nRequesting a number of %d list element priorities...\n", (int)requestedNrOfElementPriorities);
+    const size_t nrOfUserRequestedPriorities = retrieveRequestedNrOfPriorities();
 
-    if (write(fileDescriptor, &requestedNrOfElementPriorities, sizeof(size_t)))
+    if (nrOfUserRequestedPriorities != 0)
     {
-        char buffer[BUFFER_SIZE+1];
-        memset(buffer, '\0', sizeof (buffer));
+        size_t availableCount = 0;
+        size_t actuallyRequestedCount = 0;
 
-        size_t* startAddress = (size_t*)buffer;
+        printf("\nConnecting to server...\n");
+        establishServerSocketConnection(&fileDescriptor);
+        printf("Connection established\n\n");
 
-        if (read(fileDescriptor, buffer, sizeof (buffer)))
+        printf("Checking data availability\n");
+
+        sleep(1);
+        if (write(fileDescriptor, &availabilityRequestCode, sizeof(size_t)))
         {
-            sleep(1);
-            printf("Response received from server\n\n");
-            sleep(1);
-            printf("Using received priorities to create list:\n\n");
-            sleep(1);
-            List* list = createEmptyList();
-            for (size_t index = 0; index < requestedNrOfElementPriorities; ++index)
+            memset(buffer, '\0', sizeof (buffer));
+
+            size_t* startAddress = (size_t*)buffer;
+
+            if (read(fileDescriptor, buffer, sizeof (buffer)))
             {
-                if (*(startAddress + index) > 0)
+                availableCount = *startAddress;
+            }
+        }
+
+        printf("Done\n\n");
+
+        if (availableCount == 0)
+        {
+            printf("No data is available. List cannot be created\n");
+        }
+        else
+        {
+            if (nrOfUserRequestedPriorities > availableCount)
+            {
+                printf("You requested more data than available. Number of requested entries will be limited to maximum available.\n\n");
+            }
+
+            actuallyRequestedCount = nrOfUserRequestedPriorities <= availableCount ? nrOfUserRequestedPriorities : availableCount;
+
+            printf("Requesting a number of %d list element priorities...\n", (int)actuallyRequestedCount);
+
+            if (write(fileDescriptor, &actuallyRequestedCount, sizeof(size_t)))
+            {
+                memset(buffer, '\0', sizeof (buffer));
+
+                size_t* startAddress = (size_t*)buffer;
+
+                if (read(fileDescriptor, buffer, sizeof (buffer)))
                 {
-                    createAndAppendToList(list, *(startAddress + index));
-                    printf("Created and appended element with priority: %d\n", (int)(*(startAddress + index)));
+                    sleep(1);
+                    printf("Response received from server\n\n");
+                    sleep(1);
+                    printf("Using received priorities to create list:\n\n");
+                    sleep(1);
+                    List* list = createEmptyList();
+                    for (size_t index = 0; index < actuallyRequestedCount; ++index)
+                    {
+                        createAndAppendToList(list, *(startAddress + index));
+                        printf("Created and appended element with priority: %d\n", (int)(*(startAddress + index)));
+                    }
+
+                    printf("\nSorting list...\n");
+                    sleep(1);
+                    sortAscendingByPriority(list);
+                    printf("Done\n");
+
+                    printf("\nThe list has following elements after sorting:\n\n");
+                    printList(list);
+
+                    deleteList(list, deleteObject);
+                    list = NULL;
                 }
                 else
                 {
-                    printf("Could not create and append element, priority is 0\n");
+                    fprintf(stderr, "The request could not be completed\n");
                 }
             }
+            else
+            {
+                fprintf(stderr, "The request could not be completed\n");
+            }
 
-            printf("\nSorting list...\n");
-            sleep(1);
-            sortAscendingByPriority(list);
-            printf("Done\n");
-
-            printf("\nThe list has following elements after sorting:\n\n");
-            printList(list);
-
-            deleteList(list, deleteObject);
-            list = NULL;
+            close(fileDescriptor);
         }
     }
-
-    close(fileDescriptor);
 
     return 0;
 }
@@ -107,4 +152,25 @@ void establishServerSocketConnection(const int* fileDescriptor)
         perror("Connection error");
         exit(-1);
     }
+}
+
+size_t retrieveRequestedNrOfPriorities()
+{
+    size_t nrOfRequestedPriorities;
+
+    for (;;)
+    {
+        printf("Enter the requested number of list element priorities (0 to exit): ");
+        if (!readUnsignedLong(&nrOfRequestedPriorities))
+        {
+            system("clear");
+            printf("Invalid input! Please try again\n\n");
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return nrOfRequestedPriorities;
 }

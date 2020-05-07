@@ -11,8 +11,9 @@
 #define MAX_CONNECTS        4
 #define BUFFER_SIZE         512
 #define HOSTNAME            "localhost"
+#define NR_OF_REQUESTS      2
 
-static const size_t nrOfAvailablePriorites = 10;
+static const size_t nrOfAvailablePriorities = 10;
 static const size_t prioritiesList[10] = {5, 12, 4, 6, 1, 2, 3, 8, 7, 14};
 
 void setSocket(const int* fileDescriptor);
@@ -43,25 +44,37 @@ int main()
 
         char buffer[BUFFER_SIZE + 1];
         size_t* bufferAddress = (size_t*)buffer;
-        memset(buffer, '\0', sizeof(buffer));
 
-        printf("Client request received. Reading client request data...\n");
-        ssize_t count = read(clientFileDescriptor, buffer, sizeof (buffer));
-
-        if (count >= (ssize_t)sizeof(size_t))
+        for (size_t requestNr = 0; requestNr < NR_OF_REQUESTS; ++requestNr)
         {
-            const size_t nrOfPrioritiesToSend = *bufferAddress <= nrOfAvailablePriorites ? *bufferAddress : nrOfAvailablePriorites;
-            printf("Client will get first %d priorities from list\n", (int)nrOfPrioritiesToSend);
+            memset(buffer, '\0', sizeof(buffer));
 
-            for (size_t index = 0; index < nrOfPrioritiesToSend; ++index)
+            printf("Client request received. Reading client request data...\n");
+            ssize_t count = read(clientFileDescriptor, buffer, sizeof (buffer));
+
+            if (count >= (ssize_t)sizeof(size_t))
             {
-                printf("Writing priority %d into buffer\n", (int)prioritiesList[index]);
-                *(bufferAddress + index) = prioritiesList[index];
-            }
+                if (*bufferAddress > 0)
+                {
+                    const size_t nrOfPrioritiesToSend = *bufferAddress <= nrOfAvailablePriorities ? *bufferAddress : nrOfAvailablePriorities;
+                    printf("Client will get first %d priorities from list\n", (int)nrOfPrioritiesToSend);
 
-            printf("Sending requested data to client...\n");
-            write(clientFileDescriptor, buffer, sizeof(buffer));
-            printf("Done\n\n");
+                    for (size_t index = 0; index < nrOfPrioritiesToSend; ++index)
+                    {
+                        printf("Writing priority %d into buffer\n", (int)prioritiesList[index]);
+                        *(bufferAddress + index) = prioritiesList[index];
+                    }
+                }
+                else
+                {
+                    *bufferAddress = nrOfAvailablePriorities;
+                    printf("Client only reequires to know how many priorities are available. The number is %d\n", (int)nrOfAvailablePriorities);
+                }
+
+                printf("Sending requested data to client...\n");
+                write(clientFileDescriptor, buffer, sizeof(buffer));
+                printf("Done\n\n");
+            }
         }
 
         close(clientFileDescriptor);
