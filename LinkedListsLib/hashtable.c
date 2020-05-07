@@ -6,11 +6,11 @@
 #include "../Utils/error.h"
 
 // "private" (supporting) functions
-boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize);
-HashEntry* _createHashEntry(const char* key, const char* value);
-boolean _updateHashEntry(HashEntry* hashEntry, const char* value);
-HashEntry* _getMatchingKeyHashEntry(const List *currentBucket, const char* key);
-void _deleteHashEntry(Object* object); // custom deleter for hash table
+static boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize);
+static HashEntry* _createHashEntry(const char* key, const char* value);
+static boolean _updateHashEntry(HashEntry* hashEntry, const char* value);
+static HashEntry* _getMatchingKeyHashEntry(const List *currentBucket, const char* key);
+static void _deleteHashEntry(Object* object); // custom deleter for hash table
 
 HashTable* createHashTable(const size_t hashSize)
 {
@@ -168,27 +168,6 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
     }
 }
 
-void _deleteHashEntry(Object* object)
-{
-    if (object != NULL)
-    {
-        ASSERT_CONDITION(object->payload != NULL && object->type != NULL && strcmp(object->type,"HashEntry") == 0,
-                         "Invalid hash entry, deleter cannot be applied")
-
-        HashEntry* entry = (HashEntry*)object->payload;
-        free(entry->key);
-        entry->key = NULL;
-        free(entry->value);
-        entry->value = NULL;
-        free(object->payload);
-        object->payload = NULL;
-        free(object->type);
-        object->type = NULL;
-        free(object);
-        object = NULL;
-    }
-}
-
 const char* getHashEntryValue(const char* key, const HashTable* hashTable)
 {
     char* result = NULL;
@@ -249,7 +228,7 @@ size_t getHashIndexForKey(const char* key, size_t hashSize)
     return hashIndex;
 }
 
-boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize)
+static boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize)
 {
     boolean success = FALSE;
 
@@ -269,7 +248,7 @@ boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hash
     return success;
 }
 
-HashEntry* _createHashEntry(const char* key, const char* value)
+static HashEntry* _createHashEntry(const char* key, const char* value)
 {
     HashEntry* result = NULL;
 
@@ -309,7 +288,7 @@ HashEntry* _createHashEntry(const char* key, const char* value)
     return result;
 }
 
-boolean _updateHashEntry(HashEntry* hashEntry, const char* value)
+static boolean _updateHashEntry(HashEntry* hashEntry, const char* value)
 {
     boolean success = FALSE;
 
@@ -329,7 +308,7 @@ boolean _updateHashEntry(HashEntry* hashEntry, const char* value)
     return  success;
 }
 
-HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char* key)
+static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char* key)
 {
     HashEntry* matchingKeyHashEntry = NULL;
 
@@ -358,3 +337,25 @@ HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char* key)
 
     return matchingKeyHashEntry;
 }
+
+static void _deleteHashEntry(Object* object)
+{
+    if (object != NULL)
+    {
+        ASSERT_CONDITION(object->payload != NULL && object->type != NULL && strcmp(object->type,"HashEntry") == 0,
+                         "Invalid hash entry, deleter cannot be applied")
+
+        HashEntry* entry = (HashEntry*)object->payload;
+        free(entry->key);
+        entry->key = NULL;
+        free(entry->value);
+        entry->value = NULL;
+        free(object->payload);
+        object->payload = NULL;
+        free(object->type);
+        object->type = NULL;
+        free(object);
+        object = NULL;
+    }
+}
+

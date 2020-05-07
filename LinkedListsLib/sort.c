@@ -26,23 +26,23 @@ typedef struct
 } QuickSortThreadInput;
 
 // these functions are supposed to be "private", should not be accessed outside this file
-void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
-void _doMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex);
-void _doMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex);
-void _doQuickSortAscendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
-void _doQuickSortDescendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
-void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
-void _doEnhancedMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
-void _doEnhancedMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
-void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput);
-void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput);
-void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
-void _doQuickMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
-void _doQuickMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
-void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput);
-void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput);
-void _doEnhancedQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex);
-void _doEnhancedQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex);
+static void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
+static void _doMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex);
+static void _doMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex);
+static void _doQuickSortAscendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
+static void _doQuickSortDescendingByPriority(ListElement** toSort, size_t beginIndex, size_t endIndex);
+static void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
+static void _doEnhancedMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+static void _doEnhancedMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+static void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput);
+static void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput);
+static void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired);
+static void _doQuickMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+static void _doQuickMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex);
+static void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput);
+static void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput);
+static void _doEnhancedQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex);
+static void _doEnhancedQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex);
 
 void swapElement(ListElement** first, ListElement** second)
 {
@@ -142,7 +142,7 @@ void enhancedQuickSortDescendingByPriority(ListElement** array, const size_t arr
 }
 
 // "private" functions
-void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired)
+static void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired)
 {
     ListElement** auxArray = (ListElement**)calloc(arraySize, sizeof(ListElement*));
 
@@ -160,27 +160,27 @@ void _doMergeSortByPriority(ListElement** array, const size_t arraySize, boolean
     }
 }
 
-void _doMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex)
+static void _doMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex)
 {
     MERGE_SORT(ASCENDING, priority, _doMergeSortAscendingByPriority);
 }
 
-void _doMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex)
+static void _doMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, size_t startIndex, size_t endIndex)
 {
     MERGE_SORT(DESCENDING, priority, _doMergeSortDescendingByPriority);
 }
 
-void _doQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+static void _doQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
 {
     QUICK_SORT(ASCENDING, priority, _doQuickSortAscendingByPriority);
 }
 
-void _doQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+static void _doQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
 {
     QUICK_SORT(DESCENDING, priority, _doQuickSortDescendingByPriority);
 }
 
-void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired)
+static void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired)
 {
     ListElement** auxArray = (ListElement**)calloc(arraySize, sizeof(ListElement*));
 
@@ -198,17 +198,17 @@ void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arraySize,
     }
 }
 
-void _doEnhancedMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+static void _doEnhancedMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
 {
     ENHANCED_MERGE_SORT(ASCENDING, priority, &_wrapperEnhancedMergeSortAscendingByPriority)
 }
 
-void _doEnhancedMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+static void _doEnhancedMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
 {
     ENHANCED_MERGE_SORT(DESCENDING, priority, &_wrapperEnhancedMergeSortDescendingByPriority)
 }
 
-void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput)
+static void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput)
 {
     if (mergeSortThreadInput != NULL)
     {
@@ -219,7 +219,7 @@ void* _wrapperEnhancedMergeSortAscendingByPriority(void* mergeSortThreadInput)
     return NULL;
 }
 
-void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput)
+static void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput)
 {
     if (mergeSortThreadInput != NULL)
     {
@@ -230,7 +230,7 @@ void* _wrapperEnhancedMergeSortDescendingByPriority(void* mergeSortThreadInput)
     return NULL;
 }
 
-void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired)
+static void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, boolean isAscendingOrderRequired)
 {
     ListElement** auxArray = (ListElement**)calloc(arraySize, sizeof(ListElement*));
 
@@ -248,17 +248,17 @@ void _doQuickMergeSortByPriority(ListElement** array, const size_t arraySize, bo
     }
 }
 
-void _doQuickMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+static void _doQuickMergeSortAscendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
 {
     QUICK_MERGE_SORT(ASCENDING, priority, &_wrapperQuickSortAscendingByPriority)
 }
 
-void _doQuickMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
+static void _doQuickMergeSortDescendingByPriority(ListElement** array, ListElement** auxArray, const size_t startIndex, const size_t endIndex)
 {
     QUICK_MERGE_SORT(DESCENDING, priority, &_wrapperQuickSortDescendingByPriority)
 }
 
-void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput)
+static void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput)
 {
     if (quickSortThreadInput != NULL)
     {
@@ -268,7 +268,7 @@ void* _wrapperQuickSortAscendingByPriority(void* quickSortThreadInput)
 
     return NULL;
 }
-void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput)
+static void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput)
 {
     if (quickSortThreadInput != NULL)
     {
@@ -279,13 +279,13 @@ void* _wrapperQuickSortDescendingByPriority(void* quickSortThreadInput)
     return NULL;
 }
 
-void _doEnhancedQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+static void _doEnhancedQuickSortAscendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
 {
     ENHANCED_QUICK_SORT(ASCENDING, priority, &_wrapperQuickSortAscendingByPriority, _doQuickSortAscendingByPriority)
 }
 
 
-void _doEnhancedQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
+static void _doEnhancedQuickSortDescendingByPriority(ListElement** array, size_t beginIndex, size_t endIndex)
 {
     ENHANCED_QUICK_SORT(DESCENDING, priority, &_wrapperQuickSortDescendingByPriority, _doQuickSortDescendingByPriority)
 }
