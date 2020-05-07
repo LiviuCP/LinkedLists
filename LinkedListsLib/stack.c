@@ -75,6 +75,8 @@ Object* popFromStack(Stack* stack)
                              topStackElement->object->payload != NULL,     "Invalid stack element object detected")
 
             result = topStackElement->object;
+            free(topStackElement);
+            topStackElement = NULL;
         }
     }
 
