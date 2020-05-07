@@ -31,15 +31,16 @@ int main()
         exit(-1);
     }
 
-    if (childId == 0)
+    if (childId == 0)                                                                                       /* child */
     {
         close(fileDescriptors[WRITE_SIDE]);
 
-        printf("Receiving priorities from pipe...\n\n");
+        sleep(1); // for synchronization purposes (so parent has the chance to send the data)
+        printf("[PID: %d] Receiving priorities from pipe...\n\n", getpid());
 
         if (read(fileDescriptors[READ_SIDE], buffer, sizeof(buffer)) > 0)
         {
-            printf("Done\n\n");
+            printf("[PID: %d] Done\n\n", getpid());
             List* receiverList = createEmptyList();
 
             size_t* startAddress = (size_t*)buffer;
@@ -50,7 +51,7 @@ int main()
 
             sortAscendingByPriority(receiverList);
 
-            printf("The receiver list has following elements after sorting:\n\n");
+            printf("[PID: %d] The receiver list has following elements after sorting:\n\n", getpid());
             printList(receiverList);
             printf("\n");
 
@@ -59,24 +60,24 @@ int main()
         }
         else
         {
-            fprintf(stderr, "Nothing read or error occurred");
+            fprintf(stderr, "[PID: %d] Nothing read or error occurred", getpid());
         }
 
         close(fileDescriptors[READ_SIDE]);
         _exit(0);
     }
-    else
+    else                                                                                                    /* parent */
     {
         close(fileDescriptors[READ_SIDE]);
         const size_t priorities[] = {5, 2, 7, 3, 4};
 
         List* senderList = createListFromPrioritiesArray(priorities, LIST_SIZE);
 
-        printf("The sender list has following elements:\n\n");
+        printf("[PID: %d] The sender list has following elements:\n\n", getpid());
         printList(senderList);
         printf("\n");
 
-        printf("Sending priorities to pipe...\n\n");
+        printf("[PID: %d] Sending priorities to pipe...\n\n", getpid());
 
         size_t* startAddress = (size_t*)buffer;
         for (size_t index = 0; index < LIST_SIZE; ++index)
@@ -86,7 +87,7 @@ int main()
 
         write(fileDescriptors[WRITE_SIDE], buffer, sizeof(buffer));
 
-        printf("Done\n\n");
+        printf("[PID: %d] Done\n\n", getpid());
         printf("------------------------------------------------------\n\n");
 
         deleteList(senderList, deleteObject);
