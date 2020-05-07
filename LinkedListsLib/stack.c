@@ -52,7 +52,7 @@ boolean pushToStack(Stack* stack, Object* object)
 
         if (newElement != NULL)
         {
-            assignObjectToListElement(newElement, object->type, object->payload);
+            newElement->object = object;
         }
     }
 
