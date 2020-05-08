@@ -31,7 +31,7 @@ Stack* createStack()
 
 void deleteStack(Stack* stack, void (*deallocObject)(Object* object))
 {
-    if (stack != NULL && stack->container != NULL)
+    if (stack != NULL)
     {
         deleteList((List*)stack->container, deallocObject);
         stack->container = NULL;
@@ -46,7 +46,7 @@ boolean pushToStack(Stack* stack, Object* object)
 
     if (stack != NULL && object != NULL && object->type != NULL && strlen(object->type) != 0 && object->payload != NULL)
     {
-        ASSERT_CONDITION(stack->container != NULL, "Invalid stack detected");
+        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
 
         ListElement* newElement = createAndPrependToList((List*)(stack->container), 0); // all stack elements have priority 0 (priority is not relevant here)
 
@@ -63,8 +63,9 @@ Object* popFromStack(Stack* stack)
 {
     Object* result = NULL;
 
-    if (stack != NULL && stack->container != NULL)
+    if (stack != NULL)
     {
+        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
         ListElement* topStackElement = removeFirstListElement((List*)(stack->container));
 
         if (topStackElement != NULL)
@@ -85,13 +86,22 @@ Object* popFromStack(Stack* stack)
 
 void clearStack(Stack* stack, void (*deallocObject)(Object* object))
 {
-    if (stack != NULL && stack->container != NULL)
+    if (stack != NULL)
     {
+        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
         clearList((List*)stack->container, deallocObject);
     }
 }
 
 boolean isEmptyStack(const Stack* stack)
 {
-    return (getListSize((List*)stack->container) == 0);
+    boolean result = FALSE;
+
+    if (stack != NULL)
+    {
+        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
+        result = (((List*)(stack->container))->first == NULL);
+    }
+
+    return result;
 }
