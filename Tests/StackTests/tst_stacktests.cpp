@@ -1,7 +1,6 @@
 #include <QtTest>
 
 #include "../../LinkedListsLib/stack.h"
-#include "../../LinkedListsLib/linkedlist.h"
 #include "../../Utils/codeutils.h"
 #include "../../Utils/testobjects.h"
 
@@ -32,6 +31,8 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
 {
     // first push
     Stack* stack = createStack();
+
+    QVERIFY(isEmptyStack(stack));
 
     pushToStack(stack, createObject("Segment", createSegmentPayload(2, 5, 4, 11)));
 
