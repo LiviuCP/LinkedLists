@@ -29,7 +29,8 @@ SOURCES += \
         linkedlist.c \
         sort.c \
         hashtable.c \
-        stack.c
+        stack.c \
+        priorityqueue.c
 
 HEADERS += \
         linkedlistslib.h \
@@ -38,7 +39,8 @@ HEADERS += \
         listsortutils.h \
         sort.h \
         hashtable.h \
-        stack.h
+        stack.h \
+        priorityqueue.h
 
 
 unix {
