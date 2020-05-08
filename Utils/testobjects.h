@@ -25,6 +25,9 @@ typedef struct {
 extern "C"{
 #endif
 
+int* createIntegerPayload(int value);
+double* createDecimalPayload(double value);
+Point* createPointPayload(int startX, int startY);
 Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY);
 LocalConditions* createLocalConditionsPayload(int coordinateX, int coordinateY, int temperature, double humidity);
 

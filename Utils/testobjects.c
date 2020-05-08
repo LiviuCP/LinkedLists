@@ -3,6 +3,48 @@
 #include "testobjects.h"
 #include "error.h"
 
+int* createIntegerPayload(int value)
+{
+    int* result = NULL;
+
+    int* integer = (int*)malloc(sizeof(int));
+    if (integer != NULL)
+    {
+        *integer = value;
+        result = integer;
+    }
+
+    return result;
+}
+
+double* createDecimalPayload(double value)
+{
+    double* result = NULL;
+
+    double* decimal = (double*)malloc(sizeof(double));
+    if (decimal != NULL)
+    {
+        *decimal = value;
+        result = decimal;
+    }
+
+    return result;
+}
+Point* createPointPayload(int x, int y)
+{
+    Point* result = NULL;
+
+    Point* point = (Point*)malloc(sizeof(Point));
+    if (point != NULL)
+    {
+        point->x = x;
+        point->y = y;
+        result = point;
+    }
+
+    return result;
+}
+
 Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY)
 {
     Segment* result = NULL;
