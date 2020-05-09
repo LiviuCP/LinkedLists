@@ -1,6 +1,6 @@
 #include <QtTest>
 
-#include "../../LinkedListsLib/priorityqueue.h"
+#include "../../Collections/priorityqueue.h"
 #include "../../Utils/codeutils.h"
 #include "../../Utils/testobjects.h"
 

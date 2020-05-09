@@ -1,6 +1,6 @@
 #include <QtTest>
 
-#include "../../LinkedListsLib/stack.h"
+#include "../../Collections/stack.h"
 #include "../../Utils/codeutils.h"
 #include "../../Utils/testobjects.h"
 

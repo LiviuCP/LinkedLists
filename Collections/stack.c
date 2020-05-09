@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "stack.h"
-#include "linkedlist.h"
+#include "../LinkedListsLib/linkedlist.h"
 
 #include "../Utils/error.h"
 

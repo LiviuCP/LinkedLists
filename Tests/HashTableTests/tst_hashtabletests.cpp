@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-#include "../../LinkedListsLib/hashtable.h"
+#include "../../Collections/hashtable.h"
 
 class HashTableTests : public QObject
 {

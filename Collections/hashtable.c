@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "hashtable.h"
-#include "linkedlist.h"
+#include "../LinkedListsLib/linkedlist.h"
 
 #include "../Utils/error.h"
 

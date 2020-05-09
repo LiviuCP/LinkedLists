@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include "priorityqueue.h"
-#include "linkedlist.h"
+#include "../LinkedListsLib/linkedlist.h"
 #include "../Utils/codeutils.h"
 #include "../Utils/error.h"
 

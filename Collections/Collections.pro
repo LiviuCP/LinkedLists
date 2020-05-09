@@ -1,17 +1,15 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2020-04-09T12:56:35
+# Project created by QtCreator 2020-05-09T17:48:37
 #
 #-------------------------------------------------
 
 QT       -= gui
 
-QMAKE_CFLAGS += -std=c11
-
-TARGET = LinkedListsLib
+TARGET = Collections
 TEMPLATE = lib
 
-DEFINES += LINKEDLISTSLIB_LIBRARY
+DEFINES += COLLECTIONS_LIBRARY
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -25,22 +23,25 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        linkedlistslib.cpp \
-        linkedlist.c \
-        sort.c
+        collections.cpp \
+        hashtable.c \
+        priorityqueue.c \
+        stack.c
 
 HEADERS += \
-        linkedlistslib.h \
-        linkedlistslib_global.h \
-        linkedlist.h \
-        listsortutils.h \
-        sort.h
+        collections.h \
+        collections_global.h \
+        hashtable.h \
+        priorityqueue.h \
+        stack.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
 
+QMAKE_LFLAGS += "-Wl,-rpath,\'$$top_builddir/LinkedListsLib\'"
 QMAKE_LFLAGS += "-Wl,-rpath,\'$$top_builddir/Utils\'"
 
+LIBS += -L$$top_builddir/LinkedListsLib -lLinkedListsLib
 LIBS += -L$$top_builddir/Utils -lUtils
