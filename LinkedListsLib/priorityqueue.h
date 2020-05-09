@@ -9,6 +9,11 @@ typedef struct
 
 } PriorityQueue;
 
+typedef struct
+{
+    void* queueItem;
+} PriorityQueueIterator;
+
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -22,6 +27,11 @@ Object* removeFromPriorityQueue(PriorityQueue* queue);
 void clearPriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
 
 boolean isEmptyQueue(const PriorityQueue* queue);
+
+PriorityQueueIterator pqbegin(const PriorityQueue* queue);
+void pqnext(PriorityQueueIterator *it);
+Object* getPriorityQueueObject(PriorityQueueIterator it);
+size_t getObjectPriority(PriorityQueueIterator it);
 
 #ifdef __cplusplus
 }

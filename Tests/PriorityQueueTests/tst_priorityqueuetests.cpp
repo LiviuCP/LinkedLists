@@ -15,7 +15,7 @@ public:
 private slots:
     void testElementsInsertionDeletion();
     void testClearPriorityQueue();
-
+    void testIterators();
 };
 
 PriorityQueueTests::PriorityQueueTests()
@@ -117,6 +117,90 @@ void PriorityQueueTests::testClearPriorityQueue()
 
     deletePriorityQueue(queue, deleteTestObject);
     queue = nullptr;
+}
+
+void PriorityQueueTests::testIterators()
+{
+    {
+        PriorityQueue* queue = createPriorityQueue();
+
+        insertIntoPriorityQueue(queue, 4, createObject("Point", createPointPayload(4, 5)));
+        insertIntoPriorityQueue(queue, 2, createObject("Integer", createIntegerPayload(4)));
+        insertIntoPriorityQueue(queue, 5, createObject("Point", createPointPayload(-4, 8)));
+        insertIntoPriorityQueue(queue, 8, createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8)));
+        insertIntoPriorityQueue(queue, 2, createObject("Integer", createIntegerPayload(-4)));
+        insertIntoPriorityQueue(queue, 5, createObject("Decimal", createDecimalPayload(4.5567)));
+
+        PriorityQueueIterator it = pqbegin(queue);
+
+        Object* firstObject = getPriorityQueueObject(it);
+        LocalConditions* firstObjectPayload = static_cast<LocalConditions*>(firstObject->payload);
+        QVERIFY2(getObjectPriority(it) == 8 &&
+                 strcmp(firstObject->type, "LocalConditions") == 0 &&
+                 firstObjectPayload->position->x == 7 &&
+                 firstObjectPayload->position->y == -5 &&
+                 firstObjectPayload->temperature == 10 &&
+                 firstObjectPayload->humidity == 12.8,    "The iterator does not point to the right queue object");
+
+        pqnext(&it);
+
+        Object* secondObject = getPriorityQueueObject(it);
+        Point* secondObjectPayload = static_cast<Point*>(secondObject->payload);
+        QVERIFY2(getObjectPriority(it) == 5 &&
+                 strcmp(secondObject->type, "Point") == 0 &&
+                 secondObjectPayload->x == -4 &&
+                 secondObjectPayload->y == 8 ,            "The iterator does not point to the right queue object");
+
+        pqnext(&it);
+
+        Object* thirdObject = getPriorityQueueObject(it);
+        double* thirdObjectPayload = static_cast<double*>(thirdObject->payload);
+        QVERIFY2(getObjectPriority(it) == 5 &&
+                 strcmp(thirdObject->type, "Decimal") == 0 &&
+                 *thirdObjectPayload == 4.5567,           "The iterator does not point to the right queue object");
+
+        pqnext(&it);
+
+        Object* fourthObject = getPriorityQueueObject(it);
+        Point* fourthObjectPayload = static_cast<Point*>(fourthObject->payload);
+        QVERIFY2(getObjectPriority(it) == 4 &&
+                 strcmp(secondObject->type, "Point") == 0 &&
+                 fourthObjectPayload->x == 4 &&
+                 fourthObjectPayload->y == 5 ,            "The iterator does not point to the right queue object");
+
+        pqnext(&it);
+
+        Object* fifthObject = getPriorityQueueObject(it);
+        int* fifthObjectPayload = static_cast<int*>(fifthObject->payload);
+        QVERIFY2(getObjectPriority(it) == 2 &&
+                 strcmp(fifthObject->type, "Integer") == 0 &&
+                 *fifthObjectPayload == 4,                "The iterator does not point to the right queue object");
+
+        pqnext(&it);
+
+        Object* sixthObject = getPriorityQueueObject(it);
+        int* sixthObjectPayload = static_cast<int*>(sixthObject->payload);
+        QVERIFY2(getObjectPriority(it) == 2 &&
+                 strcmp(sixthObject->type, "Integer") == 0 &&
+                 *sixthObjectPayload == -4,               "The iterator does not point to the right queue object");
+
+        pqnext(&it);
+
+        QVERIFY2(it.queueItem == nullptr, "The iterator doesn't correctly reach the end position");
+
+        deletePriorityQueue(queue, deleteTestObject);
+        queue = nullptr;
+    }
+
+    {
+        PriorityQueue* queue = createPriorityQueue();
+        PriorityQueueIterator it = pqbegin(queue);
+
+        QVERIFY2(it.queueItem == nullptr, "The begin iterator of an empty priority queue is not correctly created");
+
+        deletePriorityQueue(queue, deleteTestObject);
+        queue = nullptr;
+    }
 }
 
 
