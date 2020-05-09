@@ -7,11 +7,11 @@ SUBDIRS += \
     Applications \
     Collections
 
-Applications.depends = LinkedListsLib
-Applications.depends = Utils
+LinkedListsLib.depends = Utils
 Collections.depends = LinkedListsLib
 Collections.depends = Utils
-LinkedListsLib.depends = Utils
+Applications.depends = LinkedListsLib
+Applications.depends = Utils
 Tests.depends = LinkedListsLib
 Tests.depends = Collections
 Tests.depends = Utils
