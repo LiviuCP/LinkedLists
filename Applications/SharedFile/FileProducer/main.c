@@ -19,13 +19,11 @@ int main()
     memset(buffer, '\0', BUFFER_SIZE);
 
     size_t* writeAddress = (size_t*)buffer;
-    *writeAddress = nrOfPriorities;
-    ++writeAddress;
+    *writeAddress++ = nrOfPriorities;
 
     for (size_t index = 0; index < nrOfPriorities; ++index)
     {
-        *writeAddress = priorities[index];
-        ++writeAddress;
+        *writeAddress++ = priorities[index];
     }
 
     strncpy((char*)writeAddress, endMessage, strlen(endMessage));

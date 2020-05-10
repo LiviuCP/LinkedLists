@@ -13,12 +13,6 @@ static const char* dataFile = "/tmp/listdata";
 
 void readDataFromFile(const char* dataFile, char* buffer, size_t* bytesNumber);
 
-void report_and_exit(const char* msg)
-{
-    perror(msg);
-    exit(-1);
-}
-
 int main() {
     char buffer[BUFFER_SIZE];
     memset(buffer, '\0', BUFFER_SIZE);
@@ -33,7 +27,7 @@ int main() {
     {
         size_t* readAddress = (size_t*)buffer;
 
-        const size_t payloadSize = *(readAddress++);
+        const size_t payloadSize = *readAddress++;
 
         if (payloadSize > 0)
         {
@@ -74,19 +68,22 @@ void readDataFromFile(const char* dataFile, char* buffer, size_t* bytesNumber)
     int fileDescriptor;
     if ((fileDescriptor = open(dataFile, O_RDONLY)) < 0)
     {
-        report_and_exit("File opening failed");
+        perror("File opening failed");
+        exit(-1);
     }
 
     fcntl(fileDescriptor, F_GETLK, &lock);
     if (lock.l_type != F_UNLCK)
     {
-        report_and_exit("Write lock is still active");
+        perror("Write lock is still active");
+        exit(-1);
     }
 
     lock.l_type = F_RDLCK;
     if (fcntl(fileDescriptor, F_SETLK, &lock) < 0)
     {
-        report_and_exit("Failed to get read-only file lock");
+        perror("Failed to get read-only file lock");
+        exit(-1);
     }
 
     char c;
@@ -101,7 +98,8 @@ void readDataFromFile(const char* dataFile, char* buffer, size_t* bytesNumber)
     lock.l_type = F_UNLCK;
     if (fcntl(fileDescriptor, F_SETLK, &lock) < 0)
     {
-        report_and_exit("Failed to unlock the file");
+        perror("Failed to unlock the file");
+        exit(-1);
     }
 
     close(fileDescriptor);
