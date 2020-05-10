@@ -23,6 +23,8 @@ int main() {
     readDataFromFile(dataFile, buffer, &readBytesNumber);
     printf("Done\n\n");
 
+    List* list = NULL;
+
     if (readBytesNumber >= sizeof(size_t))
     {
         size_t* readAddress = (size_t*)buffer;
@@ -31,17 +33,24 @@ int main() {
 
         if (payloadSize > 0)
         {
-            List* list = createListFromPrioritiesArray(readAddress, payloadSize);
-            sortAscendingByPriority(list);
-            sleep(1);
-            printf("The list has been created. After sorting it has following content:\n\n");
-            printList(list);
-            readAddress += payloadSize;
-            sleep(1);
-            printf("\nAdditional message from sender: \n");
-            sleep(1);
-            printf("%s\n\n", (char*)readAddress);
-            sleep(1);
+            list = createListFromPrioritiesArray(readAddress, payloadSize);
+            if (list != NULL)
+            {
+                sortAscendingByPriority(list);
+                sleep(1);
+                printf("The list has been created. After sorting it has following content:\n\n");
+                printList(list);
+                readAddress += payloadSize;
+                sleep(1);
+                printf("\nAdditional message from sender: \n");
+                sleep(1);
+                printf("%s\n\n", (char*)readAddress);
+                sleep(1);
+            }
+            else
+            {
+                fprintf(stderr, "Unable to allocate memory for list\n");
+            }
         }
         else
         {
@@ -52,6 +61,9 @@ int main() {
     {
         fprintf(stderr, "Insufficient data, no valid header available\n");
     }
+
+    deleteList(list, deleteObject);
+    list = NULL;
 
     return 0;
 }

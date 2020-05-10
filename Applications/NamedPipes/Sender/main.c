@@ -29,6 +29,7 @@ int main()
 
     deleteList(senderList, deleteObject);
     senderList = NULL;
+
     return 0;
 }
 

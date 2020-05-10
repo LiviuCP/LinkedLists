@@ -32,6 +32,7 @@ int main()
 
     deleteList(receiverList, deleteObject);
     receiverList = NULL;
+
     return 0;
 }
 
