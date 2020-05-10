@@ -46,24 +46,26 @@ int main() {
                 sleep(1);
                 printf("%s\n\n", (char*)readAddress);
                 sleep(1);
+                deleteList(list, deleteObject);
+                list = NULL;
             }
             else
             {
-                fprintf(stderr, "Unable to allocate memory for list\n");
+                fprintf(stderr, "Unable to create consumer list: no memory allocated\n");
+                exit(-1);
             }
         }
         else
         {
             fprintf(stderr, "No payload data available, cannot create list\n");
+            exit(-1);
         }
     }
     else
     {
         fprintf(stderr, "Insufficient data, no valid header available\n");
+        exit(-1);
     }
-
-    deleteList(list, deleteObject);
-    list = NULL;
 
     return 0;
 }

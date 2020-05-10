@@ -64,22 +64,24 @@ int main()
                 sleep(1);
                 printf("%s\n\n", (char*)readAddress);
                 sleep(1);
+                deleteList(list, deleteObject);
+                list = NULL;
             }
             else
             {
-                fprintf(stderr, "Unable to allocate memory for list\n");
+                fprintf(stderr, "Unable to create reader list: no memory allocated\n");
+                exit(-1);
             }
         }
         else
         {
             fprintf(stderr, "No payload data available, cannot create list\n");
+            exit(-1);
         }
 
         sem_post(semaphore);
     }
 
-    deleteList(list, deleteObject);
-    list = NULL;
     munmap(sharedMemory, BYTES_COUNT);
     close(fd);
     sem_close(semaphore);

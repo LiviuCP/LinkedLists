@@ -43,20 +43,28 @@ int main()
             printf("[PID: %d] Done\n\n", getpid());
             List* receiverList = createEmptyList();
 
-            size_t* startAddress = (size_t*)buffer;
-            for (size_t index = 0; index < LIST_SIZE; ++index)
+            if (receiverList != NULL)
             {
-                createAndAppendToList(receiverList, *(startAddress + index));
+                size_t* startAddress = (size_t*)buffer;
+                for (size_t index = 0; index < LIST_SIZE; ++index)
+                {
+                    createAndAppendToList(receiverList, *(startAddress + index));
+                }
+
+                sortAscendingByPriority(receiverList);
+
+                printf("[PID: %d] The list has following elements after sorting:\n\n", getpid());
+                printList(receiverList);
+                printf("\n");
+
+                deleteList(receiverList, deleteObject);
+                receiverList = NULL;
             }
-
-            sortAscendingByPriority(receiverList);
-
-            printf("[PID: %d] The receiver list has following elements after sorting:\n\n", getpid());
-            printList(receiverList);
-            printf("\n");
-
-            deleteList(receiverList, deleteObject);
-            receiverList = NULL;
+            else
+            {
+                fprintf(stderr, "[PID: %d] Unable to create list: no memory allocated\n", getpid());
+                _exit(-1);
+            }
         }
         else
         {
@@ -73,8 +81,18 @@ int main()
 
         List* senderList = createListFromPrioritiesArray(priorities, LIST_SIZE);
 
-        printf("[PID: %d] The sender list has following elements:\n\n", getpid());
-        printList(senderList);
+        if (senderList != NULL)
+        {
+            printf("[PID: %d] The list has following elements:\n\n", getpid());
+            printList(senderList);
+            deleteList(senderList, deleteObject);
+            senderList = NULL;
+        }
+        else
+        {
+            fprintf(stderr, "[PID: %d] Unable to create list: no memory allocated\n\n", getpid());
+        }
+
         printf("\n");
 
         printf("[PID: %d] Sending priorities to pipe...\n\n", getpid());
@@ -89,9 +107,6 @@ int main()
 
         printf("[PID: %d] Done\n\n", getpid());
         printf("------------------------------------------------------\n\n");
-
-        deleteList(senderList, deleteObject);
-        senderList = NULL;
 
         close(fileDescriptors[WRITE_SIDE]);
         wait(NULL);

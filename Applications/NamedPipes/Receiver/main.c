@@ -12,26 +12,35 @@ void fillListFromPipe(List* list, const char* pipeName, size_t* nrOfBytes, size_
 int main()
 {
     List* receiverList = createEmptyList();
-    const char* fifoName = "/tmp/linkedlistpipe";
 
-    printf("We will read priorities from a named pipe and use them for creating and appending new elements to list. Please wait...\n\n");
+    if (receiverList != NULL)
+    {
+        const char* fifoName = "/tmp/linkedlistpipe";
 
-    sleep(1);
+        printf("We will read priorities from a named pipe and use them for creating and appending new elements to list. Please wait...\n\n");
 
-    size_t nrOfBytes = 0;
-    size_t nrOfElements = 0;
+        sleep(1);
 
-    fillListFromPipe(receiverList, fifoName, &nrOfBytes, &nrOfElements);
+        size_t nrOfBytes = 0;
+        size_t nrOfElements = 0;
 
-    printf("\n%d bytes read from pipe. %d elements appended to list\n\n", (int)nrOfBytes, (int)nrOfElements);
+        fillListFromPipe(receiverList, fifoName, &nrOfBytes, &nrOfElements);
 
-    sortAscendingByPriority(receiverList);
+        printf("\n%d bytes read from pipe. %d elements appended to list\n\n", (int)nrOfBytes, (int)nrOfElements);
 
-    printf("The receiver list has following elements after sorting:\n\n");
-    printList(receiverList);
+        sortAscendingByPriority(receiverList);
 
-    deleteList(receiverList, deleteObject);
-    receiverList = NULL;
+        printf("The receiver list has following elements after sorting:\n\n");
+        printList(receiverList);
+
+        deleteList(receiverList, deleteObject);
+        receiverList = NULL;
+    }
+    else
+    {
+        fprintf(stderr, "Unable to create receiver list: no memory allocated\n");
+        exit(-1);
+    }
 
     return 0;
 }

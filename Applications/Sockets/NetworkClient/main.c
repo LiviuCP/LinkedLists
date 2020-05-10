@@ -91,22 +91,30 @@ int main()
                     printf("Using received priorities to create list:\n\n");
                     sleep(1);
                     List* list = createEmptyList();
-                    for (size_t index = 0; index < actuallyRequestedCount; ++index)
+                    if (list != NULL)
                     {
-                        createAndAppendToList(list, *(startAddress + index));
-                        printf("Created and appended element with priority: %d\n", (int)(*(startAddress + index)));
+                        for (size_t index = 0; index < actuallyRequestedCount; ++index)
+                        {
+                            createAndAppendToList(list, *(startAddress + index));
+                            printf("Created and appended element with priority: %d\n", (int)(*(startAddress + index)));
+                        }
+
+                        printf("\nSorting list...\n");
+                        sleep(1);
+                        sortAscendingByPriority(list);
+                        printf("Done\n");
+
+                        printf("\nThe list has following elements after sorting:\n\n");
+                        printList(list);
+
+                        deleteList(list, deleteObject);
+                        list = NULL;
                     }
-
-                    printf("\nSorting list...\n");
-                    sleep(1);
-                    sortAscendingByPriority(list);
-                    printf("Done\n");
-
-                    printf("\nThe list has following elements after sorting:\n\n");
-                    printList(list);
-
-                    deleteList(list, deleteObject);
-                    list = NULL;
+                    else
+                    {
+                        fprintf(stderr, "Unable to create client list: no memory allocated\n");
+                        exit(-1);
+                    }
                 }
                 else
                 {

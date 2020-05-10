@@ -20,15 +20,21 @@ int main()
 
     List* senderList = createListFromPrioritiesArray(priorities, 6);
 
-    printf("The sender list has following elements:\n\n");
-    printList(senderList);
+    if (senderList != NULL)
+    {
+        printf("The sender list has following elements:\n\n");
+        printList(senderList);
+        deleteList(senderList, deleteObject);
+        senderList = NULL;
+    }
+    else
+    {
+        fprintf(stderr, "Unable to create sender list: no memory allocated\n\n");
+    }
 
     printf("Sending list element priorities and matching priority types to a message queue\n\n");
     sendToQueue(priorities, priorityTypes, 6);
     printf("\nDone\n");
-
-    deleteList(senderList, deleteObject);
-    senderList = NULL;
 
     return 0;
 }

@@ -18,17 +18,23 @@ int main()
 
     List* senderList = createListFromPrioritiesArray(priorities, 5);
 
-    printf("The sender list has following elements:\n\n");
-    printList(senderList);
+    if (senderList != NULL)
+    {
+        printf("The sender list has following elements:\n\n");
+        printList(senderList);
+        deleteList(senderList, deleteObject);
+        senderList = NULL;
+    }
+    else
+    {
+        fprintf(stderr, "Unable to create sender list: no memory allocated\n\n");
+    }
 
     printf("Now we will send the priorities through a named pipe.\n\n");
 
     size_t bytesSent = makePipeAndSend(fifoName, priorities, 5);
 
     printf("\n%d bytes sent through the named pipe\n", (int)bytesSent);
-
-    deleteList(senderList, deleteObject);
-    senderList = NULL;
 
     return 0;
 }

@@ -13,20 +13,28 @@ void fillListFromQueue(List* list, const size_t expectedElementsNr, const size_t
 int main()
 {
     List* receiverList = createEmptyList();
-    const size_t expectedElementsNr = 6;
-    const size_t expectedPriorityTypes[] = {3, 2, 1, 3, 2, 1};
+    if (receiverList != NULL)
+    {
+        const size_t expectedElementsNr = 6;
+        const size_t expectedPriorityTypes[] = {3, 2, 1, 3, 2, 1};
 
-    printf("Filling list elements from message queue\n\n");
-    fillListFromQueue(receiverList, expectedElementsNr, expectedPriorityTypes);
-    printf("\nDone!\n\n");
+        printf("Filling list elements from message queue\n\n");
+        fillListFromQueue(receiverList, expectedElementsNr, expectedPriorityTypes);
+        printf("\nDone!\n\n");
 
-    sortAscendingByPriority(receiverList);
+        sortAscendingByPriority(receiverList);
 
-    printf("The receiver list has following elements after sorting:\n\n");
-    printList(receiverList);
+        printf("The receiver list has following elements after sorting:\n\n");
+        printList(receiverList);
 
-    deleteList(receiverList, deleteObject);
-    receiverList = NULL;
+        deleteList(receiverList, deleteObject);
+        receiverList = NULL;
+    }
+    else
+    {
+        fprintf(stderr, "Unable to create receiver list: no memory allocated\n");
+        exit(-1);
+    }
 
     return 0;
 }
