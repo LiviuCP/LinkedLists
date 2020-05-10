@@ -7,4 +7,5 @@ SUBDIRS += \
     NamedPipes \
     MessageQueues \
     Sockets \
-    SharedFile
+    SharedFile \
+    SharedMemory
