@@ -8,4 +8,5 @@ SUBDIRS += \
     MessageQueues \
     Sockets \
     SharedFile \
-    SharedMemory
+    SharedMemory \
+    Signals
