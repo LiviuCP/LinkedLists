@@ -16,6 +16,7 @@ private slots:
     void testElementsInsertionDeletion();
     void testClearPriorityQueue();
     void testIterators();
+    void testModifyObject();
 };
 
 PriorityQueueTests::PriorityQueueTests()
@@ -201,6 +202,51 @@ void PriorityQueueTests::testIterators()
         deletePriorityQueue(queue, deleteTestObject);
         queue = nullptr;
     }
+}
+
+void PriorityQueueTests::testModifyObject()
+{
+    PriorityQueue* queue = createPriorityQueue();
+
+    insertIntoPriorityQueue(queue, 8, createObject("Point", createPointPayload(4, 5)));
+    insertIntoPriorityQueue(queue, 2, createObject("Integer", createIntegerPayload(4)));
+    insertIntoPriorityQueue(queue, 5, createObject("Point", createPointPayload(-4, 8)));
+    insertIntoPriorityQueue(queue, 4, createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8)));
+    insertIntoPriorityQueue(queue, 2, createObject("Integer", createIntegerPayload(-4)));
+    insertIntoPriorityQueue(queue, 5, createObject("Decimal", createDecimalPayload(4.5567)));
+
+    PriorityQueueIterator it = pqbegin(queue);
+    pqnext(&it);
+    pqnext(&it);
+    pqnext(&it);
+
+    Object* objectToEdit = getPriorityQueueObject(it);
+
+    QVERIFY(getObjectPriority(it) == 4);
+
+    LocalConditions* payloadToEdit = static_cast<LocalConditions*>(objectToEdit->payload);
+    payloadToEdit->position->y = 2;
+    payloadToEdit->temperature = 11;
+    objectToEdit = nullptr;
+
+    deleteTestObject(removeFromPriorityQueue(queue));
+    deleteTestObject(removeFromPriorityQueue(queue));
+    deleteTestObject(removeFromPriorityQueue(queue));
+
+    Object* removedObject = removeFromPriorityQueue(queue);
+    LocalConditions* removedObjectPayload = static_cast<LocalConditions*>(removedObject->payload);
+
+    QVERIFY2(strcmp(removedObject->type, "LocalConditions") == 0 &&
+             removedObjectPayload->position->x == 7 &&
+             removedObjectPayload->position->y == 2 &&
+             removedObjectPayload->temperature == 11 &&
+             removedObjectPayload->humidity == 12.8,    "The object has not been correctly modified");
+
+    deleteTestObject(removedObject);
+    removedObject = nullptr;
+
+    deletePriorityQueue(queue, deleteTestObject);
+    queue = nullptr;
 }
 
 
