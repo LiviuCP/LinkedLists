@@ -83,6 +83,22 @@ char* getLine()
     return buffer;
 }
 
+boolean readUnsignedLong(size_t* number)
+{
+    char* input = getLine();
+    boolean isValidInt = isUnsignedLong(input);
+
+    if(isValidInt)
+    {
+        *number = (size_t)atoi(input);
+    }
+
+    free(input);
+    input = NULL;
+
+    return isValidInt;
+}
+
 boolean isUnsignedLong(const char *input)
 {
     boolean isValid = TRUE;
@@ -124,22 +140,6 @@ boolean isUnsignedLong(const char *input)
     }
 
     return isValid;
-}
-
-boolean readUnsignedLong(size_t* number)
-{
-    char* input = getLine();
-    boolean isValidInt = isUnsignedLong(input);
-
-    if(isValidInt)
-    {
-        *number = (size_t)atoi(input);
-    }
-
-    free(input);
-    input = NULL;
-
-    return isValidInt;
 }
 
 boolean areDecimalNumbersEqual(double first, double second)
