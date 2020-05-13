@@ -54,7 +54,7 @@ void PriorityQueueTests::testElementsInsertionDeletion()
              firstRemovedObjectPayload->position->x == 7 &&
              firstRemovedObjectPayload->position->y == -5 &&
              firstRemovedObjectPayload->temperature == 10 &&
-             firstRemovedObjectPayload->humidity == 12.8,    "Object has not been correctly removed from queue");
+             areDecimalNumbersEqual(firstRemovedObjectPayload->humidity, 12.8), "Object has not been correctly removed from queue");
 
     Object* secondRemovedObject = removeFromPriorityQueue(queue);
     Point* secondRemovedObjectPayload = static_cast<Point*>(secondRemovedObject->payload);
@@ -141,7 +141,7 @@ void PriorityQueueTests::testIterators()
                  firstObjectPayload->position->x == 7 &&
                  firstObjectPayload->position->y == -5 &&
                  firstObjectPayload->temperature == 10 &&
-                 firstObjectPayload->humidity == 12.8,    "The iterator does not point to the right queue object");
+                 areDecimalNumbersEqual(firstObjectPayload->humidity, 12.8), "The iterator does not point to the right queue object");
 
         pqnext(&it);
 
@@ -240,7 +240,7 @@ void PriorityQueueTests::testModifyObject()
              removedObjectPayload->position->x == 7 &&
              removedObjectPayload->position->y == 2 &&
              removedObjectPayload->temperature == 11 &&
-             removedObjectPayload->humidity == 12.8,    "The object has not been correctly modified");
+             areDecimalNumbersEqual(removedObjectPayload->humidity, 12.8), "The object has not been correctly modified");
 
     deleteTestObject(removedObject);
     removedObject = nullptr;

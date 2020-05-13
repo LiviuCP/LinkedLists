@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+#include <stdlib.h>
 
 #include "codeutils.h"
 
@@ -138,4 +140,11 @@ boolean readUnsignedLong(size_t* number)
     input = NULL;
 
     return isValidInt;
+}
+
+boolean areDecimalNumbersEqual(double first, double second)
+{
+    const double epsilon = 1e-12;
+
+    return (fabs(first - second) < epsilon);
 }

@@ -434,8 +434,8 @@ void LinkedListTests::testCopyContentToList()
                  copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
                  getListElementAtIndex(destination, 4)->priority == 2 &&
                  strcmp(getListElementAtIndex(destination, 4)->object->type, "LocalConditions") == 0 &&
-                 copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 && copiedConditions->humidity == 12.8,
-                 "The source list content has not been correctly copied to destination");
+                 copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 &&
+                 areDecimalNumbersEqual(copiedConditions->humidity, 12.8), "The source list content has not been correctly copied to destination");
 
         deleteList(source, deleteTestObject);
         source = nullptr;

@@ -48,7 +48,7 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
              firstPoppedObjectPayload->position->x == 7 &&
              firstPoppedObjectPayload->position->y == -5 &&
              firstPoppedObjectPayload->temperature == 10 &&
-             firstPoppedObjectPayload->humidity == 12.8,    "Object has not been correctly popped from list");
+             areDecimalNumbersEqual(firstPoppedObjectPayload->humidity, 12.8), "Object has not been correctly popped from list");
     QVERIFY(!isEmptyStack(stack));
 
     Object* secondPoppedObject = popFromStack(stack);
