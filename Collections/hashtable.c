@@ -5,6 +5,8 @@
 
 #include "../Utils/error.h"
 
+static const int hashEntryType = 'h' + 'a' + 's' + 'h' + 'E' + 'n' + 't' + 'r' + 'y';
+
 // "private" (supporting) functions
 static boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize);
 static HashEntry* _createHashEntry(const char* key, const char* value);
@@ -117,7 +119,7 @@ boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable
                 ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
                 if (newElement != NULL)
                 {
-                    assignObjectToListElement(newElement, "HashEntry", newHashEntry);
+                    assignObjectToListElement(newElement, hashEntryType, newHashEntry);
                     success = TRUE;
                 }
             }
@@ -144,7 +146,7 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
 
         while (!areIteratorsEqual(it, lend(currentBucket)))
         {
-            ASSERT_CONDITION(it.current->object != NULL && strcmp(it.current->object->type, "HashEntry") == 0 && it.current->object->payload != NULL,
+            ASSERT_CONDITION(it.current->object != NULL && it.current->object->type == hashEntryType && it.current->object->payload != NULL,
                              "Invalid list element object detected in hash table")
 
             HashEntry* currentHashEntry = (HashEntry*)it.current->object->payload;
@@ -318,7 +320,7 @@ static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char
 
         while (currentBucketEntry != NULL)
         {
-            ASSERT_CONDITION(currentBucketEntry->object != NULL && strcmp(currentBucketEntry->object->type, "HashEntry") == 0 && currentBucketEntry->object->payload != NULL,
+            ASSERT_CONDITION(currentBucketEntry->object != NULL && currentBucketEntry->object->type == hashEntryType && currentBucketEntry->object->payload != NULL,
                              "The current bucket entry data is incorrect")
 
             HashEntry* currentHashEntry = (HashEntry*)currentBucketEntry->object->payload;
@@ -342,8 +344,7 @@ static void _deleteHashEntry(Object* object)
 {
     if (object != NULL)
     {
-        ASSERT_CONDITION(object->payload != NULL && object->type != NULL && strcmp(object->type,"HashEntry") == 0,
-                         "Invalid hash entry, deleter cannot be applied")
+        ASSERT_CONDITION(object->payload != NULL && object->type == hashEntryType, "Invalid hash entry, deleter cannot be applied")
 
         HashEntry* entry = (HashEntry*)object->payload;
         free(entry->key);
@@ -352,8 +353,6 @@ static void _deleteHashEntry(Object* object)
         entry->value = NULL;
         free(object->payload);
         object->payload = NULL;
-        free(object->type);
-        object->type = NULL;
         free(object);
         object = NULL;
     }

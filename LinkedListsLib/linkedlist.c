@@ -773,12 +773,7 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
                 {
                     fprintf(outputFile, "yes\t");
                     fprintf(outputFile, "Object type: ");
-                    if (currentElement->object->type != NULL)
-                    {
-                        fprintf(outputFile, "%s", currentElement->object->type != NULL ? strlen(currentElement->object->type) == 0 ? "empty"
-                                                                                                                                   : currentElement->object->type
-                                                                                       : "NULL");
-                    }
+                    fprintf(outputFile, "%s", getTestObjectTypeAsString(currentElement->object->type));
                 }
                 else
                 {
@@ -802,9 +797,9 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
     }
 }
 
-void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload)
+void assignObjectToListElement(ListElement* element, int objectType, void* objectPayload)
 {
-    if (element != NULL && objectPayload != NULL && objectType != NULL)
+    if (element != NULL && objectPayload != NULL)
     {
         ASSERT_CONDITION(element->object == NULL, "Attempt to assign object without freeing the existing one first!");
 
@@ -812,19 +807,8 @@ void assignObjectToListElement(ListElement* element, const char* objectType, voi
 
         if (element->object != NULL)
         {
-            element->object->type = (char*)malloc(strlen(objectType) + 1);
-
-            if (element->object->type == NULL)
-            {
-                fprintf(stderr, "Unable to allocate memory for object type. Object cannot be assigned!");
-                free(element->object);
-                element->object = NULL;
-            }
-            else
-            {
-                strcpy(element->object->type, objectType);
-                element->object->payload= objectPayload;
-            }
+            element->object->type = objectType;
+            element->object->payload = objectPayload;
         }
         else
         {
@@ -851,19 +835,11 @@ void deleteObject(Object *object)
 {
     if (object != NULL)
     {
-        if (object->type != NULL)
-        {
-            free(object->type);
-            object->type = NULL;
-        }
-        if (object->payload != NULL)
-        {
-            free(object->payload);
-            object->payload = NULL;
-        }
+        free(object->payload);
+        object->payload = NULL;
+        free(object);
+        object = NULL;
     }
-    free(object);
-    object = NULL;
 }
 
 /* This function is just added for having a default value to be passed to the copyContentToList() function as deep copying function pointer.
@@ -886,85 +862,74 @@ boolean customCopyObject(const ListElement* source, ListElement* destination)
 {
     boolean success = FALSE;
 
-    if (source != NULL && destination != NULL && source->object != NULL && source->object->type != NULL && source->object->payload != NULL)
+    if (source != NULL && destination != NULL && source->object != NULL && source->object->payload != NULL)
     {
-        char* destinationObjectType = (char*)malloc(strlen(source->object->type)+1);
-        if (destinationObjectType != NULL)
+        const int destinationObjectType = source->object->type;
+
+        if (destinationObjectType == SEGMENT)
         {
-            strcpy(destinationObjectType, source->object->type);
-
-            if (strcmp(destinationObjectType, "Segment") == 0)
+            Segment* destinationObjectPayload = (Segment*)malloc(sizeof(Segment));
+            if (destinationObjectPayload != NULL)
             {
-                Segment* destinationObjectPayload = (Segment*)malloc(sizeof(Segment));
-                if (destinationObjectPayload != NULL)
-                {
-                    destinationObjectPayload->start = (Point*)malloc(sizeof(Point));
-                    destinationObjectPayload->stop = (Point*)malloc(sizeof(Point));
-                    Object* destinationObject = (Object*)malloc(sizeof(Object));
+                destinationObjectPayload->start = (Point*)malloc(sizeof(Point));
+                destinationObjectPayload->stop = (Point*)malloc(sizeof(Point));
+                Object* destinationObject = (Object*)malloc(sizeof(Object));
 
-                    if (destinationObjectPayload->start != NULL && destinationObjectPayload->stop != NULL && destinationObject != NULL)
-                    {
-                        const Segment* sourceObjectPayload = (Segment*)source->object->payload;
-                        destinationObjectPayload->start->x = sourceObjectPayload->start->x;
-                        destinationObjectPayload->start->y = sourceObjectPayload->start->y;
-                        destinationObjectPayload->stop->x = sourceObjectPayload->stop->x;
-                        destinationObjectPayload->stop->y = sourceObjectPayload->stop->y;
-                        destinationObject->type = destinationObjectType;
-                        destinationObject->payload = (void*)destinationObjectPayload;
-                        destination->object = destinationObject;
-                        success = TRUE;
-                    }
-                    else
-                    {
-                        free(destinationObjectPayload->start);
-                        destinationObjectPayload->start = NULL;
-                        free(destinationObjectPayload->stop);
-                        destinationObjectPayload->stop = NULL;
-                        free(destinationObjectPayload);
-                        destinationObjectPayload = NULL;
-                        free(destinationObject);
-                        destinationObject = NULL;
-                    }
+                if (destinationObjectPayload->start != NULL && destinationObjectPayload->stop != NULL && destinationObject != NULL)
+                {
+                    const Segment* sourceObjectPayload = (Segment*)source->object->payload;
+                    destinationObjectPayload->start->x = sourceObjectPayload->start->x;
+                    destinationObjectPayload->start->y = sourceObjectPayload->start->y;
+                    destinationObjectPayload->stop->x = sourceObjectPayload->stop->x;
+                    destinationObjectPayload->stop->y = sourceObjectPayload->stop->y;
+                    destinationObject->type = destinationObjectType;
+                    destinationObject->payload = (void*)destinationObjectPayload;
+                    destination->object = destinationObject;
+                    success = TRUE;
                 }
-
-            }
-            else if (strcmp(destinationObjectType, "LocalConditions") == 0)
-            {
-                LocalConditions* destinationObjectPayload = (LocalConditions*)malloc(sizeof(LocalConditions));
-                if (destinationObjectPayload != NULL)
+                else
                 {
-                    destinationObjectPayload->position = (Point*)malloc(sizeof(Point));
-                    Object* destinationObject = (Object*)malloc(sizeof(Object));
-                    if (destinationObjectPayload->position != NULL && destinationObject != NULL)
-                    {
-                        const LocalConditions* sourceObjectPayload = (LocalConditions*)source->object->payload;
-                        destinationObjectPayload->position->x = sourceObjectPayload->position->x;
-                        destinationObjectPayload->position->y = sourceObjectPayload->position->y;
-                        destinationObjectPayload->humidity = sourceObjectPayload->humidity;
-                        destinationObjectPayload->temperature = sourceObjectPayload->temperature;
-                        destinationObject->type = destinationObjectType;
-                        destinationObject->payload = (void*)destinationObjectPayload;
-                        destination->object = destinationObject;
-                        success = TRUE;
-                    }
-                    else
-                    {
-                        free(destinationObjectPayload->position);
-                        destinationObjectPayload->position = NULL;
-                        free(destinationObjectPayload);
-                        destinationObjectPayload = NULL;
-                        free(destinationObject);
-                        destinationObject = NULL;
-                    }
+                    free(destinationObjectPayload->start);
+                    destinationObjectPayload->start = NULL;
+                    free(destinationObjectPayload->stop);
+                    destinationObjectPayload->stop = NULL;
+                    free(destinationObjectPayload);
+                    destinationObjectPayload = NULL;
+                    free(destinationObject);
+                    destinationObject = NULL;
                 }
             }
+
         }
-
-        if (!success)
+        else if (destinationObjectType == LOCAL_CONDITIONS)
         {
-            // no copy action to be performed if object type is unknown
-            free(destinationObjectType);
-            destinationObjectType = NULL;
+            LocalConditions* destinationObjectPayload = (LocalConditions*)malloc(sizeof(LocalConditions));
+            if (destinationObjectPayload != NULL)
+            {
+                destinationObjectPayload->position = (Point*)malloc(sizeof(Point));
+                Object* destinationObject = (Object*)malloc(sizeof(Object));
+                if (destinationObjectPayload->position != NULL && destinationObject != NULL)
+                {
+                    const LocalConditions* sourceObjectPayload = (LocalConditions*)source->object->payload;
+                    destinationObjectPayload->position->x = sourceObjectPayload->position->x;
+                    destinationObjectPayload->position->y = sourceObjectPayload->position->y;
+                    destinationObjectPayload->humidity = sourceObjectPayload->humidity;
+                    destinationObjectPayload->temperature = sourceObjectPayload->temperature;
+                    destinationObject->type = destinationObjectType;
+                    destinationObject->payload = (void*)destinationObjectPayload;
+                    destination->object = destinationObject;
+                    success = TRUE;
+                }
+                else
+                {
+                    free(destinationObjectPayload->position);
+                    destinationObjectPayload->position = NULL;
+                    free(destinationObjectPayload);
+                    destinationObjectPayload = NULL;
+                    free(destinationObject);
+                    destinationObject = NULL;
+                }
+            }
         }
     }
 

@@ -80,7 +80,7 @@ boolean areIteratorsEqual(ListIterator first, ListIterator second);
 
 void printListContentToFile(const List* list, const char* outFile, const char* header);
 
-void assignObjectToListElement(ListElement* element, const char* objectType, void* objectPayload);
+void assignObjectToListElement(ListElement* element, int objectType, void* objectPayload);
 Object* removeObjectFromListElement(ListElement* element);
 void deleteObject(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
 boolean copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer

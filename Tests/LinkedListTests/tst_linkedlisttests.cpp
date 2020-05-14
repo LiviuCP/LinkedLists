@@ -412,9 +412,9 @@ void LinkedListTests::testCopyContentToList()
         List* destination = createListFromPrioritiesArray(thirdPriorityArray, 3);
 
         ListIterator it = lbegin(source);
-        assignObjectToListElement(it.current, "Segment", createSegmentPayload(2, 5, 4, 11));
+        assignObjectToListElement(it.current, SEGMENT, createSegmentPayload(2, 5, 4, 11));
         lnext(&it);
-        assignObjectToListElement(it.current, "LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8));
+        assignObjectToListElement(it.current, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
 
         copyContentToList(source, destination, customCopyObject, deleteTestObject);
 
@@ -430,10 +430,10 @@ void LinkedListTests::testCopyContentToList()
                  getListElementAtIndex(destination, 2)->priority == 3 &&
                  getListElementAtIndex(destination, 2)->object == nullptr &&
                  getListElementAtIndex(destination, 3)->priority == 6 &&
-                 strcmp(getListElementAtIndex(destination, 3)->object->type, "Segment") == 0 &&
+                 getListElementAtIndex(destination, 3)->object->type == SEGMENT &&
                  copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
                  getListElementAtIndex(destination, 4)->priority == 2 &&
-                 strcmp(getListElementAtIndex(destination, 4)->object->type, "LocalConditions") == 0 &&
+                 getListElementAtIndex(destination, 4)->object->type == LOCAL_CONDITIONS &&
                  copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 &&
                  areDecimalNumbersEqual(copiedConditions->humidity, 12.8), "The source list content has not been correctly copied to destination");
 
@@ -1195,17 +1195,17 @@ void LinkedListTests::testAssignRemoveObject()
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 3;
     point->y = 4;
-    assignObjectToListElement(createAndAppendToList(list, 2), "coordinates", static_cast<void*>(point));
+    assignObjectToListElement(createAndAppendToList(list, 2), POINT, static_cast<void*>(point));
     point = nullptr;
     // int
     int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 5;
-    assignObjectToListElement(createAndAppendToList(list, 3), "distance", static_cast<void*>(distance));
+    assignObjectToListElement(createAndAppendToList(list, 3), INTEGER, static_cast<void*>(distance));
     distance = nullptr;
     // float
-    float* angle = static_cast<float*>(malloc(sizeof(float)));
+    double* angle = static_cast<double*>(malloc(sizeof(double)));
     *angle = 1.25;
-    assignObjectToListElement(createAndAppendToList(list, 1), "angle", static_cast<void*>(angle));
+    assignObjectToListElement(createAndAppendToList(list, 1), DECIMAL, static_cast<void*>(angle));
     angle = nullptr;
     // no object
     Q_UNUSED(createAndPrependToList(list, 10));
@@ -1213,15 +1213,15 @@ void LinkedListTests::testAssignRemoveObject()
     ListIterator it = lbegin(list);
     QVERIFY2(it.current->object == nullptr, "Default object and object type are incorrect (should be NULL)");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->object->type, "coordinates") == 0 && (static_cast<Point*>(it.current->object->payload))->x == 3
+    QVERIFY2(it.current->object->type == POINT && (static_cast<Point*>(it.current->object->payload))->x == 3
              && (static_cast<Point*>(it.current->object->payload))->y == 4, "Object has been incorrectly assigned");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->object->type, "distance") == 0 && *(static_cast<int*>(it.current->object->payload)) == 5, "Object has been incorrectly assigned");
+    QVERIFY2(it.current->object->type == INTEGER && *(static_cast<int*>(it.current->object->payload)) == 5, "Object has been incorrectly assigned");
     lnext(&it);
-    QVERIFY2(strcmp(it.current->object->type, "angle") == 0 && *(static_cast<float*>(it.current->object->payload)) == 1.25f, "Object has been incorrectly assigned");
+    QVERIFY2(it.current->object->type == DECIMAL && areDecimalNumbersEqual(*(static_cast<double*>(it.current->object->payload)), 1.25), "Object has been incorrectly assigned");
 
     Object* removedObject = static_cast<Object*>(removeObjectFromListElement(getListElementAtIndex(list, 2)));
-    QVERIFY2(getListElementAtIndex(list, 2)->object == nullptr && (strcmp(removedObject->type, "distance") == 0) && (*(static_cast<int*>(removedObject->payload)) == 5),
+    QVERIFY2(getListElementAtIndex(list, 2)->object == nullptr && removedObject->type == INTEGER && (*(static_cast<int*>(removedObject->payload)) == 5),
              "Incorrect object removal from list element");
 
     deleteObject(removedObject);
@@ -1436,17 +1436,17 @@ void LinkedListTests::testPrintListElementsToFile()
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 5;
     point->y = 7;
-    assignObjectToListElement(getListElementAtIndex(list, 0), "coordinates", static_cast<void*>(point));
+    assignObjectToListElement(getListElementAtIndex(list, 0), POINT, static_cast<void*>(point));
     point = nullptr;
 
     int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 4;
-    assignObjectToListElement(getListElementAtIndex(list, 2), "distance", static_cast<void*>(distance));
+    assignObjectToListElement(getListElementAtIndex(list, 2), INTEGER, static_cast<void*>(distance));
     distance = nullptr;
 
-    float* angle = static_cast<float*>(malloc(sizeof(float)));
-    *angle = 1.44f;
-    assignObjectToListElement(getListElementAtIndex(list, 3), "angle", static_cast<void*>(angle));
+    double* angle = static_cast<double*>(malloc(sizeof(double)));
+    *angle = 1.44;
+    assignObjectToListElement(getListElementAtIndex(list, 3), DECIMAL, static_cast<void*>(angle));
     angle = nullptr;
 
     printListContentToFile(list, testDataFile, "");
@@ -1455,13 +1455,13 @@ void LinkedListTests::testPrintListElementsToFile()
     FILE* readTestData = fopen(testDataFile, "r");
 
     fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 0\tPriority: 3\tHas Object: yes\tObject type: coordinates\n") == 0, "First element is not printed correctly");
+    QVERIFY2(strcmp(buffer, "Element: 0\tPriority: 3\tHas Object: yes\tObject type: point\n") == 0, "First element is not printed correctly");
     fgets(buffer, 100, readTestData);
     QVERIFY2(strcmp(buffer, "Element: 1\tPriority: 2\tHas Object: no\n") == 0, "Second element is not printed correctly");
     fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 2\tPriority: 5\tHas Object: yes\tObject type: distance\n") == 0, "Third element is not printed correctly");
+    QVERIFY2(strcmp(buffer, "Element: 2\tPriority: 5\tHas Object: yes\tObject type: integer\n") == 0, "Third element is not printed correctly");
     fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 3\tPriority: 9\tHas Object: yes\tObject type: angle\n") == 0, "Fourth element is not printed correctly");
+    QVERIFY2(strcmp(buffer, "Element: 3\tPriority: 9\tHas Object: yes\tObject type: decimal\n") == 0, "Fourth element is not printed correctly");
     fgets(buffer, 100, readTestData);
     QVERIFY2(strcmp(buffer, "Element: 4\tPriority: 4\tHas Object: no"), "Fifth element is not printed correctly");
 

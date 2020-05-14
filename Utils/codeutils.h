@@ -10,7 +10,7 @@ typedef unsigned int boolean;
 
 typedef struct
 {
-    char* type;
+    int type;
     void* payload;
 }
 Object;
@@ -19,7 +19,7 @@ Object;
 extern "C"{
 #endif
 
-Object* createObject(const char* type, void *payload);
+Object* createObject(const int type, void* payload);
 
 char* getLine();
 boolean readUnsignedLong(size_t* number);

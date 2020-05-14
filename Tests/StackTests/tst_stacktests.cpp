@@ -34,17 +34,17 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
 
     QVERIFY(isEmptyStack(stack));
 
-    pushToStack(stack, createObject("Segment", createSegmentPayload(2, 5, 4, 11)));
+    pushToStack(stack, createObject(SEGMENT, createSegmentPayload(2, 5, 4, 11)));
 
     QVERIFY2(!isEmptyStack(stack), "The stack is empty, no element has been pushed");
 
-    pushToStack(stack, createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8)));
+    pushToStack(stack, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
 
     // then pop
     Object* firstPoppedObject = popFromStack(stack);
     LocalConditions* firstPoppedObjectPayload = static_cast<LocalConditions*>(firstPoppedObject->payload);
 
-    QVERIFY2(strcmp(firstPoppedObject->type, "LocalConditions") == 0 &&
+    QVERIFY2(firstPoppedObject->type == LOCAL_CONDITIONS &&
              firstPoppedObjectPayload->position->x == 7 &&
              firstPoppedObjectPayload->position->y == -5 &&
              firstPoppedObjectPayload->temperature == 10 &&
@@ -54,7 +54,7 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
     Object* secondPoppedObject = popFromStack(stack);
     Segment* secondPoppedObjectPayload = static_cast<Segment*>(secondPoppedObject->payload);
 
-    QVERIFY2(strcmp(secondPoppedObject->type, "Segment") == 0 &&
+    QVERIFY2(secondPoppedObject->type == SEGMENT &&
              secondPoppedObjectPayload->start->x == 2 &&
              secondPoppedObjectPayload->start->y == 5 &&
              secondPoppedObjectPayload->stop->x == 4 &&
@@ -73,14 +73,14 @@ void StackTests::testClearStack()
 {
     Stack* stack = createStack();
 
-    pushToStack(stack, createObject("Segment", createSegmentPayload(2, 5, 4, 11)));
-    pushToStack(stack, createObject("LocalConditions", createLocalConditionsPayload(7, -5, 10, 12.8)));
+    pushToStack(stack, createObject(SEGMENT, createSegmentPayload(2, 5, 4, 11)));
+    pushToStack(stack, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
 
     clearStack(stack, deleteTestObject);
 
     QVERIFY2(isEmptyStack(stack), "The stack has not been correctly emptied");
 
-    pushToStack(stack, createObject("Segment", createSegmentPayload(4, 2, 5, 10)));
+    pushToStack(stack, createObject(SEGMENT, createSegmentPayload(4, 2, 5, 10)));
 
     QVERIFY(!isEmptyStack(stack));
 

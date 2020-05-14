@@ -44,7 +44,7 @@ boolean pushToStack(Stack* stack, Object* object)
 {
     boolean success = FALSE;
 
-    if (stack != NULL && object != NULL && object->type != NULL && strlen(object->type) != 0 && object->payload != NULL)
+    if (stack != NULL && object != NULL && object->payload != NULL)
     {
         ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
 
@@ -70,10 +70,7 @@ Object* popFromStack(Stack* stack)
 
         if (topStackElement != NULL)
         {
-            ASSERT_CONDITION(topStackElement->object != NULL &&
-                             topStackElement->object->type != NULL &&
-                             strlen(topStackElement->object->type) != 0 &&
-                             topStackElement->object->payload != NULL,     "Invalid stack element object detected")
+            ASSERT_CONDITION(topStackElement->object != NULL && topStackElement->object->payload != NULL, "Invalid stack element object detected")
 
             result = topStackElement->object;
             free(topStackElement);

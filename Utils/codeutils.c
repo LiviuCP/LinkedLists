@@ -5,31 +5,19 @@
 
 #include "codeutils.h"
 
-Object* createObject(const char* type, void* payload)
+Object* createObject(const int type, void* payload)
 {
     Object* result = NULL;
 
-    if (type != NULL && strlen(type) != 0 && payload != NULL)
+    if (payload != NULL)
     {
-        char* objectType = malloc(strlen(type) + 1);
+        Object* object = malloc(sizeof(Object));
 
-        if (objectType != NULL)
+        if (object != NULL)
         {
-            Object* object = malloc(sizeof(Object));
-
-            if (object != NULL)
-            {
-                strcpy(objectType, type);
-                object->type = objectType;
-                objectType = NULL;
-                object->payload = payload;
-                result = object;
-            }
-            else
-            {
-                free(objectType);
-                objectType = NULL;
-            }
+            object->type = type;
+            object->payload = payload;
+            result = object;
         }
     }
 

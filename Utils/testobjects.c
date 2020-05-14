@@ -108,8 +108,7 @@ void deleteTestObject(Object* object)
     {
         if (object->payload != NULL)
         {
-            ASSERT_CONDITION(object->type != NULL, "Null object type when payload is not null"); // object should have both type and payload
-            if (strcmp(object->type,"Segment") == 0)
+            if (object->type == SEGMENT)
             {
                 Segment* segment = (Segment*)object->payload;
                 free(segment->start);
@@ -117,19 +116,48 @@ void deleteTestObject(Object* object)
                 free(segment->stop);
                 segment->stop = NULL;
             }
-            else if (strcmp(object->type, "LocalConditions") == 0)
+            else if (object->type == LOCAL_CONDITIONS)
             {
                 LocalConditions* conditions = (LocalConditions*)object->payload;
                 free(conditions->position);
                 conditions->position = NULL;
             }
+
+            /* add further payloads here that have pointer members to dynamically allocated memory */
+
+            free(object->payload);
+            object->payload = NULL;
         }
 
-        free(object->payload);
-        object->payload = NULL;
-        free(object->type);
-        object->type = NULL;
         free(object);
         object = NULL;
     }
+}
+
+const char* getTestObjectTypeAsString(int type)
+{
+    const char* result;
+
+    switch(type)
+    {
+    case INTEGER:
+        result = "integer";
+        break;
+    case DECIMAL:
+        result = "decimal";
+        break;
+    case POINT:
+        result = "point";
+        break;
+    case SEGMENT:
+        result = "segment";
+        break;
+    case LOCAL_CONDITIONS:
+        result = "local conditions";
+        break;
+    default:
+        result = "unknown";
+    }
+
+    return result;
 }

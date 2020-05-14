@@ -44,7 +44,7 @@ boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, Obj
 {
     boolean success = FALSE;
 
-    if (queue != NULL && object != NULL && object->type != NULL && strlen(object->type) != 0 && object->payload != NULL)
+    if (queue != NULL && object != NULL && object->payload != NULL)
     {
         ASSERT_CONDITION(queue->container != NULL, "NULL queue container detected");
 
@@ -106,10 +106,7 @@ Object* removeFromPriorityQueue(PriorityQueue* queue)
 
         if (removedElement != NULL)
         {
-            ASSERT_CONDITION(removedElement->object != NULL &&
-                             removedElement->object->type != NULL &&
-                             strlen(removedElement->object->type) != 0 &&
-                             removedElement->object->payload != NULL,     "Invalid queue element object detected")
+            ASSERT_CONDITION(removedElement->object != NULL && removedElement->object->payload != NULL, "Invalid queue element object detected")
 
             result = removedElement->object;
             free(removedElement);
@@ -174,10 +171,7 @@ Object* getPriorityQueueObject(PriorityQueueIterator it)
     Object* object = ((ListElement*)(it.queueItem))->object;
 
     // every queue object must be valid; we must ensure this throughout the usage period of the queue (user can modify objects by using the priority queue iterator)
-    ASSERT_CONDITION(object != NULL &&
-                     object->type != NULL &&
-                     strlen(object->type) != 0 &&
-                     object->payload != NULL,     "Invalid queue element object detected")
+    ASSERT_CONDITION(object != NULL && object->payload != NULL, "Invalid queue element object detected")
 
     return object;
 }
@@ -189,10 +183,7 @@ size_t getObjectPriority(PriorityQueueIterator it)
     Object* object = ((ListElement*)(it.queueItem))->object;
 
     // we must still ensure the object is valid even if only the priority is requested
-    ASSERT_CONDITION(object != NULL &&
-                     object->type != NULL &&
-                     strlen(object->type) != 0 &&
-                     object->payload != NULL,     "Invalid queue element object detected")
+    ASSERT_CONDITION(object != NULL && object->payload != NULL, "Invalid queue element object detected")
 
     return ((ListElement*)(it.queueItem))->priority;
 }
