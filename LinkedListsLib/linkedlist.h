@@ -7,7 +7,7 @@
 
 struct ListElement
 {
-    Object* object;
+    Object object;
     size_t priority;
 
     struct ListElement* next;
@@ -80,10 +80,10 @@ boolean areIteratorsEqual(ListIterator first, ListIterator second);
 
 void printListContentToFile(const List* list, const char* outFile, const char* header);
 
-void assignObjectToListElement(ListElement* element, int objectType, void* objectPayload);
-Object* removeObjectFromListElement(ListElement* element);
-void deleteObject(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
-boolean copyObject(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
+void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload);
+Object* detachContentFromListElement(ListElement* element);
+void deleteObjectPayload(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
+boolean copyObjectPlaceholder(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
 
 // for testing purposes only
 boolean customCopyObject(const ListElement* source, ListElement* destination);

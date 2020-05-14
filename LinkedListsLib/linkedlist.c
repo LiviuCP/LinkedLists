@@ -45,7 +45,7 @@ List* createListFromPrioritiesArray(const size_t* priorityArray, const size_t ar
         }
         else
         {
-            deleteList(list, deleteObject);
+            deleteList(list, deleteObjectPayload);
         }
 
         list = NULL;
@@ -75,7 +75,10 @@ ListElement* createListElement()
     {
         result->next = NULL;
         result->priority = 0;
-        result->object = NULL;
+
+        // an empty object should have NULL payload and a negative type
+        result->object.type = -1;
+        result->object.payload = NULL;
     }
 
     return result;
@@ -87,9 +90,12 @@ ListElement* createAndAppendToList(List* list, size_t priority)
 
     if (element != NULL)
     {
-        element->object = NULL;
-        element->priority = priority;
         element->next = NULL;
+        element->priority = priority;
+
+        // empty object
+        element->object.type = -1;
+        element->object.payload = NULL;
 
         appendToList(list, element);
     }
@@ -124,9 +130,12 @@ ListElement* createAndPrependToList(List* list, size_t priority)
 
     if (element != NULL)
     {
-        element->object = NULL;
-        element->priority = priority;
         element->next = NULL;
+        element->priority = priority;
+
+        // empty object
+        element->object.type = -1;
+        element->object.payload = NULL;
 
         prependToList(list, element);
     }
@@ -370,8 +379,7 @@ void clearList(List *list, void (*deallocObject)(Object* object))
 
         while (currentElement != NULL)
         {
-            deallocObject(currentElement->object);
-            currentElement->object = NULL;
+            deallocObject(&currentElement->object);
             ListElement* elementToDelete = currentElement;
             currentElement = currentElement->next;
             free(elementToDelete);
@@ -768,16 +776,16 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
             {
                 fprintf(outputFile, "Element: %d\t", (int)elementIndex);
                 fprintf(outputFile, "Priority: %d\t", (int)currentElement->priority);
-                fprintf(outputFile, "Has Object: ");
-                if (currentElement->object != NULL)
+                fprintf(outputFile, "Has empty Object: ");
+                if (currentElement->object.type >= 0)
                 {
-                    fprintf(outputFile, "yes\t");
+                    fprintf(outputFile, "no\t");
                     fprintf(outputFile, "Object type: ");
-                    fprintf(outputFile, "%s", getTestObjectTypeAsString(currentElement->object->type));
+                    fprintf(outputFile, "%s", getTestObjectTypeAsString(currentElement->object.type));
                 }
                 else
                 {
-                    fprintf(outputFile, "no");
+                    fprintf(outputFile, "yes");
                 }
                 fprintf(outputFile, "\n");
 
@@ -797,97 +805,100 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
     }
 }
 
-void assignObjectToListElement(ListElement* element, int objectType, void* objectPayload)
+void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload)
 {
-    if (element != NULL && objectPayload != NULL)
+    if (element != NULL && objectPayload != NULL && objectType >= 0)
     {
-        ASSERT_CONDITION(element->object == NULL, "Attempt to assign object without freeing the existing one first!");
+        ASSERT_CONDITION(element->object.payload == NULL, "Attempt to assign object without emptying the existing one first!");
 
-        element->object = (Object*)malloc(sizeof (Object));
-
-        if (element->object != NULL)
-        {
-            element->object->type = objectType;
-            element->object->payload = objectPayload;
-        }
-        else
-        {
-            fprintf(stderr, "Unable to allocate memory for object. Object cannot be assigned!");
-        }
+        element->object.type = objectType;
+        element->object.payload = objectPayload;
     }
 }
 
-Object* removeObjectFromListElement(ListElement* element)
+Object* detachContentFromListElement(ListElement* element)
 {
     Object* result = NULL;
 
-    if (element != NULL && element->object != NULL)
+    if (element != NULL)
     {
-        result  = element->object;
-        element->object = NULL;
+        ASSERT_CONDITION((element->object.type >= 0 && element->object.payload != NULL) || (element->object.type < 0 && element->object.payload == NULL), "Invalid object detected")
+
+        Object* temp = createObject(element->object.type, element->object.payload);
+
+        if (temp != NULL)
+        {
+            result = temp;
+            element->object.type = -1;
+            element->object.payload = NULL;
+        }
     }
 
     return result;
 }
 
 // user should pass a custom deleter for objects with payloads containing pointers to allocated heap memory
-void deleteObject(Object *object)
+void deleteObjectPayload(Object *object)
 {
     if (object != NULL)
     {
         free(object->payload);
         object->payload = NULL;
-        free(object);
-        object = NULL;
+        object->type = -1;
     }
 }
 
 /* This function is just added for having a default value to be passed to the copyContentToList() function as deep copying function pointer.
-   User is responsible to pass a custom deep copying function with this signature if any list element contains an non-NULL Object.
+   User is responsible to pass a custom deep copying function with this signature if any list element contains an non-empty Object.
+
+   ---> To be used for lists with EMPTY objects only!
 */
-boolean copyObject(const ListElement* source, ListElement* destination)
+boolean copyObjectPlaceholder(const ListElement* source, ListElement* destination)
 {
     boolean success = FALSE;
 
     if (source != NULL && destination != NULL)
     {
+        ASSERT_CONDITION(source->object.type < 0 && source->object.payload == NULL && destination->object.type < 0 && destination->object.payload == NULL,
+                         "The source and/or destination element object is either invalid or non-empty")
         success = TRUE;
     }
 
     return success;
 }
 
-/* This function is just for illustrating the creation of custom deep copy function */
+/* This function is just for illustrating the creation of custom deep copy function
+    ---> for test purposes only
+*/
 boolean customCopyObject(const ListElement* source, ListElement* destination)
 {
     boolean success = FALSE;
 
-    if (source != NULL && destination != NULL && source->object != NULL && source->object->payload != NULL)
+    /* copy a NON-EMPTY source object to EMPTY destination object to avoid any memory leaks */
+    if (source != NULL && destination != NULL && source->object.payload != NULL && destination->object.payload == NULL)
     {
-        const int destinationObjectType = source->object->type;
+        ASSERT_CONDITION(source->object.type >= 0, "Invalid source object detected")
 
-        if (destinationObjectType == SEGMENT)
+        if (source->object.type == SEGMENT)
         {
             Segment* destinationObjectPayload = (Segment*)malloc(sizeof(Segment));
             if (destinationObjectPayload != NULL)
             {
                 destinationObjectPayload->start = (Point*)malloc(sizeof(Point));
                 destinationObjectPayload->stop = (Point*)malloc(sizeof(Point));
-                Object* destinationObject = (Object*)malloc(sizeof(Object));
 
-                if (destinationObjectPayload->start != NULL && destinationObjectPayload->stop != NULL && destinationObject != NULL)
+                if (destinationObjectPayload->start != NULL && destinationObjectPayload->stop != NULL)
                 {
-                    const Segment* sourceObjectPayload = (Segment*)source->object->payload;
-                    destinationObjectPayload->start->x = sourceObjectPayload->start->x;
-                    destinationObjectPayload->start->y = sourceObjectPayload->start->y;
-                    destinationObjectPayload->stop->x = sourceObjectPayload->stop->x;
-                    destinationObjectPayload->stop->y = sourceObjectPayload->stop->y;
-                    destinationObject->type = destinationObjectType;
-                    destinationObject->payload = (void*)destinationObjectPayload;
-                    destination->object = destinationObject;
+                    destinationObjectPayload->start->x = ((Segment*)source->object.payload)->start->x;
+                    destinationObjectPayload->start->y = ((Segment*)source->object.payload)->start->y;
+                    destinationObjectPayload->stop->x = ((Segment*)source->object.payload)->stop->x;
+                    destinationObjectPayload->stop->y = ((Segment*)source->object.payload)->stop->y;
+                    destination->object.type = source->object.type;
+                    destination->object.payload = (void*)destinationObjectPayload;
                     success = TRUE;
                 }
-                else
+
+                if (!success) // ensure any allocated memory is freed in case deep copy failed
                 {
                     free(destinationObjectPayload->start);
                     destinationObjectPayload->start = NULL;
@@ -895,39 +906,30 @@ boolean customCopyObject(const ListElement* source, ListElement* destination)
                     destinationObjectPayload->stop = NULL;
                     free(destinationObjectPayload);
                     destinationObjectPayload = NULL;
-                    free(destinationObject);
-                    destinationObject = NULL;
                 }
             }
-
         }
-        else if (destinationObjectType == LOCAL_CONDITIONS)
+        else if (source->object.type == LOCAL_CONDITIONS)
         {
             LocalConditions* destinationObjectPayload = (LocalConditions*)malloc(sizeof(LocalConditions));
             if (destinationObjectPayload != NULL)
             {
                 destinationObjectPayload->position = (Point*)malloc(sizeof(Point));
-                Object* destinationObject = (Object*)malloc(sizeof(Object));
-                if (destinationObjectPayload->position != NULL && destinationObject != NULL)
+                if (destinationObjectPayload->position != NULL)
                 {
-                    const LocalConditions* sourceObjectPayload = (LocalConditions*)source->object->payload;
-                    destinationObjectPayload->position->x = sourceObjectPayload->position->x;
-                    destinationObjectPayload->position->y = sourceObjectPayload->position->y;
-                    destinationObjectPayload->humidity = sourceObjectPayload->humidity;
-                    destinationObjectPayload->temperature = sourceObjectPayload->temperature;
-                    destinationObject->type = destinationObjectType;
-                    destinationObject->payload = (void*)destinationObjectPayload;
-                    destination->object = destinationObject;
+                    destinationObjectPayload->position->x = ((LocalConditions*)source->object.payload)->position->x;
+                    destinationObjectPayload->position->y = ((LocalConditions*)source->object.payload)->position->y;
+                    destinationObjectPayload->humidity = ((LocalConditions*)source->object.payload)->humidity;
+                    destinationObjectPayload->temperature = ((LocalConditions*)source->object.payload)->temperature;
+                    destination->object.type = source->object.type;
+                    destination->object.payload = (void*)destinationObjectPayload;
                     success = TRUE;
                 }
-                else
+
+                if (!success) // ensure any allocated memory is freed in case deep copy failed
                 {
-                    free(destinationObjectPayload->position);
-                    destinationObjectPayload->position = NULL;
                     free(destinationObjectPayload);
                     destinationObjectPayload = NULL;
-                    free(destinationObject);
-                    destinationObject = NULL;
                 }
             }
         }

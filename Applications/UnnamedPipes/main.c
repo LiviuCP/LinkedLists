@@ -57,7 +57,7 @@ int main()
                 printList(receiverList);
                 printf("\n");
 
-                deleteList(receiverList, deleteObject);
+                deleteList(receiverList, deleteObjectPayload);
                 receiverList = NULL;
             }
             else
@@ -85,7 +85,7 @@ int main()
         {
             printf("[PID: %d] The list has following elements:\n\n", getpid());
             printList(senderList);
-            deleteList(senderList, deleteObject);
+            deleteList(senderList, deleteObjectPayload);
             senderList = NULL;
         }
         else

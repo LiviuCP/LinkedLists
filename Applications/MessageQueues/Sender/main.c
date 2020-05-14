@@ -24,7 +24,7 @@ int main()
     {
         printf("The sender list has following elements:\n\n");
         printList(senderList);
-        deleteList(senderList, deleteObject);
+        deleteList(senderList, deleteObjectPayload);
         senderList = NULL;
     }
     else

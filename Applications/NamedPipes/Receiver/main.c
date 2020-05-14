@@ -33,7 +33,7 @@ int main()
         printf("The receiver list has following elements after sorting:\n\n");
         printList(receiverList);
 
-        deleteList(receiverList, deleteObject);
+        deleteList(receiverList, deleteObjectPayload);
         receiverList = NULL;
     }
     else

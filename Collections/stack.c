@@ -40,19 +40,21 @@ void deleteStack(Stack* stack, void (*deallocObject)(Object* object))
     }
 }
 
-boolean pushToStack(Stack* stack, Object* object)
+boolean pushToStack(Stack* stack, const int objectType, void* const objectPayload)
 {
     boolean success = FALSE;
 
-    if (stack != NULL && object != NULL && object->payload != NULL)
+    if (stack != NULL && objectPayload != NULL)
     {
+        ASSERT_CONDITION(objectType >= 0, "Attempt to push invalid object")
         ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
 
         ListElement* newElement = createAndPrependToList((List*)(stack->container), 0); // all stack elements have priority 0 (priority is not relevant here)
 
         if (newElement != NULL)
         {
-            newElement->object = object;
+            newElement->object.type = objectType;
+            newElement->object.payload = objectPayload;
         }
     }
 
@@ -70,11 +72,17 @@ Object* popFromStack(Stack* stack)
 
         if (topStackElement != NULL)
         {
-            ASSERT_CONDITION(topStackElement->object != NULL && topStackElement->object->payload != NULL, "Invalid stack element object detected")
+            ASSERT_CONDITION(topStackElement->object.type >= 0 && topStackElement->object.payload != NULL, "Invalid or empty stack element object detected")
 
-            result = topStackElement->object;
-            free(topStackElement);
-            topStackElement = NULL;
+            Object* newObject = createObject(topStackElement->object.type, topStackElement->object.payload);
+
+            if (newObject != NULL)
+            {
+                *newObject = topStackElement->object;
+                result = newObject;
+                free(topStackElement);
+                topStackElement = NULL;
+            }
         }
     }
 

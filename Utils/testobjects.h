@@ -40,7 +40,7 @@ Point* createPointPayload(int startX, int startY);
 Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY);
 LocalConditions* createLocalConditionsPayload(int coordinateX, int coordinateY, int temperature, double humidity);
 
-void deleteTestObject(Object* object);
+void emptyTestObject(Object* object);
 
 const char* getTestObjectTypeAsString(int type);
 

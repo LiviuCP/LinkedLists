@@ -5,7 +5,7 @@
 
 #include "codeutils.h"
 
-Object* createObject(const int type, void* payload)
+Object* createObject(int type, void* payload)
 {
     Object* result = NULL;
 
@@ -22,6 +22,13 @@ Object* createObject(const int type, void* payload)
     }
 
     return result;
+}
+
+void deleteObject(Object* object, void (*emptyObject)(Object* object))
+{
+    emptyObject(object);
+    free(object);
+    object = NULL;
 }
 
 char* getLine()

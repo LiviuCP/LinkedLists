@@ -102,7 +102,7 @@ LocalConditions* createLocalConditionsPayload(int positionX, int positionY, int 
     return result;
 }
 
-void deleteTestObject(Object* object)
+void emptyTestObject(Object* object)
 {
     if (object != NULL)
     {
@@ -125,12 +125,10 @@ void deleteTestObject(Object* object)
 
             /* add further payloads here that have pointer members to dynamically allocated memory */
 
+            object->type = -1;
             free(object->payload);
             object->payload = NULL;
         }
-
-        free(object);
-        object = NULL;
     }
 }
 

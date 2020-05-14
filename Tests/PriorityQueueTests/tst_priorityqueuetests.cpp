@@ -36,15 +36,15 @@ void PriorityQueueTests::testElementsInsertionDeletion()
     QVERIFY(isEmptyQueue(queue));
 
     // first insert
-    insertIntoPriorityQueue(queue, 4, createObject(POINT, createPointPayload(4, 5)));
+    insertIntoPriorityQueue(queue, 4, POINT, createPointPayload(4, 5));
 
     QVERIFY2(!isEmptyQueue(queue), "The queue is empty, no element has been inserted");
 
-    insertIntoPriorityQueue(queue, 2, createObject(INTEGER, createIntegerPayload(4)));
-    insertIntoPriorityQueue(queue, 5, createObject(POINT, createPointPayload(-4, 8)));
-    insertIntoPriorityQueue(queue, 8, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
-    insertIntoPriorityQueue(queue, 2, createObject(INTEGER, createIntegerPayload(-4)));
-    insertIntoPriorityQueue(queue, 5, createObject(DECIMAL, createDecimalPayload(4.5567)));
+    insertIntoPriorityQueue(queue, 2, INTEGER, createIntegerPayload(4));
+    insertIntoPriorityQueue(queue, 5, POINT, createPointPayload(-4, 8));
+    insertIntoPriorityQueue(queue, 8, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
+    insertIntoPriorityQueue(queue, 2, INTEGER, createIntegerPayload(-4));
+    insertIntoPriorityQueue(queue, 5, DECIMAL, createDecimalPayload(4.5567));
 
     // then remove
 
@@ -83,19 +83,19 @@ void PriorityQueueTests::testElementsInsertionDeletion()
     QVERIFY2(sixthRemovedObject->type == INTEGER && *sixthRemovedObjectPayload == -4, "Object has not been correctly removed from queue");
     QVERIFY(isEmptyQueue(queue));
 
-    deleteTestObject(firstRemovedObject);
+    deleteObject(firstRemovedObject, emptyTestObject);
     firstRemovedObject = nullptr;
-    deleteTestObject(secondRemovedObject);
+    deleteObject(secondRemovedObject, emptyTestObject);
     secondRemovedObject = nullptr;
-    deleteTestObject(thirdRemovedObject);
+    deleteObject(thirdRemovedObject, emptyTestObject);
     thirdRemovedObject = nullptr;
-    deleteTestObject(fourthRemovedObject);
+    deleteObject(fourthRemovedObject, emptyTestObject);
     fourthRemovedObject = nullptr;
-    deleteTestObject(fifthRemovedObject);
+    deleteObject(fifthRemovedObject, emptyTestObject);
     fifthRemovedObject = nullptr;
-    deleteTestObject(sixthRemovedObject);
+    deleteObject(sixthRemovedObject, emptyTestObject);
     sixthRemovedObject = nullptr;
-    deletePriorityQueue(queue, deleteTestObject);
+    deletePriorityQueue(queue, emptyTestObject);
     queue = nullptr;
 }
 
@@ -103,18 +103,18 @@ void PriorityQueueTests::testClearPriorityQueue()
 {
     PriorityQueue* queue = createPriorityQueue();
 
-    insertIntoPriorityQueue(queue, 5, createObject(SEGMENT, createSegmentPayload(2, 5, 4, 11)));
-    insertIntoPriorityQueue(queue, 8, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
+    insertIntoPriorityQueue(queue, 5, SEGMENT, createSegmentPayload(2, 5, 4, 11));
+    insertIntoPriorityQueue(queue, 8, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
 
-    clearPriorityQueue(queue, deleteTestObject);
+    clearPriorityQueue(queue, emptyTestObject);
 
     QVERIFY2(isEmptyQueue(queue), "The queue has not been correctly emptied");
 
-    insertIntoPriorityQueue(queue, 7, createObject(SEGMENT, createSegmentPayload(4, 2, 5, 10)));
+    insertIntoPriorityQueue(queue, 7, SEGMENT, createSegmentPayload(4, 2, 5, 10));
 
     QVERIFY(!isEmptyQueue(queue));
 
-    deletePriorityQueue(queue, deleteTestObject);
+    deletePriorityQueue(queue, emptyTestObject);
     queue = nullptr;
 }
 
@@ -123,12 +123,12 @@ void PriorityQueueTests::testIterators()
     {
         PriorityQueue* queue = createPriorityQueue();
 
-        insertIntoPriorityQueue(queue, 4, createObject(POINT, createPointPayload(4, 5)));
-        insertIntoPriorityQueue(queue, 2, createObject(INTEGER, createIntegerPayload(4)));
-        insertIntoPriorityQueue(queue, 5, createObject(POINT, createPointPayload(-4, 8)));
-        insertIntoPriorityQueue(queue, 8, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
-        insertIntoPriorityQueue(queue, 2, createObject(INTEGER, createIntegerPayload(-4)));
-        insertIntoPriorityQueue(queue, 5, createObject(DECIMAL, createDecimalPayload(4.5567)));
+        insertIntoPriorityQueue(queue, 4, POINT, createPointPayload(4, 5));
+        insertIntoPriorityQueue(queue, 2, INTEGER, createIntegerPayload(4));
+        insertIntoPriorityQueue(queue, 5, POINT, createPointPayload(-4, 8));
+        insertIntoPriorityQueue(queue, 8, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
+        insertIntoPriorityQueue(queue, 2, INTEGER, createIntegerPayload(-4));
+        insertIntoPriorityQueue(queue, 5, DECIMAL, createDecimalPayload(4.5567));
 
         PriorityQueueIterator it = pqbegin(queue);
 
@@ -187,7 +187,7 @@ void PriorityQueueTests::testIterators()
 
         QVERIFY2(it.queueItem == nullptr, "The iterator doesn't correctly reach the end position");
 
-        deletePriorityQueue(queue, deleteTestObject);
+        deletePriorityQueue(queue, emptyTestObject);
         queue = nullptr;
     }
 
@@ -197,7 +197,7 @@ void PriorityQueueTests::testIterators()
 
         QVERIFY2(it.queueItem == nullptr, "The begin iterator of an empty priority queue is not correctly created");
 
-        deletePriorityQueue(queue, deleteTestObject);
+        deletePriorityQueue(queue, emptyTestObject);
         queue = nullptr;
     }
 }
@@ -206,12 +206,12 @@ void PriorityQueueTests::testModifyObject()
 {
     PriorityQueue* queue = createPriorityQueue();
 
-    insertIntoPriorityQueue(queue, 8, createObject(POINT, createPointPayload(4, 5)));
-    insertIntoPriorityQueue(queue, 2, createObject(INTEGER, createIntegerPayload(4)));
-    insertIntoPriorityQueue(queue, 5, createObject(POINT, createPointPayload(-4, 8)));
-    insertIntoPriorityQueue(queue, 4, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
-    insertIntoPriorityQueue(queue, 2, createObject(INTEGER, createIntegerPayload(-4)));
-    insertIntoPriorityQueue(queue, 5, createObject(DECIMAL, createDecimalPayload(4.5567)));
+    insertIntoPriorityQueue(queue, 8, POINT, createPointPayload(4, 5));
+    insertIntoPriorityQueue(queue, 2, INTEGER, createIntegerPayload(4));
+    insertIntoPriorityQueue(queue, 5, POINT, createPointPayload(-4, 8));
+    insertIntoPriorityQueue(queue, 4, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
+    insertIntoPriorityQueue(queue, 2, INTEGER, createIntegerPayload(-4));
+    insertIntoPriorityQueue(queue, 5, DECIMAL, createDecimalPayload(4.5567));
 
     PriorityQueueIterator it = pqbegin(queue);
     pqnext(&it);
@@ -227,9 +227,9 @@ void PriorityQueueTests::testModifyObject()
     payloadToEdit->temperature = 11;
     objectToEdit = nullptr;
 
-    deleteTestObject(removeFromPriorityQueue(queue));
-    deleteTestObject(removeFromPriorityQueue(queue));
-    deleteTestObject(removeFromPriorityQueue(queue));
+    deleteObject(removeFromPriorityQueue(queue), emptyTestObject);
+    deleteObject(removeFromPriorityQueue(queue), emptyTestObject);
+    deleteObject(removeFromPriorityQueue(queue), emptyTestObject);
 
     Object* removedObject = removeFromPriorityQueue(queue);
     LocalConditions* removedObjectPayload = static_cast<LocalConditions*>(removedObject->payload);
@@ -240,10 +240,10 @@ void PriorityQueueTests::testModifyObject()
              removedObjectPayload->temperature == 11 &&
              areDecimalNumbersEqual(removedObjectPayload->humidity, 12.8), "The object has not been correctly modified");
 
-    deleteTestObject(removedObject);
+    deleteObject(removedObject, emptyTestObject);
     removedObject = nullptr;
 
-    deletePriorityQueue(queue, deleteTestObject);
+    deletePriorityQueue(queue, emptyTestObject);
     queue = nullptr;
 }
 

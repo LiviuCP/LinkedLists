@@ -34,11 +34,11 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
 
     QVERIFY(isEmptyStack(stack));
 
-    pushToStack(stack, createObject(SEGMENT, createSegmentPayload(2, 5, 4, 11)));
+    pushToStack(stack, SEGMENT, createSegmentPayload(2, 5, 4, 11));
 
     QVERIFY2(!isEmptyStack(stack), "The stack is empty, no element has been pushed");
 
-    pushToStack(stack, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
+    pushToStack(stack, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
 
     // then pop
     Object* firstPoppedObject = popFromStack(stack);
@@ -61,11 +61,11 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
              secondPoppedObjectPayload->stop->y == 11,   "Object has not been correctly popped from list");
     QVERIFY(isEmptyStack(stack));
 
-    deleteTestObject(firstPoppedObject);
+    deleteObject(firstPoppedObject, emptyTestObject);
     firstPoppedObject = nullptr;
-    deleteTestObject(secondPoppedObject);
+    deleteObject(secondPoppedObject, emptyTestObject);
     secondPoppedObject = nullptr;
-    deleteStack(stack, deleteTestObject);
+    deleteStack(stack, emptyTestObject);
     stack = nullptr;
 }
 
@@ -73,18 +73,18 @@ void StackTests::testClearStack()
 {
     Stack* stack = createStack();
 
-    pushToStack(stack, createObject(SEGMENT, createSegmentPayload(2, 5, 4, 11)));
-    pushToStack(stack, createObject(LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8)));
+    pushToStack(stack, SEGMENT, createSegmentPayload(2, 5, 4, 11));
+    pushToStack(stack, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
 
-    clearStack(stack, deleteTestObject);
+    clearStack(stack, emptyTestObject);
 
     QVERIFY2(isEmptyStack(stack), "The stack has not been correctly emptied");
 
-    pushToStack(stack, createObject(SEGMENT, createSegmentPayload(4, 2, 5, 10)));
+    pushToStack(stack, SEGMENT, createSegmentPayload(4, 2, 5, 10));
 
     QVERIFY(!isEmptyStack(stack));
 
-    deleteStack(stack, deleteTestObject);
+    deleteStack(stack, emptyTestObject);
     stack = nullptr;
 }
 

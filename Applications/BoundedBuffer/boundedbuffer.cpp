@@ -70,6 +70,6 @@ value_t BoundedBuffer::readElement()
 
 BoundedBuffer::~BoundedBuffer()
 {
-    deleteList(m_Container, deleteObject);
+    deleteList(m_Container, deleteObjectPayload);
     m_Container = nullptr;
 }

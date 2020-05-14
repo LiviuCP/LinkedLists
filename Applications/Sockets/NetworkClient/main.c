@@ -107,7 +107,7 @@ int main()
                         printf("\nThe list has following elements after sorting:\n\n");
                         printList(list);
 
-                        deleteList(list, deleteObject);
+                        deleteList(list, deleteObjectPayload);
                         list = NULL;
                     }
                     else

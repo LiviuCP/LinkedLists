@@ -15,7 +15,7 @@ extern "C"{
 Stack* createStack();
 void deleteStack(Stack* stack, void (*deallocObject)(Object* object));
 
-boolean pushToStack(Stack* stack, Object* object);
+boolean pushToStack(Stack* stack, const int objectType, void* const objectPayload);
 Object* popFromStack(Stack* stack);
 
 void clearStack(Stack* stack, void (*deallocObject)(Object* object));

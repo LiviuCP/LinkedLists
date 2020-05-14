@@ -57,7 +57,7 @@ HashTable* createHashTable(const size_t hashSize)
                 {
                     if (hashBuckets[index] != NULL)
                     {
-                        deleteList(hashBuckets[index], deleteObject);
+                        deleteList(hashBuckets[index], deleteObjectPayload);
                         hashBuckets[index] = NULL;
                     }
                 }
@@ -119,7 +119,7 @@ boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable
                 ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
                 if (newElement != NULL)
                 {
-                    assignObjectToListElement(newElement, hashEntryType, newHashEntry);
+                    assignObjectContentToListElement(newElement, hashEntryType, newHashEntry);
                     success = TRUE;
                 }
             }
@@ -146,10 +146,10 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
 
         while (!areIteratorsEqual(it, lend(currentBucket)))
         {
-            ASSERT_CONDITION(it.current->object != NULL && it.current->object->type == hashEntryType && it.current->object->payload != NULL,
+            ASSERT_CONDITION(it.current->object.type == hashEntryType && it.current->object.payload != NULL,
                              "Invalid list element object detected in hash table")
 
-            HashEntry* currentHashEntry = (HashEntry*)it.current->object->payload;
+            HashEntry* currentHashEntry = (HashEntry*)(it.current->object.payload);
 
             if (strcmp(currentHashEntry->key, key) == 0)
             {
@@ -162,8 +162,7 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
 
         if (removedElement != NULL)
         {
-            _deleteHashEntry(removedElement->object);
-            removedElement->object = NULL;
+            _deleteHashEntry(&(removedElement->object));
             free(removedElement);
             removedElement = NULL;
         }
@@ -320,10 +319,10 @@ static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char
 
         while (currentBucketEntry != NULL)
         {
-            ASSERT_CONDITION(currentBucketEntry->object != NULL && currentBucketEntry->object->type == hashEntryType && currentBucketEntry->object->payload != NULL,
+            ASSERT_CONDITION(currentBucketEntry->object.type == hashEntryType && currentBucketEntry->object.payload != NULL,
                              "The current bucket entry data is incorrect")
 
-            HashEntry* currentHashEntry = (HashEntry*)currentBucketEntry->object->payload;
+            HashEntry* currentHashEntry = (HashEntry*)(currentBucketEntry->object.payload);
 
             ASSERT_CONDITION(currentHashEntry->key != NULL && currentHashEntry->value != NULL && strlen(currentHashEntry->key) > 0 && strlen(currentHashEntry->value) > 0, "Invalid key-value pair");
 
@@ -351,10 +350,9 @@ static void _deleteHashEntry(Object* object)
         entry->key = NULL;
         free(entry->value);
         entry->value = NULL;
+        object->type = -1;
         free(object->payload);
         object->payload = NULL;
-        free(object);
-        object = NULL;
     }
 }
 

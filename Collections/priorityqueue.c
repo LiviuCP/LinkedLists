@@ -40,20 +40,22 @@ void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* obj
     }
 }
 
-boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, Object* object)
+boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload)
 {
     boolean success = FALSE;
 
-    if (queue != NULL && object != NULL && object->payload != NULL)
+    if (queue != NULL && objectPayload != NULL)
     {
-        ASSERT_CONDITION(queue->container != NULL, "NULL queue container detected");
+        ASSERT_CONDITION(objectType >= 0, "Attempt to insert an invalid object")
+        ASSERT_CONDITION(queue->container != NULL, "NULL queue container detected")
 
         ListElement* newElement = createListElement();
 
         if (newElement != NULL)
         {
             newElement->priority = priority;
-            newElement->object = object;
+            newElement->object.type = objectType;
+            newElement->object.payload = objectPayload;
 
             ListElement* currentElement = ((List*)(queue->container))->first;
 
@@ -106,11 +108,19 @@ Object* removeFromPriorityQueue(PriorityQueue* queue)
 
         if (removedElement != NULL)
         {
-            ASSERT_CONDITION(removedElement->object != NULL && removedElement->object->payload != NULL, "Invalid queue element object detected")
+            ASSERT_CONDITION(removedElement->object.type >= 0 && removedElement->object.payload != NULL, "Invalid or empty queue element object detected")
 
-            result = removedElement->object;
-            free(removedElement);
-            removedElement = NULL;
+            Object* newObject = createObject(removedElement->object.type, removedElement->object.payload);
+
+            // move object type and payload into a new object as the current one is deallocated together with the list element
+            if (newObject != NULL)
+            {
+                result = newObject;
+                removedElement->object.type = -1;
+                removedElement->object.payload = NULL;
+                free(removedElement);
+                removedElement = NULL;
+            }
         }
     }
 
@@ -168,7 +178,7 @@ Object* getPriorityQueueObject(PriorityQueueIterator it)
 {
     ASSERT_CONDITION(it.queueItem != NULL, "Attempt to access a NULL priority queue item")
 
-    Object* object = ((ListElement*)(it.queueItem))->object;
+    Object* object = &(((ListElement*)(it.queueItem))->object);
 
     // every queue object must be valid; we must ensure this throughout the usage period of the queue (user can modify objects by using the priority queue iterator)
     ASSERT_CONDITION(object != NULL && object->payload != NULL, "Invalid queue element object detected")
@@ -180,7 +190,7 @@ size_t getObjectPriority(PriorityQueueIterator it)
 {
     ASSERT_CONDITION(it.queueItem != NULL, "Attempt to access a NULL priority queue item")
 
-    Object* object = ((ListElement*)(it.queueItem))->object;
+    Object* object = &(((ListElement*)(it.queueItem))->object);
 
     // we must still ensure the object is valid even if only the priority is requested
     ASSERT_CONDITION(object != NULL && object->payload != NULL, "Invalid queue element object detected")

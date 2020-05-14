@@ -19,7 +19,8 @@ Object;
 extern "C"{
 #endif
 
-Object* createObject(const int type, void* payload);
+Object* createObject(int type, void* payload);
+void deleteObject(Object* object, void (*emptyObject)(Object* object));
 
 char* getLine();
 boolean readUnsignedLong(size_t* number);

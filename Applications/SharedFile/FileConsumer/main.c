@@ -46,7 +46,7 @@ int main() {
                 sleep(1);
                 printf("%s\n\n", (char*)readAddress);
                 sleep(1);
-                deleteList(list, deleteObject);
+                deleteList(list, deleteObjectPayload);
                 list = NULL;
             }
             else

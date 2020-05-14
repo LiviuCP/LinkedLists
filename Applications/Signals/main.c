@@ -80,7 +80,7 @@ void gracefulTerminationHandler(int signalNumber)
         puts("[CHILD] Done. Sorted list content: \n");
         printList(list);
         puts("");
-        deleteList(list, deleteObject);
+        deleteList(list, deleteObjectPayload);
         list = NULL;
     }
 
