@@ -93,6 +93,7 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
         QVERIFY2(getListSize(&list) == 5, "List size is not correct");
         QVERIFY2(getListElementAtIndex(&list, 0)->priority == 7 && getListElementAtIndex(&list, 2)->priority == 6 && getListElementAtIndex(&list, 4)->priority == 4,
                  "The element is not correctly retrieved based on index");
+        QVERIFY(getListElementAtIndex(&list, 3)->object.type == -1 && getListElementAtIndex(&list, 3)->object.payload == nullptr);
 
         list.first = nullptr; // this is how we clear list if elements are on the stack (don't user clearList()!!!)
         QVERIFY(getListSize(&list) == 0);
