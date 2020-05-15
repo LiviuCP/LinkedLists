@@ -32,19 +32,19 @@ ListIterator;
 extern "C"{
 #endif
 
-List* createEmptyList();
-List* createListFromPrioritiesArray(const size_t *priorityArray, const size_t arraySize);
-void deleteList(List* list, void (*deallocObject)(Object* object));
+List* createEmptyList();                                                                                // don't use for stack created lists (heap-only)
+List* createListFromPrioritiesArray(const size_t *priorityArray, const size_t arraySize);               // don't use for stack created lists (heap-only)
+void deleteList(List* list, void (*deallocObject)(Object* object));                                     // don't use for stack created lists (heap-only)
 
-ListElement* createListElement();
+ListElement* createListElement();                                                                       // don't use for stack created lists (heap-only)
 
-ListElement* createAndAppendToList(List* list, size_t priority);
+ListElement* createAndAppendToList(List* list, size_t priority);                                        // don't use for stack created lists (heap-only)
 void appendToList(List* list, ListElement* newElement);
-ListElement* createAndPrependToList(List* list, size_t priority);
+ListElement* createAndPrependToList(List* list, size_t priority);                                       // don't use for stack created lists (heap-only)
 void prependToList(List* list, ListElement* newElement);
-ListElement* createAndInsertAfter(ListIterator it, size_t priority);
+ListElement* createAndInsertAfter(ListIterator it, size_t priority);                                    // don't use for stack created lists (heap-only)
 void insertAfter(ListIterator it, ListElement* nextElement);
-ListElement* createAndInsertBefore(ListIterator it, size_t priority);
+ListElement* createAndInsertBefore(ListIterator it, size_t priority);                                   // don't use for stack created lists (heap-only)
 void insertBefore(ListIterator it, ListElement* previousElement);
 
 ListElement* removeFirstListElement(List* list);
@@ -52,7 +52,7 @@ ListElement* removeLastListElement(List* list);
 ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
 ListElement* removeCurrentListElement(ListIterator it);
-void clearList(List* list, void (*deallocObject)(Object* object));
+void clearList(List* list, void (*deallocObject)(Object* object));                                      // don't use for stack created lists (heap-only)
 
 void swapListElements(ListIterator firstIt, ListIterator secondIt);
 void reverseList(List* list);
@@ -61,9 +61,12 @@ void sortDescendingByPriority(List* list);
 boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
 
 void moveContentToList(List* source, List* destination);
+
+/* avoid using this function with stack lists/elements */
 ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination), void (*deallocObject)(Object* object));
-ListElement** moveListToArray(List* list, size_t* arraySize);
-void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
+
+ListElement** moveListToArray(List* list, size_t* arraySize);                                           // don't use for stack created lists (heap-only)
+void moveArrayToList(ListElement** array, const size_t arraySize, List* list);                          // don't use for stack created lists (heap-only)
 
 size_t getListSize(const List* list);
 ListElement* getListElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
@@ -82,6 +85,9 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload);
 Object* detachContentFromListElement(ListElement* element);
+
+
+/* don't use these two for stack created lists (heap-only) */
 void deleteObjectPayload(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
 boolean copyObjectPlaceholder(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
 

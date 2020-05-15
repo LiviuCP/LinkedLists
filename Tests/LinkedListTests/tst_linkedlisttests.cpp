@@ -74,6 +74,29 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
         deleteList(list, deleteObjectPayload);
         list = nullptr;
     }
+
+    {
+        List list{nullptr};
+
+        ListElement first{Object{-1, nullptr}, 6, nullptr};
+        ListElement second{Object{-1, nullptr}, 2, nullptr};
+        ListElement third{Object{-1, nullptr}, 4, nullptr};
+        ListElement fourth{Object{-1, nullptr}, 5, nullptr};
+        ListElement fifth{Object{-1, nullptr}, 7, nullptr};
+
+        appendToList(&list, &first);
+        appendToList(&list, &second);
+        appendToList(&list, &third);
+        prependToList(&list, &fourth);
+        prependToList(&list, &fifth);
+
+        QVERIFY2(getListSize(&list) == 5, "List size is not correct");
+        QVERIFY2(getListElementAtIndex(&list, 0)->priority == 7 && getListElementAtIndex(&list, 2)->priority == 6 && getListElementAtIndex(&list, 4)->priority == 4,
+                 "The element is not correctly retrieved based on index");
+
+        list.first = nullptr; // this is how we clear list if elements are on the stack (don't user clearList()!!!)
+        QVERIFY(getListSize(&list) == 0);
+    }
 }
 
 void LinkedListTests::testAppendElement()
