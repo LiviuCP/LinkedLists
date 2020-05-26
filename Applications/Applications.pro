@@ -9,4 +9,5 @@ SUBDIRS += \
     Sockets \
     SharedFile \
     SharedMemory \
-    Signals
+    Signals \
+    ASyncTest
