@@ -5,19 +5,17 @@
 
 int main()
 {
-    using namespace std;
-
     size_t nrOfElements{requestInputFromUser()};
     system("clear");
 
     std::vector<size_t> receivedPriorities{};
     if (nrOfElements > 0)
     {
-        cout << "Launching async task...";
+        std::cout << "Launching async task...";
         std::future<std::vector<size_t>> result{std::async(std::launch::async, generateListElementPriorities, nrOfElements)};
-        cout << "DONE" << endl;
+        std::cout << "DONE" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
-        cout << "Waiting for result..." << endl << endl;
+        std::cout << "Waiting for result..." << std::endl << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
 
         getDataFromTask(result, receivedPriorities);
@@ -28,12 +26,12 @@ int main()
         }
         else
         {
-            cout << "The list cannot be created" << endl;
+            std::cout << "The list cannot be created" << std::endl;
         }
     }
     else
     {
-        cout<<"You exited the app!"<<endl;
+        std::cout<<"You exited the app!"<<std::endl;
     }
 
     return 0;
