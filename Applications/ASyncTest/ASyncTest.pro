@@ -7,6 +7,7 @@ QMAKE_CFLAGS += -std=c11
 
 SOURCES += \
     main.cpp \
+    asyncutils.cpp \
     ../ManualListEntry/apputils.c
 
 QMAKE_LFLAGS += "-Wl,-rpath,\'$$top_builddir/LinkedListsLib\'"
@@ -16,4 +17,5 @@ LIBS += -L$$top_builddir/LinkedListsLib -lLinkedListsLib
 LIBS += -L$$top_builddir/Utils -lUtils
 
 HEADERS += \
+    asyncutils.h \
     ../ManualListEntry/apputils.h
