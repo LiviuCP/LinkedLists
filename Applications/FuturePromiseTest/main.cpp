@@ -39,7 +39,7 @@ int main()
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
-        std::cout << std::endl << "Joining thread...";
+        std::cout << "Joining thread...";
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         prioritiesRetrieval.join();
         std::cout << "DONE" << std::endl;
