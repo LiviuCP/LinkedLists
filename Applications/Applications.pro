@@ -10,4 +10,5 @@ SUBDIRS += \
     SharedFile \
     SharedMemory \
     Signals \
-    ASyncTest
+    ASyncTest \
+    FuturePromiseTest
