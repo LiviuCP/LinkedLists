@@ -62,6 +62,7 @@ boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, con
             if (currentElement == NULL)
             {
                 ((List*)(queue->container))->first = newElement;
+                ((List*)(queue->container))->last = newElement;
             }
             else if (currentElement->priority < newElement->priority)
             {
@@ -87,6 +88,7 @@ boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, con
                 if (!success) // append to list if all elements have lower priority
                 {
                     currentElement->next = newElement;
+                    ((List*)(queue->container))->last = newElement;
                     success = TRUE;
                 }
             }

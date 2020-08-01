@@ -15,6 +15,7 @@ List* createEmptyList()
     if (list != NULL)
     {
         list->first = NULL;
+        list->last = NULL;
     }
 
     return list;
@@ -32,7 +33,7 @@ List* createListFromPrioritiesArray(const size_t* priorityArray, const size_t ar
 
         for (size_t index = 0; index < arraySize; ++index)
         {
-            if (!createAndPrependToList(list, priorityArray[arraySize-1-index])) // use prepend to avoid list "walk-through" operations
+            if (!createAndAppendToList(list, priorityArray[index]))
             {
                 success = FALSE;
                 break;
@@ -105,21 +106,21 @@ ListElement* createAndAppendToList(List* list, size_t priority)
 
 void appendToList(List* list, ListElement* newElement)
 {
-    ListElement* currentElement;
     if (list != NULL && newElement != NULL)
     {
         if (list->first == NULL)
         {
+            ASSERT_CONDITION(list->last == NULL, "Non-null pointer detected for last list element")
+
             list->first = newElement;
+            list->last = newElement;
         }
         else
         {
-            currentElement = list->first;
-            while (currentElement->next != NULL)
-            {
-                currentElement = currentElement->next;
-            }
-            currentElement->next = newElement;
+            ASSERT_CONDITION(list->last != NULL, "Null pointer detected for last list element")
+
+            list->last->next = newElement;
+            list->last = newElement;
         }
     }
 }
@@ -149,6 +150,11 @@ void prependToList(List* list, ListElement* newElement)
     {
         ASSERT_CONDITION(newElement->next == NULL, "Element to be inserted is linked to another element!");
 
+        if (list->first == NULL)
+        {
+            list->last = newElement;
+        }
+
         newElement->next = list->first;
         list->first = newElement;
     }
@@ -156,25 +162,16 @@ void prependToList(List* list, ListElement* newElement)
 
 ListElement* createAndInsertAfter(ListIterator it, size_t priority)
 {
-    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list")
 
     ListElement* result = NULL;
-
     ListElement* nextElement = createListElement();
-    nextElement->priority = priority;
 
-    if (it.current != NULL)
+    if (nextElement != NULL)
     {
-
-        if (nextElement != NULL)
-        {
-            result = nextElement;
-            insertAfter(it, nextElement);
-        }
-    }
-    else if (it.list->first == NULL)
-    {
-        it.list->first = nextElement;
+        result = nextElement;
+        nextElement->priority = priority;
+        insertAfter(it, nextElement);
     }
 
     return result;
@@ -182,13 +179,16 @@ ListElement* createAndInsertAfter(ListIterator it, size_t priority)
 
 void insertAfter(ListIterator it, ListElement* nextElement)
 {
-    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
+    ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list")
+
     if (nextElement != NULL)
     {
         ASSERT_CONDITION(nextElement->next == NULL, "Element to be inserted is linked to another element!");
 
         if (it.current != NULL)
         {
+            ASSERT_CONDITION(it.list->last != NULL, "Null pointer detected for last list element")
+
             if (it.current->next != NULL)
             {
                 ListElement* temp = it.current->next;
@@ -198,11 +198,15 @@ void insertAfter(ListIterator it, ListElement* nextElement)
             else
             {
                 it.current->next = nextElement;
+                it.list->last = nextElement;
             }
         }
         else if (it.list->first == NULL)
         {
+            ASSERT_CONDITION(it.list->last == NULL, "Non-null pointer detected for last list element")
+
             it.list->first = nextElement;
+            it.list->last = nextElement;
         }
     }
 }
@@ -212,12 +216,11 @@ ListElement* createAndInsertBefore(ListIterator it, size_t priority)
     ASSERT_CONDITION(it.list != NULL, "Iterator points to NULL list");
 
     ListElement* result = NULL;
-
     ListElement* previousElement = createListElement();
-    previousElement->priority = priority;
 
     if (previousElement != NULL)
     {
+        previousElement->priority = priority;
         result = previousElement;
         insertBefore(it, previousElement);
     }
@@ -264,6 +267,7 @@ ListElement* removeFirstListElement(List* list)
     if (list != NULL && list->first != NULL)
     {
         removedElement = list->first;
+
         if (removedElement->next != NULL)
         {
             list->first = removedElement->next;
@@ -271,7 +275,10 @@ ListElement* removeFirstListElement(List* list)
         }
         else
         {
+            ASSERT_CONDITION(list->last != NULL, "Null pointer detected for last list element")
+
             list->first = NULL;
+            list->last = NULL;
         }
     }
 
@@ -284,6 +291,8 @@ ListElement* removeLastListElement(List* list)
 
     if (list != NULL && list->first != NULL)
     {
+        ASSERT_CONDITION(list->last != NULL, "Null pointer detected for last list element")
+
         ListElement* currentElement = list->first;
         ListElement* nextElement = currentElement->next;
         if (nextElement != NULL)
@@ -295,11 +304,13 @@ ListElement* removeLastListElement(List* list)
             }
             removedElement = nextElement;
             currentElement->next = NULL;
+            list->last = currentElement;
         }
         else
         {
             removedElement = currentElement;
             list->first = NULL;
+            list->last = NULL;
         }
     }
 
@@ -313,11 +324,18 @@ ListElement* removePreviousListElement(ListIterator it)
 
     if (it.list->first != NULL && it.current != it.list->first)
     {
+        ASSERT_CONDITION(it.list->last != NULL, "Null pointer detected for last list element")
+
         ListElement* currentElement = it.list->first;
         ListElement* previousElement = it.list->first;
 
         if (currentElement->next == it.current)
         {
+            if (it.list->first == it.list->last)
+            {
+                it.list->last = NULL; // one element list, the only element is removed, becomes NULL
+            }
+
             it.list->first = it.current;
         }
         else
@@ -328,6 +346,11 @@ ListElement* removePreviousListElement(ListIterator it)
             {
                 previousElement = currentElement;
                 currentElement = currentElement->next;
+            }
+
+            if (currentElement == it.list->last)
+            {
+                it.list->last = previousElement;
             }
 
             previousElement->next = it.current;
@@ -347,9 +370,16 @@ ListElement* removeNextListElement(ListIterator it)
 
     if (it.current != NULL && it.current->next != NULL)
     {
+        ASSERT_CONDITION(it.list->last != NULL, "Null pointer detected for last list element")
+
         result = it.current->next;
         it.current->next = result->next;
         result->next = NULL;
+
+        if (result == it.list->last)
+        {
+            it.list->last = it.current->next;
+        }
     }
 
     return result;
@@ -363,7 +393,7 @@ ListElement* removeCurrentListElement(ListIterator it)
     if (it.current != NULL)
     {
         lnext(&it);
-        result =removePreviousListElement(it);
+        result = removePreviousListElement(it);
     }
 
     return result;
@@ -376,6 +406,7 @@ void clearList(List *list, void (*deallocObject)(Object* object))
     {
         ListElement* currentElement = list->first;
         list->first = NULL;
+        list->last = NULL;
 
         while (currentElement != NULL)
         {
@@ -418,19 +449,23 @@ void reverseList(List* list)
 {
     if (list != NULL && list->first != NULL)
     {
-        ListElement* firstElement = list->first;
-        ListElement* currentElement = firstElement->next;
-        firstElement->next = NULL;
+        ASSERT_CONDITION(list->last != NULL, "Null pointer detected for last list element")
+
+        ListElement* previousElement = list->first;
+        ListElement* currentElement = previousElement->next;
+        previousElement->next = NULL;
 
         while(currentElement != NULL)
         {
             ListElement* nextElement = currentElement->next;
-            currentElement->next = firstElement;
-            firstElement = currentElement;
+            currentElement->next = previousElement;
+            previousElement = currentElement;
             currentElement = nextElement;
         }
 
-        list->first = firstElement;
+        ListElement* lastElement = list->first;
+        list->first = list->last;
+        list->last = lastElement;
     }
 }
 
@@ -471,14 +506,28 @@ void moveContentToList(List* source, List* destination)
 {
     if (source != NULL && destination != NULL && source != destination && source->first != NULL)
     {
-        appendToList(destination, source->first);
+        ASSERT_CONDITION(source->last != NULL, "Null pointer detected for last source list element")
+
+        if (destination->first != NULL)
+        {
+            ASSERT_CONDITION(destination->last != NULL, "Null pointer detected for last destination list element")
+            destination->last->next = source->first;
+        }
+        else
+        {
+            ASSERT_CONDITION(destination->last == NULL, "Non-null pointer detected for last destination list element")
+            destination->first = source->first;
+        }
+
+        destination->last = source->last;
         source->first = NULL;
+        source->last = NULL;
     }
 }
 
-/* The objects of the source list will not be copied into the destination list. This is because without knowing the object types the only way to achieve this is by
-   shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, the objects will not be copied at all so the new elements of the
-   destination list will contain NULL objects
+/* The objects of the source list will not be copied into the destination list unless a proper custom copier function is provided (like customCopyObject()).
+   This is because without knowing the object types the only way to achieve this is by shallow copying, which is not safe (two pointers would indicate to the same object).
+   For this reason, by default (with copyObjectPlaceholder()) the objects will not be copied at all so the new elements of the destination list will contain NULL objects.
 */
 ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination),
                                void (*deallocObject)(Object* object))
@@ -487,48 +536,35 @@ ListElement* copyContentToList(const List* source, List* destination, boolean (*
 
     if (source != NULL && destination != NULL && source != destination && source->first != NULL)
     {
+        ASSERT_CONDITION(source->last != NULL, "Null pointer detected for last source list element")
+
         List* temp = createEmptyList();
 
         if (temp != NULL)
         {
             ListElement* currentSourceElement = source->first;
-            // use createAndAppendToList() only once to avoid overhead of finding last list element
-            ListElement* lastAppendedElement = createAndAppendToList(temp, currentSourceElement->priority);
 
-            if (lastAppendedElement != NULL && copyObjectToElement(currentSourceElement, lastAppendedElement))
+            while (currentSourceElement != NULL)
             {
-                currentSourceElement = currentSourceElement->next;
+                ListElement* elementToAppend = createAndAppendToList(temp, currentSourceElement->priority);
 
-                while (currentSourceElement != NULL)
+                if (elementToAppend != NULL && copyObjectToElement(currentSourceElement, elementToAppend))
                 {
-                    ListElement* elementToAppend = createListElement();
-
-                    if (elementToAppend != NULL && copyObjectToElement(currentSourceElement, elementToAppend))
-                    {
-                        elementToAppend->priority = currentSourceElement->priority;
-                        lastAppendedElement->next = elementToAppend;
-                        lastAppendedElement = elementToAppend;
-                        currentSourceElement = currentSourceElement->next;
-                    }
-                    else
-                    {
-                        // abort operation if a single additional element cannot be created
-                        deleteList(temp, deallocObject);
-                        temp = NULL;
-                        break;
-                    }
+                    currentSourceElement = currentSourceElement->next;
                 }
-
-                if (temp != NULL)
+                else
                 {
-                    result = temp->first;
-                    moveContentToList(temp, destination);
+                    // abort operation if a single additional element cannot be created
                     deleteList(temp, deallocObject);
                     temp = NULL;
+                    break;
                 }
             }
-            else {
-                // abort operation if the first copied element cannot be created
+
+            if (temp != NULL)
+            {
+                result = temp->first;
+                moveContentToList(temp, destination);
                 deleteList(temp, deallocObject);
                 temp = NULL;
             }
@@ -545,6 +581,8 @@ ListElement** moveListToArray(List* list, size_t* arraySize)
 
     if (list != NULL && list->first != NULL)
     {
+        ASSERT_CONDITION(list->last != NULL, "Null pointer detected for last list element")
+
         const size_t nrOfElements = getListSize(list);
 
         ListElement** array = (ListElement**)calloc(nrOfElements, sizeof(ListElement*));
@@ -563,6 +601,7 @@ ListElement** moveListToArray(List* list, size_t* arraySize)
             }
 
             list->first = NULL;
+            list->last = NULL;
             *arraySize = nrOfElements;
             result = array;
             array = NULL;
@@ -576,9 +615,10 @@ void moveArrayToList(ListElement** array, const size_t arraySize, List* list)
 {
     if (array != NULL && arraySize > 0 && list != NULL)
     {
-        ASSERT_CONDITION(list->first == NULL, "Attempt to move pointers array to unempty list");
+        ASSERT_CONDITION(list->first == NULL || list->last == NULL, "Attempt to move pointers array to unempty list")
+        ASSERT_CONDITION(*array != NULL, "NULL value array element identified")
+
         ListElement** currentArrayElement = array;
-        ASSERT_CONDITION(*array != NULL, "NULL value array element identified");
         list->first = *currentArrayElement;
         ListElement* currentListElement = list->first;
 
@@ -590,6 +630,7 @@ void moveArrayToList(ListElement** array, const size_t arraySize, List* list)
         }
 
         // ensure the list is correctly closed and the array loses ownership of the elements
+        list->last = currentListElement;
         array[arraySize-1]->next = NULL;
         for (size_t index = 0; index < arraySize; ++index)
         {
@@ -665,14 +706,8 @@ ListElement* getLastListElement(const List* list)
 
     if (list != NULL && list->first != NULL)
     {
-        ListElement* currentElement = list->first;
-
-        while (currentElement->next != NULL)
-        {
-            currentElement = currentElement->next;
-        }
-
-        result = currentElement;
+        result = list->last;
+        ASSERT_CONDITION(result != NULL, "Null pointer detected for last list element")
     }
 
     return result;

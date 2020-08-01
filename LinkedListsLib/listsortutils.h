@@ -2,6 +2,7 @@
 #define LISTUTILS_H
 
 #include "../Utils/codeutils.h"
+#include "../Utils/error.h"
 
 #define ASCENDING >
 #define DESCENDING <
@@ -10,6 +11,8 @@
 {                                                                                                                                               \
     if (list != NULL && list->first != NULL && list->first->next != NULL)                                                                       \
     {                                                                                                                                           \
+        ASSERT_CONDITION(list->last != NULL, "Null pointer detected for last list element")                                                     \
+                                                                                                                                                \
         /* bubble sort used due to the access model of the list elements (non-constant, element after element) */                               \
         for (;;)                                                                                                                                \
         {                                                                                                                                       \
@@ -57,6 +60,14 @@
                 break;                                                                                                                          \
             }                                                                                                                                   \
         }                                                                                                                                       \
+                                                                                                                                                \
+        /* "re-gain" the last list element after sorting */                                                                                     \
+        ListElement* currentElement = list->first;                                                                                              \
+        while (currentElement->next != NULL)                                                                                                    \
+        {                                                                                                                                       \
+            currentElement = currentElement->next;                                                                                              \
+        }                                                                                                                                       \
+        list->last = currentElement;                                                                                                            \
     }                                                                                                                                           \
 }
 

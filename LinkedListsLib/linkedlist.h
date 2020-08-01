@@ -18,6 +18,7 @@ typedef struct ListElement ListElement;
 typedef struct
 {
     ListElement* first;
+    ListElement* last; // required for constant time element appending
 }
 List;
 
