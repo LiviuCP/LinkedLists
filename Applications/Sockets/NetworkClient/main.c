@@ -16,15 +16,20 @@
 #define PORT_NUMBER         9801
 #define MAX_CONNECTS        4
 #define BUFFER_SIZE         512
-#define HOSTNAME            "localhost"
 
 static const size_t availabilityRequestCode = 0; // used for querying server about the maximum number of retrievable priorities
 
-void establishServerSocketConnection(const int* fileDescriptor);
+void establishServerSocketConnection(const int* fileDescriptor, const char* ipAddress);
 size_t retrieveRequestedNrOfPriorities(void);
 
-int main()
+int main(int argc, char* argv[])
 {
+    if(argc != 2)
+    {
+        printf("Usage: %s <server ip address> \n", argv[0]);
+        exit(-1);
+    }
+
     char buffer[BUFFER_SIZE+1];
     const int fileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -42,7 +47,7 @@ int main()
         size_t actuallyRequestedCount = 0;
 
         printf("\nConnecting to server...\n");
-        establishServerSocketConnection(&fileDescriptor);
+        establishServerSocketConnection(&fileDescriptor, argv[1]);
         printf("Connection established\n\n");
 
         printf("Checking data availability\n");
@@ -133,31 +138,22 @@ int main()
     return 0;
 }
 
-void establishServerSocketConnection(const int* fileDescriptor)
+void establishServerSocketConnection(const int* fileDescriptor, const char* ipAddress)
 {
-    struct hostent* host = gethostbyname(HOSTNAME);
-
-    if (!host)
-    {
-        perror("Error when getting host by name");
-        exit(-1);
-    }
-
-    if (host->h_addrtype != AF_INET)
-    {
-        perror("Bad address family error");
-        exit(-1);
-    }
-
     struct sockaddr_in socketAddress;
     memset(&socketAddress, 0, sizeof(socketAddress));
     socketAddress.sin_family = AF_INET;
-    socketAddress.sin_addr.s_addr = ((struct in_addr*) host->h_addr_list[0])->s_addr;
     socketAddress.sin_port = htons(PORT_NUMBER);
+
+    if(inet_pton(AF_INET, ipAddress, &socketAddress.sin_addr)<=0)
+    {
+        fprintf(stderr, "inet_pton error\n");
+        exit(-1);
+    }
 
     if (connect(*fileDescriptor, (struct sockaddr*) &socketAddress, sizeof(socketAddress)) < 0)
     {
-        perror("Connection error");
+        fprintf(stderr, "Connection error\n");
         exit(-1);
     }
 }

@@ -10,7 +10,6 @@
 #define PORT_NUMBER         9801
 #define MAX_CONNECTS        4
 #define BUFFER_SIZE         512
-#define HOSTNAME            "localhost"
 #define NR_OF_REQUESTS      2
 
 static const size_t nrOfAvailablePriorities = 10;
