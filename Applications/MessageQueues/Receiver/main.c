@@ -8,7 +8,7 @@
 #include "../../../LinkedListsLib/linkedlist.h"
 #include "../../ManualListEntry/apputils.h"
 
-void fillListFromQueue(List* list, const size_t expectedElementsNr, const size_t* priorityTypes);
+void fillListFromQueue(List* list, const size_t expectedElementsNr, const long* priorityTypes);
 
 int main()
 {
@@ -16,7 +16,7 @@ int main()
     if (receiverList != NULL)
     {
         const size_t expectedElementsNr = 6;
-        const size_t expectedPriorityTypes[] = {3, 2, 1, 3, 2, 1};
+        const long expectedPriorityTypes[] = {3, 2, 1, 3, 2, 1};
 
         printf("Filling list elements from message queue\n\n");
         fillListFromQueue(receiverList, expectedElementsNr, expectedPriorityTypes);
@@ -39,7 +39,7 @@ int main()
     return 0;
 }
 
-void fillListFromQueue(List* list, const size_t expectedElementsNr, const size_t* priorityTypes)
+void fillListFromQueue(List* list, const size_t expectedElementsNr, const long* priorityTypes)
 {
     if (list != NULL && priorityTypes != NULL)
     {
@@ -61,7 +61,7 @@ void fillListFromQueue(List* list, const size_t expectedElementsNr, const size_t
         {
             QueueMessage currentMessage;
 
-            if (msgrcv(queueId, &currentMessage, sizeof(currentMessage), (long)priorityTypes[index], MSG_NOERROR | IPC_NOWAIT) < 0)
+            if (msgrcv(queueId, &currentMessage, sizeof(currentMessage), priorityTypes[index], MSG_NOERROR | IPC_NOWAIT) < 0)
             {
                 fprintf(stderr, "Issues with receiving message\n");
             }

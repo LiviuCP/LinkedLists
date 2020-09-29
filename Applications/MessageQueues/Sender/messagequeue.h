@@ -9,7 +9,7 @@
 
 typedef struct
 {
-    size_t priorityType; // convention: 1 - low (one digit), 2 - medium (two digits), 3 - high (three digits)
+    long priorityType; // convention: 1 - low (one digit), 2 - medium (two digits), 3 - high (three digits)
     size_t priority;
 } QueueMessage;
 
