@@ -8,6 +8,11 @@ typedef unsigned int boolean;
 #define TRUE 1u
 #define FALSE 0u
 
+// used for restricting part of the code from compiling onto non-UNIX systems when containing POSIX threads (pthread.h)
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#define UNIX_OS
+#endif
+
 typedef struct
 {
     int type;

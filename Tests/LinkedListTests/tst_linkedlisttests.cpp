@@ -1147,6 +1147,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         list = nullptr;
     }
 
+#ifdef UNIX_OS
     // enhanced merge sort
     {
         List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
@@ -1185,6 +1186,7 @@ void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
         deleteList(list, deleteObjectPayload);
         list = nullptr;
     }
+#endif
 }
 
 void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
@@ -1245,6 +1247,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         list = nullptr;
     }
 
+#ifdef UNIX_OS
     // enhanced merge sort
     {
         List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
@@ -1283,6 +1286,7 @@ void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
         deleteList(list, deleteObjectPayload);
         list = nullptr;
     }
+#endif
 }
 
 void LinkedListTests::testIterators()

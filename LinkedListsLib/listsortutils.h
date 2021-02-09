@@ -217,6 +217,7 @@
     }                                                                                                                                           \
 }
 
+#ifdef UNIX_OS
 #define MERGE_THE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                      \
 {                                                                                                                                               \
     size_t firstIndex = startIndex;                                                                                                             \
@@ -315,6 +316,7 @@
         MERGE_THE_SORTED_HALF_ARRAYS(condition, parameter)                                                                                      \
     }                                                                                                                                           \
 }
+#endif
 
 #define QUICK_SORT(condition, parameter, recursiveCall)                                                                                         \
 {                                                                                                                                               \
@@ -368,6 +370,7 @@
     }                                                                                                                                           \
 }
 
+#ifdef UNIX_OS
 #define ENHANCED_QUICK_SORT(condition, parameter, threadFunctionAddress, recursiveCall)                                                         \
 {                                                                                                                                               \
     if (beginIndex != endIndex)                                                                                                                 \
@@ -439,6 +442,7 @@
         }                                                                                                                                       \
     }                                                                                                                                           \
 }
+#endif
 
 #define CHECK_IF_SORTED(condition, parameter)                                                                                                   \
 {                                                                                                                                               \

@@ -1,14 +1,22 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    ManualListEntry \
-    BoundedBuffer \
-    UnnamedPipes \
-    NamedPipes \
-    MessageQueues \
-    Sockets \
-    SharedFile \
-    SharedMemory \
-    Signals \
-    ASyncTest \
-    FuturePromiseTest
+    ManualListEntry
+
+unix {
+    SUBDIRS += \
+        BoundedBuffer \
+        UnnamedPipes \
+        NamedPipes \
+        MessageQueues \
+        Sockets \
+        SharedFile \
+        ASyncTest \
+        FuturePromiseTest
+}
+
+unix:!macx {
+    SUBDIRS += \
+        SharedMemory \
+        Signals
+}

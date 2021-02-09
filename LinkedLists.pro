@@ -9,9 +9,5 @@ SUBDIRS += \
 
 LinkedListsLib.depends = Utils
 Collections.depends = LinkedListsLib
-Collections.depends = Utils
 Applications.depends = LinkedListsLib
-Applications.depends = Utils
-Tests.depends = LinkedListsLib
 Tests.depends = Collections
-Tests.depends = Utils
