@@ -14,6 +14,6 @@ SOURCES += \
 
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-QMAKE_LFLAGS += "-Wl,-rpath,\'$$top_builddir/Utils\'"
-
 LIBS += -L$$top_builddir/Utils -lUtils
+
+QMAKE_LFLAGS += "-Wl,-rpath,\'../../Utils\'"

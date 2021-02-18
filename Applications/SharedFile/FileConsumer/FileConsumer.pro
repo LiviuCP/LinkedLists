@@ -11,6 +11,8 @@ SOURCES += \
 HEADERS += \
     ../../ManualListEntry/apputils.h
 
-QMAKE_LFLAGS += "-Wl,-rpath,\'$$top_builddir/LinkedListsLib\'"
-
 LIBS += -L$$top_builddir/LinkedListsLib -lLinkedListsLib
+LIBS += -L$$top_builddir/Utils -lUtils
+
+QMAKE_LFLAGS += "-Wl,-rpath,\'../../../LinkedListsLib\'"
+QMAKE_LFLAGS += "-Wl,-rpath,\'../../../Utils\'"
