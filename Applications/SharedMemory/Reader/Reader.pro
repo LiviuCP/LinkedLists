@@ -11,7 +11,10 @@ SOURCES += \
 HEADERS += \
     ../../ManualListEntry/apputils.h
 
-LIBS += -lrt -lpthread
+unix:!macx {
+    LIBS += -lrt
+}
+
 LIBS += -L$$top_builddir/LinkedListsLib -lLinkedListsLib
 LIBS += -L$$top_builddir/Utils -lUtils
 

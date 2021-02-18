@@ -11,7 +11,6 @@ SOURCES += \
 HEADERS += \
     ../ManualListEntry/apputils.h
 
-LIBS += -lrt -lpthread
 LIBS += -L$$top_builddir/LinkedListsLib -lLinkedListsLib
 LIBS += -L$$top_builddir/Utils -lUtils
 

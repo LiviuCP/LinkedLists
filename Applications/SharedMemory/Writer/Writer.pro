@@ -4,7 +4,9 @@ CONFIG -= app_bundle
 
 QMAKE_CFLAGS += -std=c11
 
-LIBS += -lrt -lpthread
+unix:!macx {
+    LIBS += -lrt
+}
 
 SOURCES += \
     main.c

@@ -11,12 +11,8 @@ unix {
         MessageQueues \
         Sockets \
         SharedFile \
-        ASyncTest \
-        FuturePromiseTest
-}
-
-unix:!macx {
-    SUBDIRS += \
         SharedMemory \
+        ASyncTest \
+        FuturePromiseTest \
         Signals
 }
