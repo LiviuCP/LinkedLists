@@ -2,7 +2,7 @@
 #include <thread>
 #include <future>
 
-#include "../ASyncTest/asyncutils.h"
+#include "asyncutils.h"
 
 void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t>> prioritiesRetrievalPromise);  // move semantics
 //void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t>>* prioritiesRetrievalPromise); // pointer

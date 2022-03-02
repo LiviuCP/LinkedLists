@@ -2,9 +2,9 @@
 #include <thread>
 
 #include "asyncutils.h"
-#include "../../LinkedListsLib/linkedlist.h"
-#include "../../Utils/codeutils.h"
-#include "../ManualListEntry/apputils.h"
+#include "linkedlist.h"
+#include "codeutils.h"
+#include "apputils.h"
 
 size_t requestInputFromUser()
 {
