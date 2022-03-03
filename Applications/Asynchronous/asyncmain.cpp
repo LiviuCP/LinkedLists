@@ -5,7 +5,7 @@
 
 int main()
 {
-    size_t nrOfElements{requestInputFromUser()};
+    size_t nrOfElements{requestListElementsCountFromUser()};
     system("clear");
 
     std::vector<size_t> receivedPriorities{};

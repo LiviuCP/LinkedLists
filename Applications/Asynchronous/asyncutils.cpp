@@ -6,21 +6,21 @@
 #include "codeutils.h"
 #include "listprintutils.h"
 
-size_t requestInputFromUser()
+size_t requestListElementsCountFromUser()
 {
     size_t result = 0;
 
-    while(true)
+    bool isValidElementsCount{false};
+
+    while(!isValidElementsCount)
     {
         std::cout << "Enter the number of elements (enter 0 to quit): ";
 
-        if (!readUnsignedLong(&result))
+        isValidElementsCount = readUnsignedLong(&result);
+
+        if (!isValidElementsCount)
         {
             std::cout << "Invalid Value! Please try again" << std::endl << std::endl;
-        }
-        else
-        {
-            break;
         }
     }
 

@@ -5,7 +5,7 @@
 #include <array>
 #include <future>
 
-size_t requestInputFromUser();
+size_t requestListElementsCountFromUser();
 std::vector<size_t> generateListElementPriorities(size_t nrOfElements);
 void getDataFromTask(std::future<std::vector<size_t>>& result, std::vector<size_t>& data);
 void putPrioritiesIntoList(const std::vector<size_t> receivedPriorities);
