@@ -14,9 +14,8 @@ include_directories(
 add_subdirectory(ManualListEntry)
 
 if (UNIX)
-    add_subdirectory(ASyncTest)
+    add_subdirectory(Asynchronous)
     add_subdirectory(BoundedBuffer)
-    add_subdirectory(FuturePromiseTest)
     add_subdirectory(Signals)
     add_subdirectory(UnnamedPipes)
     add_subdirectory(MessageQueues)
