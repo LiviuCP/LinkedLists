@@ -6,10 +6,13 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+include_directories(../Utils)
+
 add_library(${PROJECT_NAME} SHARED
     linkedlistslib.cpp
     linkedlist.c
     sort.c
+    listprintutils.c
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Utils)

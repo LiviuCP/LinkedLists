@@ -1,7 +1,7 @@
 #ifndef APPUTILS_H
 #define APPUTILS_H
 
-#include "../../LinkedListsLib/linkedlist.h"
+#include "linkedlist.h"
 
 #ifdef __cplusplus
 extern "C"{

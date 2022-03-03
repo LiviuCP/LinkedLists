@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 #include "linkedlist.h"
-#include "apputils.h"
+#include "listprintutils.h"
 
 void fillListFromPipe(List* list, const char* pipeName, size_t* nrOfBytes, size_t* nrOfElements);
 

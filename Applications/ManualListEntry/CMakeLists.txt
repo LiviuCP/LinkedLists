@@ -6,7 +6,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(${PROJECT_NAME}
     main.c
-    apputils.c
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LinkedListsLib)

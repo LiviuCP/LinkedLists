@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include "linkedlist.h"
-#include "apputils.h"
+#include "listprintutils.h"
 
 size_t makePipeAndSend(const char *pipeName, const size_t* priorities, const size_t elementsCount);
 

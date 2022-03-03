@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "../../LinkedListsLib/linkedlist.h"
-#include "../ManualListEntry/apputils.h"
+#include "listprintutils.h"
 
 #define WRITE_SIDE 1
 #define READ_SIDE 0

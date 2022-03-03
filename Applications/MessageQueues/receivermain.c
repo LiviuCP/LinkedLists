@@ -6,7 +6,7 @@
 
 #include "messagequeue.h"
 #include "linkedlist.h"
-#include "apputils.h"
+#include "listprintutils.h"
 
 void fillListFromQueue(List* list, const size_t expectedElementsNr, const long* priorityTypes);
 

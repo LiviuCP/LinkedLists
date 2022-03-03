@@ -4,7 +4,7 @@
 #include "sort.h"
 #include "listsortutils.h"
 
-#include "../Utils/error.h"
+#include "error.h"
 
 #define SORT_ASCENDING TRUE
 #define SORT_DESCENDING FALSE

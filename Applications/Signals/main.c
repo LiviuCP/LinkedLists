@@ -6,7 +6,7 @@
 #include <sys/types.h>
 
 #include "../../LinkedListsLib/linkedlist.h"
-#include "../ManualListEntry/apputils.h"
+#include "listprintutils.h"
 
 static const size_t nrOfPriorities = 5;
 static const size_t priorities[] = {6, 2, 7, 3, 4};
