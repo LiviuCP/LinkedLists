@@ -23,5 +23,6 @@ target_link_libraries(StdFuturePromise PRIVATE LinkedListsLib)
 target_link_libraries(StdFuturePromise PRIVATE Utils)
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(${PROJECT_NAME} PRIVATE pthread)
+    target_link_libraries(StdAsync PRIVATE pthread)
+    target_link_libraries(StdFuturePromise PRIVATE pthread)
 endif()
