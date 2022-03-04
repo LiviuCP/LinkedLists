@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(UnnamedPipes LANGUAGES C CXX)
+project(UnnamedPipes LANGUAGES C)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(${PROJECT_NAME}

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(ManualListEntry LANGUAGES C CXX)
+project(ManualListEntry LANGUAGES C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
