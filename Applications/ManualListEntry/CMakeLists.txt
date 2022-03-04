@@ -5,7 +5,7 @@ project(ManualListEntry LANGUAGES C)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(${PROJECT_NAME}
-    main.c
+    listentrymain.c
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LinkedListsLib)

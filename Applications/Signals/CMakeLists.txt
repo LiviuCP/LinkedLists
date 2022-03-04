@@ -7,7 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_compile_options(-D_XOPEN_SOURCE=700)
 
 add_executable(${PROJECT_NAME}
-    main.c
+    signalsmain.c
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LinkedListsLib)
