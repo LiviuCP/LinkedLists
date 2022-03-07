@@ -8,7 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories(../Utils)
 
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} ${LIB_TYPE}
     linkedlistslib.cpp
     linkedlist.c
     sort.c

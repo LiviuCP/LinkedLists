@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <pthread.h>
 
 #include "sort.h"
 #include "listsortutils.h"
@@ -10,6 +9,9 @@
 #define SORT_DESCENDING FALSE
 
 #ifdef UNIX_OS
+
+#include <pthread.h>
+
 typedef struct
 {
     ListElement** array;
@@ -25,6 +27,7 @@ typedef struct
     size_t startIndex;
     size_t endIndex;
 } QuickSortThreadInput;
+
 #endif
 
 // these functions are supposed to be "private", should not be accessed outside this file

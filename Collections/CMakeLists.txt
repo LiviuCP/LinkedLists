@@ -11,7 +11,7 @@ include_directories(
     ../Utils
 )
 
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} ${LIB_TYPE}
     collections.cpp
     hashtable.c
     priorityqueue.c
