@@ -2,11 +2,12 @@
 #include <thread>
 
 #include "asyncutils.h"
+#include "codeutils.h"
 
 int main()
 {
     size_t nrOfElements{requestListElementsCountFromUser()};
-    system("clear");
+    clearScreen();
 
     std::vector<size_t> receivedPriorities{};
     if (nrOfElements > 0)

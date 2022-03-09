@@ -167,7 +167,7 @@ size_t retrieveRequestedNrOfPriorities()
         printf("Enter the requested number of list element priorities (0 to exit): ");
         if (!readUnsignedLong(&nrOfRequestedPriorities))
         {
-            system("clear");
+            clearScreen();
             printf("Invalid input! Please try again\n\n");
         }
         else

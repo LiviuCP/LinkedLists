@@ -3,6 +3,7 @@
 #include <future>
 
 #include "asyncutils.h"
+#include "codeutils.h"
 
 void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t>> prioritiesRetrievalPromise);  // move semantics
 //void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t>>* prioritiesRetrievalPromise); // pointer
@@ -11,7 +12,7 @@ void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<siz
 int main()
 {
     size_t nrOfElements{requestListElementsCountFromUser()};
-    system("clear");
+    clearScreen();
 
     std::vector<size_t> receivedPriorities{};
     if (nrOfElements > 0)

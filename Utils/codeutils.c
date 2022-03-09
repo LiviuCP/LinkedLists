@@ -143,3 +143,12 @@ boolean areDecimalNumbersEqual(double first, double second)
 
     return (fabs(first - second) < epsilon);
 }
+
+void clearScreen()
+{
+#if defined (UNIX_OS)
+    system("clear"); // Linux & Mac
+#else
+    system("cls"); // Windows
+#endif
+}

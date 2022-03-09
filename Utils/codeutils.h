@@ -33,6 +33,8 @@ boolean readUnsignedLong(size_t* number);
 boolean isUnsignedLong(const char* input);
 boolean areDecimalNumbersEqual(double first, double second);
 
+void clearScreen();
+
 #ifdef __cplusplus
 }
 #endif

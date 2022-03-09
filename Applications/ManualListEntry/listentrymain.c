@@ -19,7 +19,7 @@ int main()
             printf("Element priority: ");
             if (!readUnsignedLong(&priority))
             {
-                system("clear");
+                clearScreen();
                 printf("Invalid input! Please try again\n\n");
                 continue;
             }
@@ -35,7 +35,7 @@ int main()
         }
 
 
-        system("clear");
+        clearScreen();
         printf("You created the list. Now you can choose one of the below options.\n\n");
 
         for (;;)
@@ -58,7 +58,7 @@ int main()
             size_t choice;
             if (!readUnsignedLong(&choice))
             {
-                system("clear");
+                clearScreen();
                 printf("Invalid input! Please try again\n\n");
                 continue;
             }
@@ -69,27 +69,27 @@ int main()
                 case 0:
                     // erase list
                     deleteList(list, deleteObjectPayload);
-                    system("clear");
+                    clearScreen();
                     printf("You exited the app!\n");
                     break;
                 case 1:
                     printf("\nEnter the element priority: ");
                     if (!readUnsignedLong(&priority))
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Invalid input. No element appended to list\n\n");
                         continue;
                     }
                     else if (priority == 0)
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Priority should be greater than 0. No element appended to list\n\n");
                         continue;
                     }
                     else
                     {
                         createAndAppendToList(list, priority);
-                        system("clear");
+                        clearScreen();
                         printf("Element appended\n\n");
                     }
                     break;
@@ -97,20 +97,20 @@ int main()
                     printf("\nEnter the priority: ");
                     if (!readUnsignedLong(&priority))
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Invalid input. No element prepended to list\n\n");
                         continue;
                     }
                     else if (priority == 0)
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Priority should be greater than 0. No element prepended to list\n\n");
                         continue;
                     }
                     else
                     {
                         createAndPrependToList(list, priority);
-                        system("clear");
+                        clearScreen();
                         printf("Element prepended\n\n");
                     }
                     break;
@@ -118,12 +118,12 @@ int main()
                     if (getListSize(list) != 0)
                     {
                         removeFirstListElement(list);
-                        system("clear");
+                        clearScreen();
                         printf("First element removed\n\n");
                     }
                     else
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Cannot remove first element! The list is empty.\n\n");
                     }
                     break;
@@ -131,12 +131,12 @@ int main()
                     if (getListSize(list) != 0)
                     {
                         removeLastListElement(list);
-                        system("clear");
+                        clearScreen();
                         printf("Last element removed\n\n");
                     }
                     else
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Cannot remove last element! The list is empty.\n\n");
                     }
                     break;
@@ -144,12 +144,12 @@ int main()
                     if (getListSize(list) != 0)
                     {
                         sortAscendingByPriority(list);
-                        system("clear");
+                        clearScreen();
                         printf("The list has been sorted.\n\n");
                     }
                     else
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Nothing to sort, list is empty\n\n");
                     }
                     break;
@@ -157,12 +157,12 @@ int main()
                     if (getListSize(list) != 0)
                     {
                         reverseList(list);
-                        system("clear");
+                        clearScreen();
                         printf("The list has been reversed.\n\n");
                     }
                     else
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Nothing to reverse, list is empty\n\n");
                     }
                     break;
@@ -170,12 +170,12 @@ int main()
                     if (getListSize(list) != 0)
                     {
                         clearList(list, deleteObjectPayload);
-                        system("clear");
+                        clearScreen();
                         printf("The list has been emptied\n\n");
                     }
                     else
                     {
-                        system("clear");
+                        clearScreen();
                         printf("The list is already empty!\n\n");
                     }
                     break;
@@ -183,24 +183,24 @@ int main()
                     printf("\nEnter the index: ");
                     if (!readUnsignedLong(&index))
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Invalid input. No element appended to list\n\n");
                         continue;
                     }
                     else if (index > getListSize(list))
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Invalid index (out of bounds)!\n\n");
                         continue;
                     }
                     else
                     {
-                        system("clear");
+                        clearScreen();
                         printf("Element with index %d has priority %zu\n\n", (unsigned int)index, (size_t)getListElementAtIndex(list, index)->priority);
                     }
                     break;
                 default:
-                    system("clear");
+                    clearScreen();
                     printf("Invalid choice\n\n");
                 }
             }
