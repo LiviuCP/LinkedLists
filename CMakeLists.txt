@@ -4,6 +4,14 @@ project(LinkedLists LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# this variable is propagated to all nested libraries (should be declared before any subdir)
+set(LIB_TYPE SHARED)
+
+# errors were encountered when building some libraries as shared on Windows so it has been decided to keep it static on this OS for the moment
+if(WIN32)
+    set(LIB_TYPE STATIC)
+endif()
+
 add_subdirectory(Applications)
 add_subdirectory(LinkedListsLib)
 add_subdirectory(Collections)
@@ -13,12 +21,4 @@ find_package(QT NAMES Qt5 Qt6 COMPONENTS Test QUIET)
 
 if(QT_FOUND)
     add_subdirectory(Tests)
-endif()
-
-# this variable is propagated to all nested libraries
-set(LIB_TYPE SHARED)
-
-# errors were encountered when building some libraries as shared on Windows so it has been decided to keep it static on this OS for the moment
-if(WIN32)
-    set(LIB_TYPE STATIC)
 endif()
