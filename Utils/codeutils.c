@@ -148,7 +148,7 @@ void clearScreen()
 {
 #if defined (UNIX_OS)
     system("clear"); // Linux & Mac
-#else
+#elif defined(_WIN32)
     system("cls"); // Windows
 #endif
 }
