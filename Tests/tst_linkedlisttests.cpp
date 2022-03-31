@@ -1572,7 +1572,11 @@ void LinkedListTests::testPrintListElementsToFile()
     const size_t prioritiesArray[5]{3, 2, 5, 9, 4};
     List* list = createListFromPrioritiesArray(prioritiesArray, 5);
 
+#ifdef _WIN32
+    const char* testDataFile = "C:\\test.txt";
+#else
     const char* testDataFile = "/tmp/test.txt";
+#endif
 
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 5;
