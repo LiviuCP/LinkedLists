@@ -30,6 +30,7 @@ private slots:
     void testRemoveCurrentElement();
     void testSwapElements();
     void testReverseList();
+    void testBatchReverseList();
     void testSortAscendingByPriority();
     void testSortDescendingByPriority();
     void testSortAscendingByPriorityUsingRandomAccess();
@@ -910,6 +911,213 @@ void LinkedListTests::testReverseList()
 
         deleteList(list, deleteObjectPayload);
         list = nullptr;
+    }
+}
+
+void LinkedListTests::testBatchReverseList()
+{
+    const size_t prioritiesArray[8]{6, 2, 5, 4, 1, 2, 7, 8};
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+
+        batchReverseList(list, 0);
+
+        QVERIFY2(getListSize(list) == 4 &&
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+
+        batchReverseList(list, 1);
+
+        QVERIFY2(getListSize(list) == 4 &&
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+
+        batchReverseList(list, 2);
+
+        QVERIFY2(getListSize(list) == 4 &&
+                 getListElementAtIndex(list, 0)->priority == 2 &&
+                 getListElementAtIndex(list, 1)->priority == 6 &&
+                 getListElementAtIndex(list, 2)->priority == 4 &&
+                 getListElementAtIndex(list, 3)->priority == 5,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 2 && list->last->priority == 5, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+
+        batchReverseList(list, 3);
+
+        QVERIFY2(getListSize(list) == 4 &&
+                 getListElementAtIndex(list, 0)->priority == 5 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 6 &&
+                 getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 5 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+
+        batchReverseList(list, 4);
+
+        QVERIFY2(getListSize(list) == 4 &&
+                 getListElementAtIndex(list, 0)->priority == 4 &&
+                 getListElementAtIndex(list, 1)->priority == 5 &&
+                 getListElementAtIndex(list, 2)->priority == 2 &&
+                 getListElementAtIndex(list, 3)->priority == 6,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 4 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+
+        batchReverseList(list, 5);
+
+        QVERIFY2(getListSize(list) == 4 &&
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+
+        batchReverseList(list, 2);
+
+        QVERIFY2(getListSize(list) == 5 &&
+                 getListElementAtIndex(list, 0)->priority == 2 &&
+                 getListElementAtIndex(list, 1)->priority == 6 &&
+                 getListElementAtIndex(list, 2)->priority == 4 &&
+                 getListElementAtIndex(list, 3)->priority == 5 &&
+                 getListElementAtIndex(list, 4)->priority == 1,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 2 && list->last->priority == 1, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+
+        batchReverseList(list, 3);
+
+        QVERIFY2(getListSize(list) == 5 &&
+                 getListElementAtIndex(list, 0)->priority == 5 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 6 &&
+                 getListElementAtIndex(list, 3)->priority == 4 &&
+                 getListElementAtIndex(list, 4)->priority == 1,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 5 && list->last->priority == 1, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 7);
+
+        batchReverseList(list, 2);
+
+        QVERIFY2(getListSize(list) == 7 &&
+                 getListElementAtIndex(list, 0)->priority == 2 &&
+                 getListElementAtIndex(list, 1)->priority == 6 &&
+                 getListElementAtIndex(list, 2)->priority == 4 &&
+                 getListElementAtIndex(list, 3)->priority == 5 &&
+                 getListElementAtIndex(list, 4)->priority == 2 &&
+                 getListElementAtIndex(list, 5)->priority == 1 &&
+                 getListElementAtIndex(list, 6)->priority == 7,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 2 && list->last->priority == 7, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 7);
+
+        batchReverseList(list, 3);
+
+        QVERIFY2(getListSize(list) == 7 &&
+                 getListElementAtIndex(list, 0)->priority == 5 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 6 &&
+                 getListElementAtIndex(list, 3)->priority == 2 &&
+                 getListElementAtIndex(list, 4)->priority == 1 &&
+                 getListElementAtIndex(list, 5)->priority == 4 &&
+                 getListElementAtIndex(list, 6)->priority == 7,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 5 && list->last->priority == 7, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+
+        batchReverseList(list, 2);
+
+        QVERIFY2(getListSize(list) == 8 &&
+                 getListElementAtIndex(list, 0)->priority == 2 &&
+                 getListElementAtIndex(list, 1)->priority == 6 &&
+                 getListElementAtIndex(list, 2)->priority == 4 &&
+                 getListElementAtIndex(list, 3)->priority == 5 &&
+                 getListElementAtIndex(list, 4)->priority == 2 &&
+                 getListElementAtIndex(list, 5)->priority == 1 &&
+                 getListElementAtIndex(list, 6)->priority == 8 &&
+                 getListElementAtIndex(list, 7)->priority == 7,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 2 && list->last->priority == 7, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+
+        batchReverseList(list, 3);
+
+        QVERIFY2(getListSize(list) == 8 &&
+                 getListElementAtIndex(list, 0)->priority == 5 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 6 &&
+                 getListElementAtIndex(list, 3)->priority == 2 &&
+                 getListElementAtIndex(list, 4)->priority == 1 &&
+                 getListElementAtIndex(list, 5)->priority == 4 &&
+                 getListElementAtIndex(list, 6)->priority == 7 &&
+                 getListElementAtIndex(list, 7)->priority == 8,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 5 && list->last->priority == 8, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+
+        batchReverseList(list, 4);
+
+        QVERIFY2(getListSize(list) == 8 &&
+                 getListElementAtIndex(list, 0)->priority == 4 &&
+                 getListElementAtIndex(list, 1)->priority == 5 &&
+                 getListElementAtIndex(list, 2)->priority == 2 &&
+                 getListElementAtIndex(list, 3)->priority == 6 &&
+                 getListElementAtIndex(list, 4)->priority == 8 &&
+                 getListElementAtIndex(list, 5)->priority == 7 &&
+                 getListElementAtIndex(list, 6)->priority == 2 &&
+                 getListElementAtIndex(list, 7)->priority == 1,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 4 && list->last->priority == 1, "First and last element of the list are not correctly referenced");
     }
 }
 

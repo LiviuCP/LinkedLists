@@ -57,6 +57,7 @@ void clearList(List* list, void (*deallocObject)(Object* object));              
 
 void swapListElements(ListIterator firstIt, ListIterator secondIt);
 void reverseList(List* list);
+void batchReverseList(List* list, size_t batchSize);                                                  // reverses the list in groups (batches), each batch having batchSize elements
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);
 boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));

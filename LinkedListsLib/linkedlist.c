@@ -469,6 +469,67 @@ void reverseList(List* list)
     }
 }
 
+/* The batch size should be greater than 1 and smaller or equal to the list size, otherwise nothing gets reversed
+ */
+void batchReverseList(List* list, size_t batchSize)
+{
+    const size_t nrOfElements = getListSize(list);
+
+    size_t nrOfBatchesToReverse = 0;
+    size_t nrOfUnreversableElements = nrOfElements;
+
+    if (nrOfElements > 0 && batchSize > 1 && batchSize <= nrOfElements)
+    {
+        nrOfBatchesToReverse = nrOfElements / batchSize;
+        nrOfUnreversableElements = nrOfElements % batchSize;
+    }
+
+    ListElement* firstElementInBatch = list->first;
+    ListElement* elementToLinkToNextBatch = NULL; // connection point to the next batch (once this has been reversed) / the unchanged elements
+    ListElement* previousElement = NULL;
+    ListElement* currentElement = NULL;
+    size_t nrOfBatchesLeftToReverse = nrOfBatchesToReverse;
+
+    while (nrOfBatchesLeftToReverse > 0)
+    {
+        previousElement = firstElementInBatch;
+        currentElement = previousElement->next;
+        previousElement->next = NULL; // break the connection between the two nodes, they will be connected the other way around (reversed)
+
+        // elements in batch are reversed 2 at a time (0 - 1, 1 -2, ...), hence the decrease by 1 (for 2 elements in batch only 1 reversal etc)
+        size_t reversalsCountInBatch = batchSize - 1;
+
+        while (reversalsCountInBatch > 0)
+        {
+            ListElement* nextElement = currentElement->next;
+            currentElement->next = previousElement;
+            previousElement = currentElement;
+            currentElement = nextElement;
+            --reversalsCountInBatch;
+        }
+
+        if (nrOfBatchesLeftToReverse == nrOfBatchesToReverse)
+        {
+            list->first = previousElement; // reference to first element to be updated during first batch
+        }
+
+        if (0 == nrOfUnreversableElements && 1 == nrOfBatchesLeftToReverse)
+        {
+            list->last = firstElementInBatch; // reference to last element to be updated during last batch if no unreversable elements exist after
+        }
+
+        if (elementToLinkToNextBatch != NULL)
+        {
+            elementToLinkToNextBatch->next = previousElement; // this is applicable starting with second batch (there is no previous batch to be linked to first batch)
+        }
+
+        firstElementInBatch->next = currentElement; // link the reversed batch to the elements to follow (firstElementInBatch is actually the last element after reversal)
+        elementToLinkToNextBatch = firstElementInBatch; // this is for later relinking if the elements to follow are from a batch to be reversed (once this has been done)
+        firstElementInBatch = currentElement; // finalize move to next batch (if any)
+        --nrOfBatchesLeftToReverse;
+    }
+}
+
 void sortAscendingByPriority(List* list)
 {
     BUBBLE_SORT(ASCENDING , priority)
