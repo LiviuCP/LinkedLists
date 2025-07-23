@@ -920,22 +920,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        ListElement* lastReversedElement = batchReverseList(list, 0);
 
-        batchReverseList(list, 0);
-
-        QVERIFY2(getListSize(list) == 4 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 5 &&
-                 getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
-
-        QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
-
-        batchReverseList(list, 1);
+        QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 4 &&
                  getListElementAtIndex(list, 0)->priority == 6 &&
@@ -948,8 +935,24 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        ListElement* lastReversedElement = batchReverseList(list, 1);
 
-        batchReverseList(list, 2);
+        QVERIFY(!lastReversedElement);
+
+        QVERIFY2(getListSize(list) == 4 &&
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2 &&
+                 getListElementAtIndex(list, 2)->priority == 5 &&
+                 getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 5);
 
         QVERIFY2(getListSize(list) == 4 &&
                  getListElementAtIndex(list, 0)->priority == 2 &&
@@ -962,8 +965,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        ListElement* lastReversedElement = batchReverseList(list, 3);
 
-        batchReverseList(list, 3);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
         QVERIFY2(getListSize(list) == 4 &&
                  getListElementAtIndex(list, 0)->priority == 5 &&
@@ -976,8 +980,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        ListElement* lastReversedElement = batchReverseList(list, 4);
 
-        batchReverseList(list, 4);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
         QVERIFY2(getListSize(list) == 4 &&
                  getListElementAtIndex(list, 0)->priority == 4 &&
@@ -990,8 +995,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        ListElement* lastReversedElement = batchReverseList(list, 5);
 
-        batchReverseList(list, 5);
+        QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 4 &&
                  getListElementAtIndex(list, 0)->priority == 6 &&
@@ -1004,8 +1010,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+        ListElement* lastReversedElement = batchReverseList(list, 2);
 
-        batchReverseList(list, 2);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 5);
 
         QVERIFY2(getListSize(list) == 5 &&
                  getListElementAtIndex(list, 0)->priority == 2 &&
@@ -1019,8 +1026,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+        ListElement* lastReversedElement = batchReverseList(list, 3);
 
-        batchReverseList(list, 3);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
         QVERIFY2(getListSize(list) == 5 &&
                  getListElementAtIndex(list, 0)->priority == 5 &&
@@ -1034,8 +1042,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 7);
+        ListElement* lastReversedElement = batchReverseList(list, 2);
 
-        batchReverseList(list, 2);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 1);
 
         QVERIFY2(getListSize(list) == 7 &&
                  getListElementAtIndex(list, 0)->priority == 2 &&
@@ -1051,8 +1060,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 7);
+        ListElement* lastReversedElement = batchReverseList(list, 3);
 
-        batchReverseList(list, 3);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 4);
 
         QVERIFY2(getListSize(list) == 7 &&
                  getListElementAtIndex(list, 0)->priority == 5 &&
@@ -1068,8 +1078,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+        ListElement* lastReversedElement = batchReverseList(list, 2);
 
-        batchReverseList(list, 2);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 7);
 
         QVERIFY2(getListSize(list) == 8 &&
                  getListElementAtIndex(list, 0)->priority == 2 &&
@@ -1086,8 +1097,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+        ListElement* lastReversedElement = batchReverseList(list, 3);
 
-        batchReverseList(list, 3);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 4);
 
         QVERIFY2(getListSize(list) == 8 &&
                  getListElementAtIndex(list, 0)->priority == 5 &&
@@ -1104,8 +1116,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+        ListElement* lastReversedElement = batchReverseList(list, 4);
 
-        batchReverseList(list, 4);
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 1);
 
         QVERIFY2(getListSize(list) == 8 &&
                  getListElementAtIndex(list, 0)->priority == 4 &&
@@ -1123,20 +1136,9 @@ void LinkedListTests::testBatchReverseList()
     // some additional (corner) cases
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        ListElement* lastReversedElement = batchReverseList(list, 0);
 
-        batchReverseList(list, 0);
-
-        QVERIFY2(getListSize(list) == 2 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
-
-        QVERIFY2(list->first->priority == 6 && list->last->priority == 2, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
-
-        batchReverseList(list, 1);
+        QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 2 &&
                  getListElementAtIndex(list, 0)->priority == 6 &&
@@ -1147,8 +1149,22 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        ListElement* lastReversedElement = batchReverseList(list, 1);
 
-        batchReverseList(list, 2);
+        QVERIFY(!lastReversedElement);
+
+        QVERIFY2(getListSize(list) == 2 &&
+                 getListElementAtIndex(list, 0)->priority == 6 &&
+                 getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 6 && list->last->priority == 2, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
         QVERIFY2(getListSize(list) == 2 &&
                  getListElementAtIndex(list, 0)->priority == 2 &&
@@ -1159,8 +1175,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        ListElement* lastReversedElement = batchReverseList(list, 3);
 
-        batchReverseList(list, 3);
+        QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 2 &&
                  getListElementAtIndex(list, 0)->priority == 6 &&
@@ -1171,19 +1188,9 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 1);
+        ListElement* lastReversedElement = batchReverseList(list, 0);
 
-        batchReverseList(list, 0);
-
-        QVERIFY2(getListSize(list) == 1 &&
-                 getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
-
-        QVERIFY2(list->first->priority == 6 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 1);
-
-        batchReverseList(list, 1);
+        QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 1 &&
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
@@ -1193,8 +1200,21 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createListFromPrioritiesArray(prioritiesArray, 1);
+        ListElement* lastReversedElement = batchReverseList(list, 1);
 
-        batchReverseList(list, 2);
+        QVERIFY(!lastReversedElement);
+
+        QVERIFY2(getListSize(list) == 1 &&
+                 getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
+
+        QVERIFY2(list->first->priority == 6 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
+    }
+
+    {
+        List* list = createListFromPrioritiesArray(prioritiesArray, 1);
+        ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 1 &&
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
@@ -1204,14 +1224,15 @@ void LinkedListTests::testBatchReverseList()
 
     {
         List* list = createEmptyList();
+        ListElement* lastReversedElement = batchReverseList(list, 0);
 
-        batchReverseList(list, 0);
-
+        QVERIFY(!lastReversedElement);
         QVERIFY(getListSize(list) == 0);
         QVERIFY(!list->first && !list->last);
 
-        batchReverseList(list, 1);
+        lastReversedElement = batchReverseList(list, 1);
 
+        QVERIFY(!lastReversedElement);
         QVERIFY(getListSize(list) == 0);
         QVERIFY(!list->first && !list->last);
     }

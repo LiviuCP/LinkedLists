@@ -470,9 +470,11 @@ void reverseList(List* list)
 }
 
 /* The batch size should be greater than 1 and smaller or equal to the list size, otherwise nothing gets reversed
+   Return value: last element from the last reversed batch after reversing finished (NULL if no reversing applied)
  */
-void batchReverseList(List* list, size_t batchSize)
+ListElement* batchReverseList(List* list, size_t batchSize)
 {
+    ListElement* lastReversedElement = NULL;
     const size_t nrOfElements = getListSize(list);
 
     size_t nrOfBatchesToReverse = 0;
@@ -526,8 +528,16 @@ void batchReverseList(List* list, size_t batchSize)
         firstElementInBatch->next = currentElement; // link the reversed batch to the elements to follow (firstElementInBatch is actually the last element after reversal)
         elementToLinkToNextBatch = firstElementInBatch; // this is for later relinking if the elements to follow are from a batch to be reversed (once this has been done)
         firstElementInBatch = currentElement; // finalize move to next batch (if any)
+
+        if (1 == nrOfBatchesLeftToReverse)
+        {
+            lastReversedElement = elementToLinkToNextBatch;
+        }
+
         --nrOfBatchesLeftToReverse;
     }
+
+    return lastReversedElement;
 }
 
 void sortAscendingByPriority(List* list)
