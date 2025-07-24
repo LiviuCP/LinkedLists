@@ -21,12 +21,12 @@ extern "C"{
 PriorityQueue* createPriorityQueue();
 void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
 
-boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload);
+bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload);
 Object* removeFromPriorityQueue(PriorityQueue* queue);
 
 void clearPriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
 
-boolean isEmptyQueue(const PriorityQueue* queue);
+bool isEmptyQueue(const PriorityQueue* queue);
 
 PriorityQueueIterator pqbegin(const PriorityQueue* queue);
 void pqnext(PriorityQueueIterator *it);

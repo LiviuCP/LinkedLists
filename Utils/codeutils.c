@@ -78,12 +78,12 @@ char* getLine()
     return buffer;
 }
 
-boolean readUnsignedLong(size_t* number)
+bool readUnsignedLong(size_t* number)
 {
     char* input = getLine();
-    boolean isValidInt = isUnsignedLong(input);
+    bool isValidInt = isUnsignedLong(input);
 
-    if(isValidInt)
+    if (isValidInt)
     {
         *number = (size_t)atoi(input);
     }
@@ -94,9 +94,9 @@ boolean readUnsignedLong(size_t* number)
     return isValidInt;
 }
 
-boolean isUnsignedLong(const char *input)
+bool isUnsignedLong(const char *input)
 {
-    boolean isValid = TRUE;
+    bool isValid = true;
 
     if (input != NULL && strlen(input) != 0)
     {
@@ -118,7 +118,7 @@ boolean isUnsignedLong(const char *input)
             case '9':
                 break;
             default:
-                isValid = FALSE;
+                isValid = false;
             }
 
             ++currentPos;
@@ -131,13 +131,13 @@ boolean isUnsignedLong(const char *input)
     }
     else
     {
-        isValid = FALSE;
+        isValid = false;
     }
 
     return isValid;
 }
 
-boolean areDecimalNumbersEqual(double first, double second)
+bool areDecimalNumbersEqual(double first, double second)
 {
     const double epsilon = 1e-12;
 

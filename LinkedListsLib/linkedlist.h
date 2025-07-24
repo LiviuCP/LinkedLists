@@ -60,12 +60,12 @@ void reverseList(List* list);
 ListElement* batchReverseList(List* list, size_t batchSize);                                            // reverses the list in groups (batches), each batch having batchSize elements
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);
-boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
+bool sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
 
 void moveContentToList(List* source, List* destination);
 
 /* avoid using this function with stack lists/elements */
-ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination), void (*deallocObject)(Object* object));
+ListElement* copyContentToList(const List* source, List* destination, bool (*copyObjectToElement)(const ListElement* source, ListElement* destination), void (*deallocObject)(Object* object));
 
 ListElement** moveListToArray(List* list, size_t* arraySize);                                           // don't use for stack created lists (heap-only)
 void moveArrayToList(ListElement** array, const size_t arraySize, List* list);                          // don't use for stack created lists (heap-only)
@@ -74,14 +74,14 @@ size_t getListSize(const List* list);
 ListElement* getListElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
 ListElement* getPreviousListElement(ListIterator it);
 ListElement* getLastListElement(const List* list);
-boolean isListElementContained(const ListElement* element, const List* list);
-boolean isSortedAscendingByPriority(const List* list);
-boolean isSortedDescendingByPriority(const List* list);
+bool isListElementContained(const ListElement* element, const List* list);
+bool isSortedAscendingByPriority(const List* list);
+bool isSortedDescendingByPriority(const List* list);
 
 ListIterator lbegin(List* list);
 ListIterator lend(List* list);
 void lnext(ListIterator* iterator);
-boolean areIteratorsEqual(ListIterator first, ListIterator second);
+bool areIteratorsEqual(ListIterator first, ListIterator second);
 
 void printListContentToFile(const List* list, const char* outFile, const char* header);
 
@@ -91,10 +91,10 @@ Object* detachContentFromListElement(ListElement* element);
 
 /* don't use these two for stack created lists (heap-only) */
 void deleteObjectPayload(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)
-boolean copyObjectPlaceholder(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
+bool copyObjectPlaceholder(const ListElement* source, ListElement* destination); // default object copy function, does nothing but is required for passing a default function pointer
 
 // for testing purposes only
-boolean customCopyObject(const ListElement* source, ListElement* destination);
+bool customCopyObject(const ListElement* source, ListElement* destination);
 
 #ifdef __cplusplus
 }

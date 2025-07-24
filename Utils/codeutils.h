@@ -2,11 +2,7 @@
 #define CODEUTILS_H
 
 #include <stdlib.h>
-
-typedef unsigned int boolean;
-
-#define TRUE 1u
-#define FALSE 0u
+#include <stdbool.h>
 
 // used for restricting part of the code from compiling onto non-UNIX systems when containing POSIX threads (pthread.h)
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
@@ -28,10 +24,10 @@ Object* createObject(int type, void* payload);
 void deleteObject(Object* object, void (*emptyObject)(Object* object));
 
 char* getLine();
-boolean readUnsignedLong(size_t* number);
+bool readUnsignedLong(size_t* number);
 
-boolean isUnsignedLong(const char* input);
-boolean areDecimalNumbersEqual(double first, double second);
+bool isUnsignedLong(const char* input);
+bool areDecimalNumbersEqual(double first, double second);
 
 void clearScreen();
 

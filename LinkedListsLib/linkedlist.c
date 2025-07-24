@@ -29,13 +29,13 @@ List* createListFromPrioritiesArray(const size_t* priorityArray, const size_t ar
     {
         List* list = createEmptyList();
 
-        boolean success = TRUE;
+        bool success = true;
 
         for (size_t index = 0; index < arraySize; ++index)
         {
             if (!createAndAppendToList(list, priorityArray[index]))
             {
-                success = FALSE;
+                success = false;
                 break;
             }
         }
@@ -550,9 +550,9 @@ void sortDescendingByPriority(List* list)
     BUBBLE_SORT(DESCENDING , priority)
 }
 
-boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
+bool sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
 {
-    boolean result = FALSE;
+    bool result = false;
 
     if (list != NULL && list->first != NULL)
     {
@@ -563,7 +563,7 @@ boolean sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** ar
         {
             sortingAlgorithm(array, arraySize);
             moveArrayToList(array, arraySize, list);
-            result = TRUE;
+            result = true;
         }
 
         free(array);
@@ -600,7 +600,7 @@ void moveContentToList(List* source, List* destination)
    This is because without knowing the object types the only way to achieve this is by shallow copying, which is not safe (two pointers would indicate to the same object).
    For this reason, by default (with copyObjectPlaceholder()) the objects will not be copied at all so the new elements of the destination list will contain NULL objects.
 */
-ListElement* copyContentToList(const List* source, List* destination, boolean (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+ListElement* copyContentToList(const List* source, List* destination, bool (*copyObjectToElement)(const ListElement* source, ListElement* destination),
                                void (*deallocObject)(Object* object))
 {
     ListElement* result = NULL;
@@ -784,9 +784,9 @@ ListElement* getLastListElement(const List* list)
     return result;
 }
 
-boolean isListElementContained(const ListElement* element, const List* list)
+bool isListElementContained(const ListElement* element, const List* list)
 {
-    boolean result = FALSE;
+    bool result = false;
 
     if (element != NULL && list != NULL && list->first != NULL)
     {
@@ -796,7 +796,7 @@ boolean isListElementContained(const ListElement* element, const List* list)
         {
             if (element == currentElement)
             {
-                result = TRUE;
+                result = true;
                 break;
             }
             currentElement = currentElement->next;
@@ -806,12 +806,12 @@ boolean isListElementContained(const ListElement* element, const List* list)
     return result;
 }
 
-boolean isSortedAscendingByPriority(const List* list)
+bool isSortedAscendingByPriority(const List* list)
 {
     CHECK_IF_SORTED(ASCENDING, priority);
 }
 
-boolean isSortedDescendingByPriority(const List* list)
+bool isSortedDescendingByPriority(const List* list)
 {
     CHECK_IF_SORTED(DESCENDING, priority);
 }
@@ -851,7 +851,7 @@ void lnext(ListIterator* iterator)
     }
 }
 
-boolean areIteratorsEqual(ListIterator first, ListIterator second)
+bool areIteratorsEqual(ListIterator first, ListIterator second)
 {
     ASSERT_CONDITION(first.list != NULL && second.list != NULL, "At least one iterator points to a NULL list");
     ASSERT_CONDITION(first.list == second.list, "Iterators belong to different lists")
@@ -959,15 +959,15 @@ void deleteObjectPayload(Object *object)
 
    ---> To be used for lists with EMPTY objects only!
 */
-boolean copyObjectPlaceholder(const ListElement* source, ListElement* destination)
+bool copyObjectPlaceholder(const ListElement* source, ListElement* destination)
 {
-    boolean success = FALSE;
+    bool success = false;
 
     if (source != NULL && destination != NULL)
     {
         ASSERT_CONDITION(source->object.type < 0 && source->object.payload == NULL && destination->object.type < 0 && destination->object.payload == NULL,
                          "The source and/or destination element object is either invalid or non-empty")
-        success = TRUE;
+        success = true;
     }
 
     return success;
@@ -976,9 +976,9 @@ boolean copyObjectPlaceholder(const ListElement* source, ListElement* destinatio
 /* This function is just for illustrating the creation of custom deep copy function
     ---> for test purposes only
 */
-boolean customCopyObject(const ListElement* source, ListElement* destination)
+bool customCopyObject(const ListElement* source, ListElement* destination)
 {
-    boolean success = FALSE;
+    bool success = false;
 
     /* copy a NON-EMPTY source object to EMPTY destination object to avoid any memory leaks */
     if (source != NULL && destination != NULL && source->object.payload != NULL && destination->object.payload == NULL)
@@ -1001,7 +1001,7 @@ boolean customCopyObject(const ListElement* source, ListElement* destination)
                     destinationObjectPayload->stop->y = ((Segment*)source->object.payload)->stop->y;
                     destination->object.type = source->object.type;
                     destination->object.payload = (void*)destinationObjectPayload;
-                    success = TRUE;
+                    success = true;
                 }
 
                 if (!success) // ensure any allocated memory is freed in case deep copy failed
@@ -1029,7 +1029,7 @@ boolean customCopyObject(const ListElement* source, ListElement* destination)
                     destinationObjectPayload->temperature = ((LocalConditions*)source->object.payload)->temperature;
                     destination->object.type = source->object.type;
                     destination->object.payload = (void*)destinationObjectPayload;
-                    success = TRUE;
+                    success = true;
                 }
 
                 if (!success) // ensure any allocated memory is freed in case deep copy failed

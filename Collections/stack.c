@@ -1,5 +1,3 @@
-#include <string.h>
-
 #include "stack.h"
 #include "../LinkedListsLib/linkedlist.h"
 
@@ -40,9 +38,9 @@ void deleteStack(Stack* stack, void (*deallocObject)(Object* object))
     }
 }
 
-boolean pushToStack(Stack* stack, const int objectType, void* const objectPayload)
+bool pushToStack(Stack* stack, const int objectType, void* const objectPayload)
 {
-    boolean success = FALSE;
+    bool success = false;
 
     if (stack != NULL && objectPayload != NULL)
     {
@@ -98,9 +96,9 @@ void clearStack(Stack* stack, void (*deallocObject)(Object* object))
     }
 }
 
-boolean isEmptyStack(const Stack* stack)
+bool isEmptyStack(const Stack* stack)
 {
-    boolean result = FALSE;
+    bool result = false;
 
     if (stack != NULL)
     {

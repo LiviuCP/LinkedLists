@@ -1,5 +1,4 @@
 #include "bitoperations.h"
-#include "error.h"
 
 #define BYTE_SIZE 8
 #define NIBBLE_SIZE BYTE_SIZE/2
@@ -41,7 +40,7 @@ byte_t rotateRight(const byte_t byte, const size_t nrOfRotations)
 
         while (remainingRotations > 0)
         {
-            boolean maskedLastBitBeforeShift = result & LSB_MASK;
+            bool maskedLastBitBeforeShift = result & LSB_MASK;
             result = result >> 1;
 
             if (maskedLastBitBeforeShift != 0u)
@@ -149,9 +148,9 @@ size_t getMinNrOfRequiredBits(const byte_t byte)
     return result;
 }
 
-boolean isPalyndrome(const byte_t byte)
+bool isPalyndrome(const byte_t byte)
 {
-    boolean status = TRUE;
+    bool status = true;
 
     size_t leftIndex = BYTE_SIZE - 1;
     size_t rightIndex = 0;
@@ -160,7 +159,7 @@ boolean isPalyndrome(const byte_t byte)
     {
         if (((byte & (LSB_MASK << leftIndex)) >> (leftIndex - rightIndex)) ^ (byte & (LSB_MASK << rightIndex)))
         {
-            status = FALSE;
+            status = false;
             break;
         }
         else

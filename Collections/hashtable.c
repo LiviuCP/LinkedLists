@@ -8,9 +8,9 @@
 static const int hashEntryType = 'h' + 'a' + 's' + 'h' + 'E' + 'n' + 't' + 'r' + 'y';
 
 // "private" (supporting) functions
-static boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize);
+static bool _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize);
 static HashEntry* _createHashEntry(const char* key, const char* value);
-static boolean _updateHashEntry(HashEntry* hashEntry, const char* value);
+static bool _updateHashEntry(HashEntry* hashEntry, const char* value);
 static HashEntry* _getMatchingKeyHashEntry(const List *currentBucket, const char* key);
 static void _deleteHashEntry(Object* object); // custom deleter for hash table
 
@@ -24,14 +24,14 @@ HashTable* createHashTable(const size_t hashSize)
 
         if (hashBuckets != NULL)
         {
-            boolean allListsCreated = TRUE;
+            bool allListsCreated = true;
 
             for (size_t index = 0; index < hashSize; ++index)
             {
                 hashBuckets[index] = createEmptyList();
                 if (hashBuckets[index] == NULL)
                 {
-                    allListsCreated = FALSE;
+                    allListsCreated = false;
                     break;
                 }
             }
@@ -86,9 +86,9 @@ void deleteHashTable(HashTable* hashTable)
     hashTable = NULL;
 }
 
-boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable)
+bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
 {
-    boolean success = FALSE;
+    bool success = false;
 
     if (key != NULL && value != NULL && hashTable != NULL && strlen(key) > 0 && strlen(value) > 0)
     {
@@ -120,7 +120,7 @@ boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable
                 if (newElement != NULL)
                 {
                     assignObjectContentToListElement(newElement, hashEntryType, newHashEntry);
-                    success = TRUE;
+                    success = true;
                 }
             }
         }
@@ -229,9 +229,9 @@ size_t getHashIndexForKey(const char* key, size_t hashSize)
     return hashIndex;
 }
 
-static boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize)
+static bool _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize)
 {
-    boolean success = FALSE;
+    bool success = false;
 
     if (key != NULL && hashIndex != NULL && strlen(key) > 0 && hashSize > 0)
     {
@@ -243,7 +243,7 @@ static boolean _retrieveHashIndex(const char* key, size_t* hashIndex, const size
         }
 
         *hashIndex = sum % hashSize;
-        success = TRUE;
+        success = true;
     }
 
     return success;
@@ -289,9 +289,9 @@ static HashEntry* _createHashEntry(const char* key, const char* value)
     return result;
 }
 
-static boolean _updateHashEntry(HashEntry* hashEntry, const char* value)
+static bool _updateHashEntry(HashEntry* hashEntry, const char* value)
 {
-    boolean success = FALSE;
+    bool success = false;
 
     if (hashEntry != NULL && value != NULL)
     {
@@ -302,7 +302,7 @@ static boolean _updateHashEntry(HashEntry* hashEntry, const char* value)
             strcpy(newValue, value);
             free(hashEntry->value);
             hashEntry->value = newValue;
-            success = TRUE;
+            success = true;
         }
     }
 

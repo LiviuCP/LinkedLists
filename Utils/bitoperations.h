@@ -2,8 +2,7 @@
 #define BITOPERATIONS_H
 
 #include <stdlib.h>
-
-#include "codeutils.h"
+#include <stdbool.h>
 
 typedef unsigned char byte_t;
 
@@ -20,7 +19,7 @@ void swapBytes(byte_t* firstByte, byte_t* secondByte);
 
 size_t getNumberOfSetBits(const byte_t byte);
 size_t getMinNrOfRequiredBits(const byte_t byte);
-boolean isPalyndrome(const byte_t byte);
+bool isPalyndrome(const byte_t byte);
 
 #ifdef __cplusplus
 }

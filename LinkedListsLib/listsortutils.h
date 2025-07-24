@@ -446,7 +446,7 @@
 
 #define CHECK_IF_SORTED(condition, parameter)                                                                                                   \
 {                                                                                                                                               \
-    boolean isSorted = TRUE;                                                                                                                    \
+    bool isSorted = true;                                                                                                                    \
                                                                                                                                                 \
     if (list!= NULL)                                                                                                                            \
     {                                                                                                                                           \
@@ -466,7 +466,7 @@
     }                                                                                                                                           \
     else                                                                                                                                        \
     {                                                                                                                                           \
-        isSorted = FALSE;                                                                                                                       \
+        isSorted = false;                                                                                                                       \
     }                                                                                                                                           \
                                                                                                                                                 \
     return isSorted;                                                                                                                            \

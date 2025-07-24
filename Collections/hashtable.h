@@ -2,7 +2,7 @@
 #define HASHTABLE_H
 
 #include <stdlib.h>
-#include "../Utils/codeutils.h"
+#include <stdbool.h>
 
 typedef struct
 {
@@ -22,7 +22,7 @@ extern "C" {
 
 HashTable* createHashTable(const size_t hashSize);
 void deleteHashTable(HashTable* hashTable);
-boolean insertHashEntry(const char* key, const char* value, HashTable* hashTable);
+bool insertHashEntry(const char* key, const char* value, HashTable* hashTable);
 void eraseHashEntry(const char* key, HashTable* hashTable);
 
 const char* getHashEntryValue(const char* key, const HashTable* hashTable);

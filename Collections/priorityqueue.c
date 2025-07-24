@@ -2,7 +2,6 @@
 
 #include "priorityqueue.h"
 #include "../LinkedListsLib/linkedlist.h"
-#include "../Utils/codeutils.h"
 #include "../Utils/error.h"
 
 PriorityQueue* createPriorityQueue()
@@ -40,9 +39,9 @@ void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* obj
     }
 }
 
-boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload)
+bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload)
 {
-    boolean success = FALSE;
+    bool success = false;
 
     if (queue != NULL && objectPayload != NULL)
     {
@@ -81,7 +80,7 @@ boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, con
                     {
                         newElement->next = currentElement->next;
                         currentElement->next = newElement;
-                        success = TRUE;
+                        success = true;
                         break;
                     }
                 }
@@ -89,7 +88,7 @@ boolean insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, con
                 {
                     currentElement->next = newElement;
                     ((List*)(queue->container))->last = newElement;
-                    success = TRUE;
+                    success = true;
                 }
             }
         }
@@ -138,9 +137,9 @@ void clearPriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* obje
     }
 }
 
-boolean isEmptyQueue(const PriorityQueue* queue)
+bool isEmptyQueue(const PriorityQueue* queue)
 {
-    boolean result = FALSE;
+    bool result = false;
 
     if (queue != NULL)
     {
