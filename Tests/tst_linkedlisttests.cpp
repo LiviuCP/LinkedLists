@@ -931,6 +931,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -946,6 +949,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -961,6 +967,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 5,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 2 && list->last->priority == 5, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -976,6 +985,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 5 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -991,6 +1003,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 6,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 4 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1006,6 +1021,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 4, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1022,6 +1040,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 4)->priority == 1,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 2 && list->last->priority == 1, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1038,6 +1059,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 4)->priority == 1,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 5 && list->last->priority == 1, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1056,6 +1080,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 6)->priority == 7,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 2 && list->last->priority == 7, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1074,6 +1101,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 6)->priority == 7,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 5 && list->last->priority == 7, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1093,6 +1123,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 7)->priority == 7,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 2 && list->last->priority == 7, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1112,6 +1145,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 7)->priority == 8,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 5 && list->last->priority == 8, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1131,6 +1167,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 7)->priority == 1,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 4 && list->last->priority == 1, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     // some additional (corner) cases
@@ -1145,6 +1184,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 2, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1158,6 +1200,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 2, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1171,6 +1216,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 6,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 2 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1184,6 +1232,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 2, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1196,6 +1247,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1208,6 +1262,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1220,6 +1277,9 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
 
         QVERIFY2(list->first->priority == 6 && list->last->priority == 6, "First and last element of the list are not correctly referenced");
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 
     {
@@ -1235,6 +1295,9 @@ void LinkedListTests::testBatchReverseList()
         QVERIFY(!lastReversedElement);
         QVERIFY(getListSize(list) == 0);
         QVERIFY(!list->first && !list->last);
+
+        deleteList(list, deleteObjectPayload);
+        list = nullptr;
     }
 }
 
