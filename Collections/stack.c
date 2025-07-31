@@ -3,6 +3,8 @@
 
 #include "../Utils/error.h"
 
+#include <stdio.h>
+
 Stack* createStack()
 {
     Stack* result = NULL;
@@ -44,15 +46,18 @@ bool pushToStack(Stack* stack, const int objectType, void* const objectPayload)
 
     if (stack != NULL && objectPayload != NULL)
     {
-        ASSERT_CONDITION(objectType >= 0, "Attempt to push invalid object")
-        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
+        ASSERT(objectType >= 0, "Attempt to push invalid object");
+        ASSERT(stack->container != NULL, "NULL stack container detected");
 
-        ListElement* newElement = createAndPrependToList((List*)(stack->container), 0); // all stack elements have priority 0 (priority is not relevant here)
-
-        if (newElement != NULL)
+        if (objectType >= 0 && stack->container != NULL)
         {
-            newElement->object.type = objectType;
-            newElement->object.payload = objectPayload;
+            ListElement* newElement = createAndPrependToList((List*)(stack->container), 0); // all stack elements have priority 0 (priority is not relevant here)
+
+            if (newElement != NULL)
+            {
+                newElement->object.type = objectType;
+                newElement->object.payload = objectPayload;
+            }
         }
     }
 
@@ -65,14 +70,27 @@ Object* popFromStack(Stack* stack)
 
     if (stack != NULL)
     {
-        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
-        ListElement* topStackElement = removeFirstListElement((List*)(stack->container));
+        ListElement* topStackElement = NULL;
+
+        ASSERT(stack->container != NULL, "NULL stack container detected");
+
+        if (stack->container != NULL)
+        {
+            topStackElement = removeFirstListElement((List*)(stack->container));
+        }
 
         if (topStackElement != NULL)
         {
-            ASSERT_CONDITION(topStackElement->object.type >= 0 && topStackElement->object.payload != NULL, "Invalid or empty stack element object detected")
+            Object* newObject = NULL;
 
-            Object* newObject = createObject(topStackElement->object.type, topStackElement->object.payload);
+            if (topStackElement->object.type >= 0 && topStackElement->object.payload != NULL)
+            {
+                newObject = createObject(topStackElement->object.type, topStackElement->object.payload);
+            }
+            else
+            {
+                ASSERT(false, "Invalid or empty stack element object detected");
+            }
 
             if (newObject != NULL)
             {
@@ -91,8 +109,12 @@ void clearStack(Stack* stack, void (*deallocObject)(Object* object))
 {
     if (stack != NULL)
     {
-        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
-        clearList((List*)stack->container, deallocObject);
+        ASSERT(stack->container != NULL, "NULL stack container detected");
+
+        if (stack->container != NULL)
+        {
+            clearList((List*)stack->container, deallocObject);
+        }
     }
 }
 
@@ -102,8 +124,12 @@ bool isEmptyStack(const Stack* stack)
 
     if (stack != NULL)
     {
-        ASSERT_CONDITION(stack->container != NULL, "NULL stack container detected")
-        result = (((List*)(stack->container))->first == NULL);
+        ASSERT(stack->container != NULL, "NULL stack container detected");
+
+        if (stack->container != NULL)
+        {
+            result = (((List*)(stack->container))->first == NULL);
+        }
     }
 
     return result;

@@ -11,7 +11,7 @@
 {                                                                                                                                               \
     if (list != NULL && list->first != NULL && list->first->next != NULL)                                                                       \
     {                                                                                                                                           \
-        ASSERT_CONDITION(list->last != NULL, "Null pointer detected for last list element")                                                     \
+        ASSERT(list->last != NULL, "Null pointer detected for last list element")                                                               \
                                                                                                                                                 \
         /* bubble sort used due to the access model of the list elements (non-constant, element after element) */                               \
         for (;;)                                                                                                                                \
@@ -446,7 +446,7 @@
 
 #define CHECK_IF_SORTED(condition, parameter)                                                                                                   \
 {                                                                                                                                               \
-    bool isSorted = true;                                                                                                                    \
+    bool isSorted = true;                                                                                                                       \
                                                                                                                                                 \
     if (list!= NULL)                                                                                                                            \
     {                                                                                                                                           \

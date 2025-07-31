@@ -1,22 +1,21 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <stdio.h>
 #include <assert.h>
 
 #ifndef NDEBUG
-#define ASSERT_CONDITION(condition, message)                                    \
+#define ASSERT(condition, message)                                              \
         {                                                                       \
             if(!(condition))                                                    \
             {                                                                   \
-                fprintf(stderr, "ASSERTION ERROR! ");                           \
-                fprintf(stderr, message);                                       \
-                fprintf(stderr, "\n");                                          \
-                assert(0);                                                      \
+                printf("ASSERTION ERROR! ");                                    \
+                printf(message);                                                \
+                printf("\n");                                                   \
+                assert(false);                                                  \
             }                                                                   \
         }
 #else
-#define ASSERT_CONDITION(condition, message)
+#define ASSERT(condition, message)
 #endif
 
 #endif // ERROR_H

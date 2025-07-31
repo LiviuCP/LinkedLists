@@ -54,11 +54,16 @@ static void _doEnhancedQuickSortDescendingByPriority(ListElement** array, size_t
 
 void swapElement(ListElement** first, ListElement** second)
 {
-    ASSERT_CONDITION(first != NULL && second != NULL, "Attempt to swap by dereferencing NULL pointer");
-
-    ListElement* swap = *first;
-    *first = *second;
-    *second = swap;
+    if (first != NULL && second != NULL)
+    {
+        ListElement* swap = *first;
+        *first = *second;
+        *second = swap;
+    }
+    else
+    {
+        ASSERT(false, "Attempt to swap by dereferencing NULL pointer");
+    }
 }
 
 void insertionSortAscendingByPriority(ListElement** array, const size_t arraySize)

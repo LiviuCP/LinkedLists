@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include "hashtable.h"
@@ -92,14 +93,20 @@ bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
 
     if (key != NULL && value != NULL && hashTable != NULL && strlen(key) > 0 && strlen(value) > 0)
     {
-        ASSERT_CONDITION(hashTable->hashSize > 0 && hashTable->hashBuckets != NULL, "Invalid hash table")
+        List* currentBucket = NULL;
 
-        size_t hashIndex;
-        _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
-//        fprintf(stderr, "key %s, hash index: %d\n", key, (int)hashIndex);
+        if (hashTable->hashSize > 0 && hashTable->hashBuckets != NULL)
+        {
+            size_t hashIndex;
+            _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+            currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
+        }
+        else
+        {
+            ASSERT(false, "Invalid hash table");
+        }
 
-        List* currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
-        ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
+        ASSERT(currentBucket != NULL, "NULL hash table bucket");
 
         HashEntry* matchingKeyHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
 
@@ -133,21 +140,34 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
 {
     if (key!= NULL && strlen(key) > 0 && hashTable != NULL)
     {
-        ASSERT_CONDITION(hashTable->hashSize > 0 && hashTable->hashBuckets != NULL, "Invalid hash table")
+        List* currentBucket = NULL;
 
-        size_t hashIndex;
-        _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+        if (hashTable->hashSize > 0 && hashTable->hashBuckets != NULL)
+        {
+            size_t hashIndex;
+            _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+            currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
+        }
+        else
+        {
+            ASSERT(false, "Invalid hash table");
+        }
 
-        List* currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
-        ASSERT_CONDITION(currentBucket != NULL, "NULL bucket detected in hash table")
+        ASSERT(currentBucket != NULL, "NULL bucket detected in hash table");
 
         ListElement* removedElement = NULL;
         ListIterator it = lbegin(currentBucket);
 
         while (!areIteratorsEqual(it, lend(currentBucket)))
         {
-            ASSERT_CONDITION(it.current->object.type == hashEntryType && it.current->object.payload != NULL,
-                             "Invalid list element object detected in hash table")
+            if (!it.current)
+            {
+                ASSERT(false, "Iterator points to empty list");
+                break;
+            }
+
+            ASSERT(it.current->object.type == hashEntryType && it.current->object.payload != NULL,
+                             "Invalid list element object detected in hash table");
 
             HashEntry* currentHashEntry = (HashEntry*)(it.current->object.payload);
 
@@ -175,13 +195,20 @@ const char* getHashEntryValue(const char* key, const HashTable* hashTable)
 
     if (key != NULL && strlen(key) != 0 && hashTable != NULL)
     {
-        ASSERT_CONDITION(hashTable->hashSize > 0 && hashTable->hashBuckets != NULL, "Invalid hash table")
+        List* currentBucket = NULL;
 
-        size_t hashIndex;
-        _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+        if (hashTable->hashSize > 0 && hashTable->hashBuckets != NULL)
+        {
+            size_t hashIndex;
+            _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+            currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
+        }
+        else
+        {
+            ASSERT(false, "Invalid hash table");
+        }
 
-        List* currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
-        ASSERT_CONDITION(currentBucket != NULL, "NULL hash table bucket");
+        ASSERT(currentBucket != NULL, "NULL hash table bucket");
 
         HashEntry* matchingHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
 
@@ -224,7 +251,7 @@ size_t getHashIndexesCount(const HashTable* hashTable)
 size_t getHashIndexForKey(const char* key, size_t hashSize)
 {
     size_t hashIndex;
-    ASSERT_CONDITION(_retrieveHashIndex(key, &hashIndex, hashSize), "Invalid key or hash size")
+    ASSERT(_retrieveHashIndex(key, &hashIndex, hashSize), "Invalid key or hash size");
 
     return hashIndex;
 }
@@ -319,12 +346,19 @@ static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char
 
         while (currentBucketEntry != NULL)
         {
-            ASSERT_CONDITION(currentBucketEntry->object.type == hashEntryType && currentBucketEntry->object.payload != NULL,
-                             "The current bucket entry data is incorrect")
+            if (currentBucketEntry->object.type != hashEntryType || currentBucketEntry->object.payload == NULL)
+            {
+                ASSERT(false, "The current bucket entry data is incorrect");
+                break;
+            }
 
             HashEntry* currentHashEntry = (HashEntry*)(currentBucketEntry->object.payload);
 
-            ASSERT_CONDITION(currentHashEntry->key != NULL && currentHashEntry->value != NULL && strlen(currentHashEntry->key) > 0 && strlen(currentHashEntry->value) > 0, "Invalid key-value pair");
+            if (currentHashEntry->key == NULL || currentHashEntry->value == NULL || strlen(currentHashEntry->key) == 0 || strlen(currentHashEntry->value) == 0)
+            {
+                ASSERT(false, "Invalid key-value pair");
+                break;
+            }
 
             if (strcmp(currentHashEntry->key, key) == 0)
             {
@@ -343,16 +377,21 @@ static void _deleteHashEntry(Object* object)
 {
     if (object != NULL)
     {
-        ASSERT_CONDITION(object->payload != NULL && object->type == hashEntryType, "Invalid hash entry, deleter cannot be applied")
-
-        HashEntry* entry = (HashEntry*)object->payload;
-        free(entry->key);
-        entry->key = NULL;
-        free(entry->value);
-        entry->value = NULL;
-        object->type = -1;
-        free(object->payload);
-        object->payload = NULL;
+        if (object->payload != NULL && object->type == hashEntryType)
+        {
+            HashEntry* entry = (HashEntry*)object->payload;
+            free(entry->key);
+            entry->key = NULL;
+            free(entry->value);
+            entry->value = NULL;
+            object->type = -1;
+            free(object->payload);
+            object->payload = NULL;
+        }
+        else
+        {
+            ASSERT(false, "Invalid hash entry, deleter cannot be applied");
+        }
     }
 }
 
