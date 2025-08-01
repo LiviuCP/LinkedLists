@@ -46,6 +46,9 @@ private slots:
     void testMoveArrayToList();
     void testPrintListElementsToFile();
 
+    // additional test for an utility function (TODO: create a separate utilities tests suite in the future if more such tests are required)
+    void testConvertIntToString();
+
 private:
     size_t _getSumOfPriorities(List* list);
 };
@@ -1987,16 +1990,43 @@ void LinkedListTests::testPrintListElementsToFile()
     char* buffer = static_cast<char*>(malloc(100));
     FILE* readTestData = fopen(testDataFile, "r");
 
-    fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 0\tPriority: 3\tHas empty Object: no\tObject type: point\n") == 0, "First element is not printed correctly");
-    fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 1\tPriority: 2\tHas empty Object: yes\n") == 0, "Second element is not printed correctly");
-    fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 2\tPriority: 5\tHas empty Object: no\tObject type: integer\n") == 0, "Third element is not printed correctly");
-    fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 3\tPriority: 9\tHas empty Object: no\tObject type: decimal\n") == 0, "Fourth element is not printed correctly");
-    fgets(buffer, 100, readTestData);
-    QVERIFY2(strcmp(buffer, "Element: 4\tPriority: 4\tHas empty Object: yes"), "Fifth element is not printed correctly");
+    if (!readTestData)
+    {
+        free(buffer);
+        buffer = nullptr;
+        QFAIL("File opening failure!");
+    }
+
+    char* result = fgets(buffer, 100, readTestData);
+    const bool success1 = strcmp(buffer, "Element: 0\tPriority: 3\tHas empty Object: no\tObject type: point\n") == 0;
+
+    if (result)
+    {
+        result = fgets(buffer, 100, readTestData);
+    }
+
+    const bool success2 = strcmp(buffer, "Element: 1\tPriority: 2\tHas empty Object: yes\n") == 0;
+
+    if (result)
+    {
+        result = fgets(buffer, 100, readTestData);
+    }
+
+    const bool success3 = strcmp(buffer, "Element: 2\tPriority: 5\tHas empty Object: no\tObject type: integer\n") == 0;
+
+    if (result)
+    {
+        result = fgets(buffer, 100, readTestData);
+    }
+
+    const bool success4 = strcmp(buffer, "Element: 3\tPriority: 9\tHas empty Object: no\tObject type: decimal\n") == 0;
+
+    if (result)
+    {
+        fgets(buffer, 100, readTestData);
+    }
+
+    const bool success5 = strcmp(buffer, "Element: 4\tPriority: 4\tHas empty Object: yes");
 
     fclose(readTestData);
     readTestData = nullptr;
@@ -2004,6 +2034,71 @@ void LinkedListTests::testPrintListElementsToFile()
     buffer = nullptr;
     deleteList(list, deleteObjectPayload);
     list = nullptr;
+
+    // checks performed at the end to avoid memory leaks
+    QVERIFY2(success1, "First element is not printed correctly");
+    QVERIFY2(success2, "Second element is not printed correctly");
+    QVERIFY2(success3, "Third element is not printed correctly");
+    QVERIFY2(success4, "Fourth element is not printed correctly");
+    QVERIFY2(success5, "Fifth element is not printed correctly");
+}
+
+void LinkedListTests::testConvertIntToString()
+{
+    char resultingString[21]; // assume int is 64 bit, worst-case scenario
+    size_t bound{sizeof(resultingString)}; // bound matches string size
+
+    bool success = convertIntToString(0, resultingString, bound);
+
+    QVERIFY(success);
+    QVERIFY(strcmp(resultingString, "0") == 0);
+
+    success = convertIntToString(-1, resultingString, bound);
+
+    QVERIFY(success);
+    QVERIFY(strcmp(resultingString, "-1") == 0);
+
+    success = convertIntToString(1, resultingString, bound);
+
+    QVERIFY(success);
+    QVERIFY(strcmp(resultingString, "1") == 0);
+
+    success = convertIntToString(2504326, resultingString, bound);
+
+    QVERIFY(success);
+    QVERIFY(strcmp(resultingString, "2504326") == 0);
+
+    success = convertIntToString(-45289458, resultingString, bound);
+
+    QVERIFY(success);
+    QVERIFY(strcmp(resultingString, "-45289458") == 0);
+
+    // test with smaller bounds, less than minimum required by function
+    bound = 11;
+    success = convertIntToString(0, resultingString, bound);
+
+    QVERIFY(!success);
+
+    // test with bound 0 to ensure there is no crash
+    bound = 0;
+    success = convertIntToString(0, resultingString, bound);
+
+    QVERIFY(!success);
+
+    // test with smaller available string, bound matching string size
+    char smallerResultingString[3];
+    bound = sizeof(smallerResultingString);
+    success = convertIntToString(100, smallerResultingString, bound); // no success but no crash either!
+
+    QVERIFY(!success);
+
+    // don't do this, bound should not be higher than available string size (although in this case the provided string is sufficient for a correct conversion)!
+    bound = 25;
+    success = convertIntToString(-2, smallerResultingString, bound);
+
+    // no crash / error only because the string size was enough for accomodating all chars including the terminating one ('\0')
+    QVERIFY(success);
+    QVERIFY(strcmp(smallerResultingString, "-2") == 0);
 }
 
 size_t LinkedListTests::_getSumOfPriorities(List *list)

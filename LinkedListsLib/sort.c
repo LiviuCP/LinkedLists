@@ -171,7 +171,7 @@ static void _doMergeSortByPriority(ListElement** array, const size_t arraySize, 
     }
     else
     {
-        fprintf(stderr, "Cannot perform merge sort, unable to allocate memory for the auxiliary array");
+        printf("Cannot perform merge sort, unable to allocate memory for the auxiliary array");
     }
 }
 
@@ -210,7 +210,7 @@ static void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arr
     }
     else
     {
-        fprintf(stderr, "Cannot perform enhanced merge sort, unable to allocate memory for the auxiliary array");
+        printf("Cannot perform enhanced merge sort, unable to allocate memory for the auxiliary array");
     }
 }
 
@@ -260,7 +260,7 @@ static void _doQuickMergeSortByPriority(ListElement** array, const size_t arrayS
     }
     else
     {
-        fprintf(stderr, "Cannot perform enhanced merge sort, unable to allocate memory for the auxiliary array");
+        printf("Cannot perform enhanced merge sort, unable to allocate memory for the auxiliary array");
     }
 }
 

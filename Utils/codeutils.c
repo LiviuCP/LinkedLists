@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "codeutils.h"
+#include "error.h"
 
 Object* createObject(int type, void* payload)
 {
@@ -41,7 +42,7 @@ char* getLine()
 
     if (buffer == NULL)
     {
-        fprintf(stderr, "Bad memory allocation");
+        printf("Bad memory allocation");
         exit(-1);
     }
 
@@ -56,7 +57,7 @@ char* getLine()
             }
             else
             {
-                fprintf(stderr, "Bad memory re-allocation");
+                printf("Bad memory re-allocation");
                 exit(-1);
             }
         }
@@ -135,6 +136,59 @@ bool isUnsignedLong(const char *input)
     }
 
     return isValid;
+}
+
+bool convertIntToString(int valueToConvert, char* str, size_t availableCharsCount)
+{
+    bool result = false;
+    const size_t minRequiredCharsCount = sizeof(int) <= 4 ? 12 : 21; // possible sign and terminating character included
+
+    if (str != NULL && availableCharsCount >= minRequiredCharsCount)
+    {
+        size_t currentCharIndex = 0;
+        const char asciiChar0 = '0';
+
+        // "memset" '\0' (memset triggered some security warnings)
+        for (size_t index = 0; index < availableCharsCount; ++index)
+        {
+            str[index] = '\0';
+        }
+
+        if (valueToConvert < 0)
+        {
+            str[currentCharIndex] = '-';
+            valueToConvert = -valueToConvert;
+            ++currentCharIndex;
+        }
+
+        char convertedDigitChars[availableCharsCount];
+        size_t convertedDigitCharsCount = 0;
+
+        int quotient = valueToConvert;
+        int remainder = 0;
+
+        do
+        {
+            remainder = quotient % 10;
+            quotient = quotient / 10;
+            convertedDigitChars[convertedDigitCharsCount] = (char)(asciiChar0 + remainder);
+            ++convertedDigitCharsCount;
+        }
+        while (quotient > 0);
+
+        ASSERT(convertedDigitCharsCount > 0, "At least one char should have been found for the integer!");
+
+        // enter the digit chars within result string in reverse order of their "discovery"
+        for (size_t charsToReverseCount = convertedDigitCharsCount; charsToReverseCount > 0; --charsToReverseCount)
+        {
+            str[currentCharIndex] = convertedDigitChars[charsToReverseCount - 1];
+            ++currentCharIndex;
+        }
+
+        result = true;
+    }
+
+    return result;
 }
 
 bool areDecimalNumbersEqual(double first, double second)

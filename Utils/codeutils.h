@@ -27,6 +27,7 @@ char* getLine();
 bool readUnsignedLong(size_t* number);
 
 bool isUnsignedLong(const char* input);
+bool convertIntToString(int valueToConvert, char* str, size_t availableCharsCount);
 bool areDecimalNumbersEqual(double first, double second);
 
 void clearScreen();

@@ -912,42 +912,55 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
             ListElement* currentElement = list->first;
             size_t elementIndex = 0;
 
-            fprintf(outputFile, "%s", header);
+            fputs(header, outputFile);
 
             if (getListSize(list) == 0)
             {
-                fprintf(outputFile, "EMPTY LIST");
+                fputs("EMPTY LIST", outputFile);
             }
 
             while (currentElement != NULL)
             {
-                fprintf(outputFile, "Element: %d\t", (int)elementIndex);
-                fprintf(outputFile, "Priority: %d\t", (int)currentElement->priority);
-                fprintf(outputFile, "Has empty Object: ");
+                char stringToDisplay[12];
+
+                convertIntToString((int)elementIndex, stringToDisplay, sizeof(stringToDisplay));
+                fputs("Element: ", outputFile);
+                fputs(stringToDisplay, outputFile);
+                fputs("\t", outputFile);
+
+                convertIntToString((int)currentElement->priority, stringToDisplay, sizeof(stringToDisplay));
+                fputs("Priority: ", outputFile);
+                fputs(stringToDisplay, outputFile);
+                fputs("\t", outputFile);
+
+                fputs("Has empty Object: ", outputFile);
+
                 if (currentElement->object.type >= 0)
                 {
-                    fprintf(outputFile, "no\t");
-                    fprintf(outputFile, "Object type: ");
-                    fprintf(outputFile, "%s", getTestObjectTypeAsString(currentElement->object.type));
+                    fputs("no\t", outputFile);
+                    fputs("Object type: ", outputFile);
+                    fputs(getTestObjectTypeAsString(currentElement->object.type), outputFile);
                 }
                 else
                 {
-                    fprintf(outputFile, "yes");
+                    fputs("yes", outputFile);
                 }
-                fprintf(outputFile, "\n");
+
+                fputs("\n", outputFile);
 
                 currentElement = currentElement->next;
                 ++elementIndex;
             }
+
             fclose(outputFile);
             outputFile = NULL;
         }
         else
         {
             errorNumber = errno;
-            fprintf(stderr, "A file opening error occurred!\n");
-            fprintf(stderr, "Error number: %d\n", errno);
-            fprintf(stderr, "Error description: %s\n", strerror(errorNumber));
+            printf("A file opening error occurred!\n");
+            printf("Error number: %d\n", errno);
+            printf("Error description: %s\n", strerror(errorNumber));
         }
     }
 }
