@@ -126,10 +126,27 @@ bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
             if (newHashEntry != NULL)
             {
                 ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
+
                 if (newElement != NULL)
                 {
                     assignObjectContentToListElement(newElement, hashEntryType, newHashEntry);
                     success = true;
+                }
+                else
+                {
+                    ASSERT(newHashEntry->key && newHashEntry->value, "Invalid hash entry!");
+
+                    if (newHashEntry->key)
+                    {
+                        free(newHashEntry->key);
+                    }
+
+                    if (newHashEntry->value)
+                    {
+                        free(newHashEntry->value);
+                    }
+
+                    free(newHashEntry);
                 }
             }
         }
