@@ -73,18 +73,20 @@ HashTable* createHashTable(const size_t hashSize)
 
 void deleteHashTable(HashTable* hashTable)
 {
+    ASSERT(hashTable != NULL, "Attempt to delete NULL hash table");
+
     if (hashTable != NULL)
     {
         for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
         {
             deleteList((List*)(hashTable->hashBuckets)[hashIndex], _deleteHashEntry);
         }
-    }
 
-    free(hashTable->hashBuckets);
-    hashTable->hashBuckets = NULL;
-    free(hashTable);
-    hashTable = NULL;
+        free(hashTable->hashBuckets);
+        hashTable->hashBuckets = NULL;
+        free(hashTable);
+        hashTable = NULL;
+    }
 }
 
 bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
@@ -329,6 +331,7 @@ static bool _updateHashEntry(HashEntry* hashEntry, const char* value)
             strcpy(newValue, value);
             free(hashEntry->value);
             hashEntry->value = newValue;
+            newValue = NULL;
             success = true;
         }
     }
