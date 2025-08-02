@@ -21,38 +21,38 @@ List* createEmptyList()
     return list;
 }
 
-List* createListFromPrioritiesArray(const size_t* priorityArray, const size_t arraySize)
+List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize)
 {
-    List* result = NULL;
+    List* list = NULL;
 
-    if (priorityArray != NULL && arraySize > 0)
+    if (prioritiesArray != NULL && arraySize > 0)
     {
-        List* list = createEmptyList();
+        list = createEmptyList();
 
-        bool success = true;
-
-        for (size_t index = 0; index < arraySize; ++index)
+        if (list != NULL)
         {
-            if (!createAndAppendToList(list, priorityArray[index]))
+            bool elementCreationFailed = false;
+
+            for (size_t index = 0; index < arraySize; ++index)
             {
-                success = false;
-                break;
+                ListElement* listElement = createAndAppendToList(list, prioritiesArray[index]);
+
+                if (!listElement)
+                {
+                    elementCreationFailed = true;
+                    break;
+                }
+            }
+
+            if (elementCreationFailed)
+            {
+                deleteList(list, deleteObjectPayload);
+                list = NULL;
             }
         }
-
-        if (success)
-        {
-            result = list;
-        }
-        else
-        {
-            deleteList(list, deleteObjectPayload);
-        }
-
-        list = NULL;
     }
 
-    return result;
+    return list;
 }
 
 // user is responsible for de-allocating the Object of each element prior to erasing the list

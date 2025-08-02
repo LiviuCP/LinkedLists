@@ -34,7 +34,7 @@ extern "C"{
 #endif
 
 List* createEmptyList();                                                                                // don't use for stack created lists (heap-only)
-List* createListFromPrioritiesArray(const size_t *priorityArray, const size_t arraySize);               // don't use for stack created lists (heap-only)
+List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize);             // don't use for stack created lists (heap-only)
 void deleteList(List* list, void (*deallocObject)(Object* object));                                     // don't use for stack created lists (heap-only)
 
 ListElement* createListElement();                                                                       // don't use for stack created lists (heap-only)
