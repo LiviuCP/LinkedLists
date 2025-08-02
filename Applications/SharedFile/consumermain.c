@@ -51,19 +51,19 @@ int main() {
             }
             else
             {
-                fprintf(stderr, "Unable to create consumer list: no memory allocated\n");
+                printf("Unable to create consumer list: no memory allocated\n");
                 exit(-1);
             }
         }
         else
         {
-            fprintf(stderr, "No payload data available, cannot create list\n");
+            printf("No payload data available, cannot create list\n");
             exit(-1);
         }
     }
     else
     {
-        fprintf(stderr, "Insufficient data, no valid header available\n");
+        printf("Insufficient data, no valid header available\n");
         exit(-1);
     }
 

@@ -69,13 +69,13 @@ int main()
             }
             else
             {
-                fprintf(stderr, "Unable to create reader list: no memory allocated\n");
+                printf("Unable to create reader list: no memory allocated\n");
                 exit(-1);
             }
         }
         else
         {
-            fprintf(stderr, "No payload data available, cannot create list\n");
+            printf("No payload data available, cannot create list\n");
             exit(-1);
         }
 

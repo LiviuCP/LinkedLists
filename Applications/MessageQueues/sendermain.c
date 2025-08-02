@@ -29,7 +29,7 @@ int main()
     }
     else
     {
-        fprintf(stderr, "Unable to create sender list: no memory allocated\n\n");
+        printf("Unable to create sender list: no memory allocated\n\n");
     }
 
     printf("Sending list element priorities and matching priority types to a message queue\n\n");

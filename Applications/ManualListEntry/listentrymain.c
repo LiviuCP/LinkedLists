@@ -213,7 +213,7 @@ int main()
     }
     else
     {
-        fprintf(stderr, "Unable to create list: no memory allocated\n");
+        printf("Unable to create list: no memory allocated\n");
         exit(-1);
     }
 

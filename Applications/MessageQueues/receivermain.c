@@ -32,7 +32,7 @@ int main()
     }
     else
     {
-        fprintf(stderr, "Unable to create receiver list: no memory allocated\n");
+        printf("Unable to create receiver list: no memory allocated\n");
         exit(-1);
     }
 
@@ -63,7 +63,7 @@ void fillListFromQueue(List* list, const size_t expectedElementsNr, const long* 
 
             if (msgrcv(queueId, &currentMessage, sizeof(currentMessage), priorityTypes[index], MSG_NOERROR | IPC_NOWAIT) < 0)
             {
-                fprintf(stderr, "Issues with receiving message\n");
+                printf("Issues with receiving message\n");
             }
 
             printf("Received list element priority %d of type %d\n", (int)currentMessage.priority, (int)currentMessage.priorityType);

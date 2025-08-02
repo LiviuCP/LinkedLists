@@ -62,13 +62,13 @@ int main()
             }
             else
             {
-                fprintf(stderr, "[PID: %d] Unable to create list: no memory allocated\n", getpid());
+                printf("[PID: %d] Unable to create list: no memory allocated\n", getpid());
                 _exit(-1);
             }
         }
         else
         {
-            fprintf(stderr, "[PID: %d] Nothing read or error occurred", getpid());
+            printf("[PID: %d] Nothing read or error occurred", getpid());
         }
 
         close(fileDescriptors[READ_SIDE]);
@@ -90,7 +90,7 @@ int main()
         }
         else
         {
-            fprintf(stderr, "[PID: %d] Unable to create list: no memory allocated\n\n", getpid());
+            printf("[PID: %d] Unable to create list: no memory allocated\n\n", getpid());
         }
 
         printf("\n");

@@ -117,18 +117,18 @@ int main(int argc, char* argv[])
                     }
                     else
                     {
-                        fprintf(stderr, "Unable to create client list: no memory allocated\n");
+                        printf("Unable to create client list: no memory allocated\n");
                         exit(-1);
                     }
                 }
                 else
                 {
-                    fprintf(stderr, "The request could not be completed\n");
+                    printf("The request could not be completed\n");
                 }
             }
             else
             {
-                fprintf(stderr, "The request could not be completed\n");
+                printf("The request could not be completed\n");
             }
 
             close(fileDescriptor);
@@ -147,13 +147,13 @@ void establishServerSocketConnection(const int* fileDescriptor, const char* ipAd
 
     if(inet_pton(AF_INET, ipAddress, &socketAddress.sin_addr)<=0)
     {
-        fprintf(stderr, "inet_pton error\n");
+        printf("inet_pton error\n");
         exit(-1);
     }
 
     if (connect(*fileDescriptor, (struct sockaddr*) &socketAddress, sizeof(socketAddress)) < 0)
     {
-        fprintf(stderr, "Connection error\n");
+        printf("Connection error\n");
         exit(-1);
     }
 }

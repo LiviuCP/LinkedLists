@@ -27,7 +27,7 @@ int main()
     }
     else
     {
-        fprintf(stderr, "Unable to create sender list: no memory allocated\n\n");
+        printf("Unable to create sender list: no memory allocated\n\n");
     }
 
     printf("Now we will send the priorities through a named pipe.\n\n");

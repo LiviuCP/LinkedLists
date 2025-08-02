@@ -38,7 +38,7 @@ int main()
     }
     else
     {
-        fprintf(stderr, "Unable to create receiver list: no memory allocated\n");
+        printf("Unable to create receiver list: no memory allocated\n");
         exit(-1);
     }
 
