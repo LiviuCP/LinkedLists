@@ -23,6 +23,8 @@ extern "C"{
 Object* createObject(int type, void* payload);
 void deleteObject(Object* object, void (*emptyObject)(Object* object));
 
+char* createStringCopy(const char* src);
+
 char* getLine();
 bool readUnsignedLong(size_t* number);
 

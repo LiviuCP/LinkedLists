@@ -297,42 +297,46 @@ static bool _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t 
 
 static HashEntry* _createHashEntry(const char* key, const char* value)
 {
-    HashEntry* result = NULL;
+    HashEntry* entry = NULL;
 
-    if (key != NULL && value != NULL && strlen(key) != 0 && strlen(value) != 0)
+    if (key != NULL && value != NULL && strlen(key) > 0 && strlen(value) > 0)
     {
-        HashEntry* entry = NULL;
-        char* entryKey = (char*)malloc(strlen(key) + 1);
-        char* entryValue = (char*)malloc(strlen(value) + 1);
+        entry = (HashEntry*)malloc(sizeof (HashEntry));
 
-        if (entryKey != NULL && entryValue != NULL)
+        if (entry != NULL)
         {
-            entry = (HashEntry*)malloc(sizeof (HashEntry));
+            char* entryKey = createStringCopy(key);
+            char* entryValue = NULL;
 
-            if (entry != NULL)
+            if (entryKey != NULL)
             {
-                strcpy(entryKey, key);
-                strcpy(entryValue, value);
+                entryValue = createStringCopy(value);
+
+                if (entryValue == NULL)
+                {
+                    free(entryKey);
+                    entryKey = NULL;
+                }
+            }
+
+            if (entryValue != NULL)
+            {
+                ASSERT(entryKey != NULL, "Invalid key!");
+
                 entry->key = entryKey;
                 entry->value = entryValue;
                 entryKey = NULL;
                 entryValue = NULL;
-                result = entry;
             }
-        }
-
-        if (result == NULL)
-        {
-            free(entry);
-            entry = NULL;
-            free(entryKey);
-            entryKey = NULL;
-            free(entryValue);
-            entryValue = NULL;
+            else
+            {
+                free(entry);
+                entry = NULL;
+            }
         }
     }
 
-    return result;
+    return entry;
 }
 
 static bool _updateHashEntry(HashEntry* hashEntry, const char* value)
@@ -341,11 +345,10 @@ static bool _updateHashEntry(HashEntry* hashEntry, const char* value)
 
     if (hashEntry != NULL && value != NULL)
     {
-        char* newValue = (char*)malloc(strlen(value) + 1);
+        char* newValue = createStringCopy(value);
 
         if (newValue != NULL)
         {
-            strcpy(newValue, value);
             free(hashEntry->value);
             hashEntry->value = newValue;
             newValue = NULL;

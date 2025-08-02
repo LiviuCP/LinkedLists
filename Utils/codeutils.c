@@ -32,6 +32,31 @@ void deleteObject(Object* object, void (*emptyObject)(Object* object))
     object = NULL;
 }
 
+char* createStringCopy(const char* src)
+{
+    char* srcCopy = NULL;
+
+    if (src)
+    {
+        const size_t requiredCharsCount = strlen(src) + 1;
+        srcCopy = (char*)malloc(requiredCharsCount);
+
+        if (srcCopy != NULL)
+        {
+            size_t index;
+
+            for (index = 0; index < requiredCharsCount - 1; ++index)
+            {
+                srcCopy[index] = src[index];
+            }
+
+            srcCopy[index] = '\0';
+        }
+    }
+
+    return srcCopy;
+}
+
 char* getLine()
 {
     const size_t c_InitialBufferSize = 10;
