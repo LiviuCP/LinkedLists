@@ -10,8 +10,9 @@
 #include <netdb.h>
 
 #include "linkedlist.h"
-#include "listprintutils.h"
+#include "bitoperations.h"
 #include "codeutils.h"
+#include "listprintutils.h"
 
 #define PORT_NUMBER         9801
 #define MAX_CONNECTS        4
@@ -30,7 +31,7 @@ int main(int argc, char* argv[])
         exit(-1);
     }
 
-    char buffer[BUFFER_SIZE+1];
+    char buffer[BUFFER_SIZE + 1];
     const int fileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
 
     if (fileDescriptor < 0)
@@ -55,7 +56,7 @@ int main(int argc, char* argv[])
         sleep(1);
         if (write(fileDescriptor, &availabilityRequestCode, sizeof(size_t)))
         {
-            memset(buffer, '\0', sizeof (buffer));
+            setNChars(buffer, '\0', sizeof(buffer));
 
             size_t* startAddress = (size_t*)buffer;
 
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
 
             if (write(fileDescriptor, &actuallyRequestedCount, sizeof(size_t)))
             {
-                memset(buffer, '\0', sizeof (buffer));
+                setNChars(buffer, '\0', sizeof(buffer));
 
                 size_t* startAddress = (size_t*)buffer;
 
@@ -141,7 +142,7 @@ int main(int argc, char* argv[])
 void establishServerSocketConnection(const int* fileDescriptor, const char* ipAddress)
 {
     struct sockaddr_in socketAddress;
-    memset(&socketAddress, 0, sizeof(socketAddress));
+    setNBytes((byte_t*)&socketAddress, 0, sizeof(socketAddress));
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_port = htons(PORT_NUMBER);
 

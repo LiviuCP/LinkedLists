@@ -15,7 +15,7 @@ void readDataFromFile(const char* dataFile, char* buffer, size_t* bytesNumber);
 
 int main() {
     char buffer[BUFFER_SIZE];
-    memset(buffer, '\0', BUFFER_SIZE);
+    setNChars(buffer, '\0', BUFFER_SIZE);
 
     size_t readBytesNumber = 0;
     printf("Reading data from file...\n");

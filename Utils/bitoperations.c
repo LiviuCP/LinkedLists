@@ -171,3 +171,14 @@ bool isPalyndrome(const byte_t byte)
 
     return status;
 }
+
+void setNBytes(byte_t* start, byte_t value, size_t count)
+{
+    if (start != NULL && count > 0)
+    {
+        for (size_t index = 0; index < count; ++index)
+        {
+            start[index] = value;
+        }
+    }
+}

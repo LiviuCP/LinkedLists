@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "codeutils.h"
+
 #define BUFFER_SIZE 256
 
 static const char* dataFile = "/tmp/listdata";
@@ -16,7 +18,7 @@ void writeDataToFile(const char* dataFile, const char* buffer, size_t bufferSize
 int main()
 {
     char buffer[BUFFER_SIZE];
-    memset(buffer, '\0', BUFFER_SIZE);
+    setNChars(buffer, '\0', BUFFER_SIZE);
 
     size_t* writeAddress = (size_t*)buffer;
     *writeAddress++ = nrOfPriorities;

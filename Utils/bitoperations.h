@@ -21,6 +21,9 @@ size_t getNumberOfSetBits(const byte_t byte);
 size_t getMinNrOfRequiredBits(const byte_t byte);
 bool isPalyndrome(const byte_t byte);
 
+// a general purpose replacement for memset which is considered insecure by C11 standard (for string use setNChars(), see codeutils.h)
+void setNBytes(byte_t* start, byte_t value, size_t count);
+
 #ifdef __cplusplus
 }
 #endif

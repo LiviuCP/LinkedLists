@@ -7,6 +7,9 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+#include "bitoperations.h"
+#include "codeutils.h"
+
 #define PORT_NUMBER         9801
 #define MAX_CONNECTS        4
 #define BUFFER_SIZE         512
@@ -46,7 +49,7 @@ int main()
 
         for (size_t requestNr = 0; requestNr < NR_OF_REQUESTS; ++requestNr)
         {
-            memset(buffer, '\0', sizeof(buffer));
+            setNChars(buffer, '\0', sizeof(buffer));
 
             printf("Client request received. Reading client request data...\n");
             ssize_t count = read(clientFileDescriptor, buffer, sizeof (buffer));
@@ -85,7 +88,7 @@ int main()
 void setSocket(const int* fileDescriptor)
 {
     struct sockaddr_in serverAddress;
-    memset(&serverAddress, 0, sizeof(serverAddress));
+    setNBytes((byte_t*)&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddress.sin_port = htons(PORT_NUMBER);

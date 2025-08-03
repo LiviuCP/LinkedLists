@@ -23,6 +23,9 @@ extern "C"{
 Object* createObject(int type, void* payload);
 void deleteObject(Object* object, void (*emptyObject)(Object* object));
 
+// a replacement for memset which is considered insecure by C11 standard (to be used for strings)
+void setNChars(char* start, char value, size_t count);
+
 char* createStringCopy(const char* src);
 
 char* getLine();

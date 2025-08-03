@@ -16,7 +16,8 @@ int main()
 {
     int fileDescriptors[2];
     char buffer[256];
-    memset(buffer, '\0', sizeof(buffer));
+
+    setNChars(buffer, '\0', sizeof(buffer));
 
     if (pipe(fileDescriptors) < 0)
     {

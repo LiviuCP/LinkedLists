@@ -32,6 +32,17 @@ void deleteObject(Object* object, void (*emptyObject)(Object* object))
     object = NULL;
 }
 
+void setNChars(char* start, char value, size_t count)
+{
+    if (start != NULL && count > 0)
+    {
+        for (size_t index = 0; index < count; ++index)
+        {
+            start[index] = value;
+        }
+    }
+}
+
 char* createStringCopy(const char* src)
 {
     char* srcCopy = NULL;
@@ -173,11 +184,7 @@ bool convertIntToString(int valueToConvert, char* str, size_t availableCharsCoun
         size_t currentCharIndex = 0;
         const char asciiChar0 = '0';
 
-        // "memset" '\0' (memset triggered some security warnings)
-        for (size_t index = 0; index < availableCharsCount; ++index)
-        {
-            str[index] = '\0';
-        }
+        setNChars(str, '\0', availableCharsCount);
 
         if (valueToConvert < 0)
         {
