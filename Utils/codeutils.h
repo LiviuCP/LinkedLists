@@ -27,6 +27,7 @@ void deleteObject(Object* object, void (*emptyObject)(Object* object));
 void setNChars(char* start, char value, size_t count);
 
 char* createStringCopy(const char* src);
+size_t copyNCharsToString(char* destination, const char* source, size_t count);
 
 char* getLine();
 bool readUnsignedLong(size_t* number);

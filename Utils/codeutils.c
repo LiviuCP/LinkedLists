@@ -68,6 +68,48 @@ char* createStringCopy(const char* src)
     return srcCopy;
 }
 
+size_t copyNCharsToString(char* destination, const char* source, size_t count)
+{
+    size_t copiedCharsCount = 0;
+
+    if (destination != NULL && source != NULL)
+    {
+        const size_t sourceSize = strlen(source);
+        copiedCharsCount = count < sourceSize ? count : sourceSize;
+
+        const size_t delta = source < destination ? destination - source : source - destination;
+
+        if (source < destination)
+        {
+            // the source includes the destination, no modification is allowed
+            if (strlen(source) >= delta)
+            {
+                copiedCharsCount = 0;
+            }
+        }
+        else
+        {
+            // the destination might or might not include the source, yet copying chars should not cause overriding the source content
+            if (copiedCharsCount >= delta)
+            {
+                copiedCharsCount = 0;
+            }
+        }
+
+        if (copiedCharsCount > 0)
+        {
+            for (size_t index = 0; index < copiedCharsCount; ++index)
+            {
+                destination[index] = source[index];
+            }
+
+            destination[copiedCharsCount] = '\0';
+        }
+    }
+
+    return copiedCharsCount;
+}
+
 char* getLine()
 {
     const size_t c_InitialBufferSize = 10;

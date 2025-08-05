@@ -28,13 +28,7 @@ int main()
         *writeAddress++ = priorities[index];
     }
 
-    char* endMessageWriteAddress = (char*)writeAddress;
-
-    for (size_t index = 0; index < strlen(endMessage); ++index)
-    {
-        endMessageWriteAddress[index] = endMessage[index];
-    }
-
+    copyNCharsToString((char*)writeAddress, endMessage, strlen(endMessage));
     writeDataToFile(dataFile, buffer, (sizeof(nrOfPriorities) + sizeof(priorities) + strlen(endMessage) + 1));
 
     return 0;
