@@ -43,29 +43,27 @@ void setNChars(char* start, char value, size_t count)
     }
 }
 
-char* createStringCopy(const char* src)
+char* createStringCopy(const char* source)
 {
-    char* srcCopy = NULL;
+    char* sourceCopy = NULL;
 
-    if (src)
+    if (source)
     {
-        const size_t requiredCharsCount = strlen(src) + 1;
-        srcCopy = (char*)malloc(requiredCharsCount);
+        const size_t sourceLength = strlen(source);
+        sourceCopy = (char*)malloc(strlen(source) + 1);
 
-        if (srcCopy != NULL)
+        if (sourceCopy != NULL)
         {
-            size_t index;
-
-            for (index = 0; index < requiredCharsCount - 1; ++index)
+            for (size_t index = 0; index < sourceLength; ++index)
             {
-                srcCopy[index] = src[index];
+                sourceCopy[index] = source[index];
             }
 
-            srcCopy[index] = '\0';
+            sourceCopy[sourceLength] = '\0';
         }
     }
 
-    return srcCopy;
+    return sourceCopy;
 }
 
 size_t copyNCharsToString(char* destination, const char* source, size_t count)

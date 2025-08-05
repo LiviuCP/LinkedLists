@@ -26,7 +26,7 @@ void deleteObject(Object* object, void (*emptyObject)(Object* object));
 // a replacement for memset which is considered insecure by C11 standard (to be used for strings)
 void setNChars(char* start, char value, size_t count);
 
-char* createStringCopy(const char* src);
+char* createStringCopy(const char* source);
 size_t copyNCharsToString(char* destination, const char* source, size_t count);
 
 char* getLine();
