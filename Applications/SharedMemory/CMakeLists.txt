@@ -14,6 +14,8 @@ add_executable(SharedMemoryWriter
 
 target_link_libraries(SharedMemoryReader PRIVATE LinkedListsLib)
 target_link_libraries(SharedMemoryReader PRIVATE Utils)
+target_link_libraries(SharedMemoryWriter PRIVATE Utils)
+
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(SharedMemoryReader PRIVATE rt)

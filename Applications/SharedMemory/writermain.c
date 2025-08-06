@@ -7,6 +7,8 @@
 #include <semaphore.h>
 #include <string.h>
 
+#include "codeutils.h"
+
 #define BYTES_COUNT 512
 #define PERMISSIONS 0644
 #define READ_ACCESS_TIME 15
@@ -54,7 +56,7 @@ int main()
         *writeAddress++ = priorities[index];
     }
 
-    strcpy((char*)writeAddress, endMessage);
+    copyNCharsToString((char*)writeAddress, endMessage, strlen(endMessage));
 
     if (sem_post(semaphore) < 0)
     {
