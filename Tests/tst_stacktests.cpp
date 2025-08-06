@@ -1,4 +1,4 @@
-#include <QtTest>
+#include <QTest>
 
 #include "stack.h"
 #include "codeutils.h"
@@ -8,24 +8,10 @@ class StackTests : public QObject
 {
     Q_OBJECT
 
-public:
-    StackTests();
-    ~StackTests();
-
 private slots:
     void testElementsAreCorrectlyPushedAndPopped();
     void testClearStack();
 };
-
-StackTests::StackTests()
-{
-
-}
-
-StackTests::~StackTests()
-{
-
-}
 
 void StackTests::testElementsAreCorrectlyPushedAndPopped()
 {

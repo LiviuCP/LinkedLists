@@ -1,4 +1,4 @@
-#include <QtTest>
+#include <QTest>
 
 #include <cstring>
 
@@ -10,10 +10,6 @@
 class LinkedListTests : public QObject
 {
     Q_OBJECT
-
-public:
-    LinkedListTests();
-    ~LinkedListTests();
 
 private slots:
     void testListIsCorrectlyCreatedAndCleared();
@@ -49,14 +45,6 @@ private slots:
 private:
     size_t _getSumOfPriorities(List* list);
 };
-
-LinkedListTests::LinkedListTests()
-{
-}
-
-LinkedListTests::~LinkedListTests()
-{
-}
 
 void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
 {

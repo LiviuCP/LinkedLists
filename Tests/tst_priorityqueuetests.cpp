@@ -1,4 +1,4 @@
-#include <QtTest>
+#include <QTest>
 
 #include "priorityqueue.h"
 #include "codeutils.h"
@@ -8,26 +8,12 @@ class PriorityQueueTests : public QObject
 {
     Q_OBJECT
 
-public:
-    PriorityQueueTests();
-    ~PriorityQueueTests();
-
 private slots:
     void testElementsInsertionDeletion();
     void testClearPriorityQueue();
     void testIterators();
     void testModifyObject();
 };
-
-PriorityQueueTests::PriorityQueueTests()
-{
-
-}
-
-PriorityQueueTests::~PriorityQueueTests()
-{
-
-}
 
 void PriorityQueueTests::testElementsInsertionDeletion()
 {

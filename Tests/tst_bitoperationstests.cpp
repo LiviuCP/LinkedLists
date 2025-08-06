@@ -1,14 +1,10 @@
-#include <QtTest>
+#include <QTest>
 
 #include "bitoperations.h"
 
 class BitOperationsTests : public QObject
 {
     Q_OBJECT
-
-public:
-    BitOperationsTests();
-    ~BitOperationsTests();
 
 private slots:
     void testRotations();
@@ -20,16 +16,6 @@ private slots:
     void testCountMinNrOfRequiredBits();
     void testIsPalyndrome();
 };
-
-BitOperationsTests::BitOperationsTests()
-{
-
-}
-
-BitOperationsTests::~BitOperationsTests()
-{
-
-}
 
 void BitOperationsTests::testRotations()
 {

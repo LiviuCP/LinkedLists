@@ -1,4 +1,4 @@
-#include <QtTest>
+#include <QTest>
 
 #include <cstring>
 
@@ -8,10 +8,6 @@ class HashTableTests : public QObject
 {
     Q_OBJECT
 
-public:
-    HashTableTests();
-    ~HashTableTests();
-
 private slots:
     void testHashTableIsCorrectlyCreated();
     void testHashIndexesAreCorrectlyRetrieved();
@@ -19,16 +15,6 @@ private slots:
     void testEntryIsCorrectlyErased();
     void testEntryValueIsCorrectlyUpdated();
 };
-
-HashTableTests::HashTableTests()
-{
-
-}
-
-HashTableTests::~HashTableTests()
-{
-
-}
 
 void HashTableTests::testHashTableIsCorrectlyCreated()
 {
