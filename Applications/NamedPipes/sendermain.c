@@ -46,15 +46,16 @@ size_t makePipeAndSend(const char* pipeName, const size_t* priorities, const siz
     if (priorities != NULL && elementsCount > 0)
     {
         const size_t nrOfBytes = elementsCount * sizeof (size_t);
+        const mode_t mode = 0666;
 
         printf("Creating named pipe\n");
-        mkfifo(pipeName, 0666);
+        mkfifo(pipeName, mode);
         printf("Done creating pipe\n");
 
         sleep(1);
 
         printf("\nOpening pipe for writing (open function returns once the receiver opens the pipe for reading)\n");
-        int fDescriptor = open(pipeName, O_CREAT | O_WRONLY);
+        int fDescriptor = open(pipeName, O_CREAT | O_WRONLY, mode);
 
         if (fDescriptor < 0)
         {
