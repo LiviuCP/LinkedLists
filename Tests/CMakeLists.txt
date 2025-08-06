@@ -23,12 +23,14 @@ include_directories(
 )
 
 add_executable(BitOperationsTests tst_bitoperationstests.cpp)
+add_executable(CodeUtilsTests tst_codeutilstests.cpp)
 add_executable(HashTableTests tst_hashtabletests.cpp)
 add_executable(LinkedListTests tst_linkedlisttests.cpp)
 add_executable(PriorityQueueTests tst_priorityqueuetests.cpp)
 add_executable(StackTests tst_stacktests.cpp)
 
 add_test(NAME BitOperationsTests COMMAND BitOperationsTests)
+add_test(NAME CodeUtilsTests COMMAND CodeUtilsTests)
 add_test(NAME HashTableTests COMMAND HashTableTests)
 add_test(NAME LinkedListTests COMMAND LinkedListTests)
 add_test(NAME PriorityQueueTests COMMAND PriorityQueueTests)
@@ -36,6 +38,9 @@ add_test(NAME StackTests COMMAND StackTests)
 
 target_link_libraries(BitOperationsTests PRIVATE Qt${QT_VERSION_MAJOR}::Test)
 target_link_libraries(BitOperationsTests PRIVATE Utils)
+
+target_link_libraries(CodeUtilsTests PRIVATE Qt${QT_VERSION_MAJOR}::Test)
+target_link_libraries(CodeUtilsTests PRIVATE Utils)
 
 target_link_libraries(HashTableTests PRIVATE Qt${QT_VERSION_MAJOR}::Test)
 target_link_libraries(HashTableTests PRIVATE Collections)
