@@ -115,7 +115,7 @@ int main()
                     }
                     break;
                 case 3:
-                    if (getListSize(list) != 0)
+                    if (!isEmptyList(list))
                     {
                         removeFirstListElement(list);
                         clearScreen();
@@ -128,7 +128,7 @@ int main()
                     }
                     break;
                 case 4:
-                    if (getListSize(list) != 0)
+                    if (!isEmptyList(list))
                     {
                         removeLastListElement(list);
                         clearScreen();
@@ -141,7 +141,7 @@ int main()
                     }
                     break;
                 case 5:
-                    if (getListSize(list) != 0)
+                    if (!isEmptyList(list))
                     {
                         sortAscendingByPriority(list);
                         clearScreen();
@@ -154,7 +154,7 @@ int main()
                     }
                     break;
                 case 6:
-                    if (getListSize(list) != 0)
+                    if (!isEmptyList(list))
                     {
                         reverseList(list);
                         clearScreen();
@@ -167,7 +167,7 @@ int main()
                     }
                     break;
                 case 7:
-                    if (getListSize(list) != 0)
+                    if (!isEmptyList(list))
                     {
                         clearList(list, deleteObjectPayload);
                         clearScreen();

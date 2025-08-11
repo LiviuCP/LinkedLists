@@ -64,6 +64,7 @@ void deleteList(List* list, void (*deallocObject)(Object* object))
         {
             clearList(list, deallocObject);
         }
+
         free(list);
     }
 }
@@ -410,7 +411,7 @@ ListElement* removeCurrentListElement(ListIterator it)
 }
 
 // user is responsible for de-allocating the Object of each element prior to erasing elements from the list
-void clearList(List *list, void (*deallocObject)(Object* object))
+void clearList(List* list, void (*deallocObject)(Object* object))
 {
     if (list != NULL)
     {
@@ -427,6 +428,13 @@ void clearList(List *list, void (*deallocObject)(Object* object))
             elementToDelete = NULL;
         }
     }
+}
+
+// not to be used for heap created lists unless the references to first and last have been previously stored (memory leaks might occur)
+void detachListElements(List* list)
+{
+    list->first = NULL;
+    list->last = NULL;
 }
 
 void swapListElements(ListIterator firstIt, ListIterator secondIt)
@@ -738,7 +746,7 @@ size_t getListSize(const List* list)
 {
     size_t length = 0;
 
-    if (list != NULL && list->first != NULL)
+    if (!isEmptyList(list))
     {
         ListElement* currentElement = list->first;
 
@@ -750,6 +758,19 @@ size_t getListSize(const List* list)
     }
 
     return length;
+}
+
+bool isEmptyList(const List* list)
+{
+    bool isEmpty = true;
+
+    if (list != NULL)
+    {
+        isEmpty = list->first == NULL;
+        ASSERT((isEmpty && list->last == NULL) || (!isEmpty && list->last != NULL), "Last element should be NULL for an empty list and NOT NULL for a unempty list");
+    }
+
+    return isEmpty;
 }
 
 ListElement* getListElementAtIndex(const List* list, size_t index)
@@ -801,14 +822,31 @@ ListElement* getPreviousListElement(ListIterator it)
     return result;
 }
 
+ListElement* getFirstListElement(const List* list)
+{
+    ListElement* result = NULL;
+
+    if (list != NULL)
+    {
+        result = list->first;
+
+        ASSERT((result != NULL && list->last != NULL) || (result == NULL && list->last == NULL),
+               "Both first and last element should either be NULL or NOT NULL!");
+    }
+
+    return result;
+}
+
 ListElement* getLastListElement(const List* list)
 {
     ListElement* result = NULL;
 
-    if (list != NULL && list->first != NULL)
+    if (list != NULL)
     {
         result = list->last;
-        ASSERT(result != NULL, "Null pointer detected for last list element");
+
+        ASSERT((result != NULL && list->first != NULL) || (result == NULL && list->first == NULL),
+               "Both first and last element should either be NULL or NOT NULL!");
     }
 
     return result;
@@ -914,7 +952,7 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
 
             fputs(header, outputFile);
 
-            if (getListSize(list) == 0)
+            if (isEmptyList(list))
             {
                 fputs("EMPTY LIST", outputFile);
             }

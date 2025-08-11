@@ -54,6 +54,7 @@ ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
 ListElement* removeCurrentListElement(ListIterator it);
 void clearList(List* list, void (*deallocObject)(Object* object));                                      // don't use for stack created lists (heap-only)
+void detachListElements(List* list);                                                                    // use this function instead of clearList() for stack created lists
 
 void swapListElements(ListIterator firstIt, ListIterator secondIt);
 void reverseList(List* list);
@@ -71,8 +72,10 @@ ListElement** moveListToArray(List* list, size_t* arraySize);                   
 void moveArrayToList(ListElement** array, const size_t arraySize, List* list);                          // don't use for stack created lists (heap-only)
 
 size_t getListSize(const List* list);
+bool isEmptyList(const List* list);
 ListElement* getListElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
 ListElement* getPreviousListElement(ListIterator it);
+ListElement* getFirstListElement(const List* list);
 ListElement* getLastListElement(const List* list);
 bool isListElementContained(const ListElement* element, const List* list);
 bool isSortedAscendingByPriority(const List* list);

@@ -365,7 +365,7 @@ static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char
 
     if (currentBucket != NULL && key != NULL && strlen(key) != 0)
     {
-        ListElement* currentBucketEntry = currentBucket->first;
+        ListElement* currentBucketEntry = getFirstListElement(currentBucket);
 
         while (currentBucketEntry != NULL)
         {

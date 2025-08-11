@@ -128,7 +128,7 @@ bool isEmptyStack(const Stack* stack)
 
         if (stack->container != NULL)
         {
-            result = (((List*)(stack->container))->first == NULL);
+            result = isEmptyList((List*)stack->container);
         }
     }
 

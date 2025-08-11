@@ -65,17 +65,15 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const 
             newElement->object.type = objectType;
             newElement->object.payload = objectPayload;
 
-            ListElement* currentElement = ((List*)(queue->container))->first;
+            ListElement* currentElement = getFirstListElement((List*)queue->container);
 
             if (currentElement == NULL)
             {
-                ((List*)(queue->container))->first = newElement;
-                ((List*)(queue->container))->last = newElement;
+                appendToList((List*)queue->container, newElement);
             }
             else if (currentElement->priority < newElement->priority)
             {
-                ((List*)(queue->container))->first = newElement;
-                newElement->next = currentElement;
+                prependToList((List*)queue->container, newElement);
             }
             else
             {
@@ -95,8 +93,7 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const 
                 }
                 if (!success) // append to list if all elements have lower priority
                 {
-                    currentElement->next = newElement;
-                    ((List*)(queue->container))->last = newElement;
+                    appendToList((List*)queue->container, newElement);
                     success = true;
                 }
             }
@@ -173,13 +170,11 @@ bool isEmptyQueue(const PriorityQueue* queue)
 
     if (queue != NULL)
     {
+        ASSERT(queue->container != NULL, "NULL queue container detected");
+
         if (queue->container != NULL)
         {
-            result = (((List*)(queue->container))->first == NULL);
-        }
-        else
-        {
-            ASSERT(false, "NULL queue container detected");
+            result = isEmptyList((List*)queue->container);
         }
     }
 
@@ -196,7 +191,7 @@ PriorityQueueIterator pqbegin(const PriorityQueue* queue)
         if (queue->container != NULL)
         {
             List* list = (List*)(queue->container);
-            result.queueItem = (void*)(list->first);
+            result.queueItem = getFirstListElement(list);
             list = NULL;
         }
         else
