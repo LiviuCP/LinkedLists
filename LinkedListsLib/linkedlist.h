@@ -29,9 +29,21 @@ typedef struct
 }
 ListIterator;
 
+typedef struct
+{
+    void* content;
+}
+ListElementsPool;
+
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+ListElementsPool* createListElementsPool();
+void deleteListElementsPool(ListElementsPool* pool);
+size_t getAvailableElementsCount(ListElementsPool* pool);
+ListElement* aquireElement(ListElementsPool* pool);
+bool releaseElement(ListElement* element, ListElementsPool* pool);
 
 List* createEmptyList();                                                                                // don't use for stack created lists (heap-only)
 List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize);             // don't use for stack created lists (heap-only)

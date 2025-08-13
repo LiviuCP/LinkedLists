@@ -8,6 +8,211 @@
 #include "../Utils/error.h"
 #include "../Utils/testobjects.h"
 
+#define POOL_ITEMS_COUNT 4
+
+typedef struct
+{
+    ListElement* data;
+    ListElement** dataRefs;
+    size_t itemsCount;
+    size_t availableItemsCount;
+} ListElementsPoolContent;
+
+static bool initListElementsPool(ListElementsPool* pool)
+{
+    bool success = false;
+
+    ListElementsPoolContent* content = NULL;
+    ListElement* data = NULL;
+    ListElement** dataRefs = NULL;
+
+    if (pool != NULL)
+    {
+        content = malloc(sizeof(ListElementsPoolContent));
+    }
+
+    if (content != NULL)
+    {
+        data = (ListElement*)malloc(POOL_ITEMS_COUNT * sizeof(ListElement));
+    }
+
+    if (data != NULL)
+    {
+        dataRefs = (ListElement**)malloc(POOL_ITEMS_COUNT * sizeof(ListElement*));
+    }
+
+    if (dataRefs != NULL)
+    {
+        success = true;
+
+        for (size_t index = 0; index < POOL_ITEMS_COUNT; ++index)
+        {
+            data[index].next = NULL;
+            data[index].object.type = -1;
+            data[index].object.payload = NULL;
+            data[index].priority = 0;
+            dataRefs[index] = &data[index];
+        }
+
+        content->data = data;
+        content->dataRefs = dataRefs;
+        content->itemsCount = POOL_ITEMS_COUNT;
+        content->availableItemsCount = POOL_ITEMS_COUNT;
+        pool->content = content;
+    }
+
+    if (!success)
+    {
+        if (content != NULL)
+        {
+            free(content);
+            content = NULL;
+        }
+
+        if (data != NULL)
+        {
+            free(data);
+            data = NULL;
+        }
+
+        if (dataRefs != NULL)
+        {
+            free(dataRefs);
+            dataRefs = NULL;
+        }
+    }
+
+    return success;
+}
+
+static void cleanupListElementsPool(ListElementsPool* pool)
+{
+    if (pool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)pool->content;
+
+        if (content != NULL)
+        {
+            if (content->data != NULL)
+            {
+                free(content->data);
+                content->data = NULL;
+            }
+
+            if (content->dataRefs != NULL)
+            {
+                free(content->dataRefs);
+                content->dataRefs = NULL;
+            }
+
+            free(pool->content);
+            pool->content = NULL;
+            content = NULL;
+        }
+    }
+}
+
+ListElementsPool* createListElementsPool()
+{
+    ListElementsPool* pool = (ListElementsPool*)malloc(sizeof(ListElementsPool));
+
+    if (pool != NULL)
+    {
+        const bool success = initListElementsPool(pool);
+
+        if (!success)
+        {
+            free(pool);
+            pool = NULL;
+        }
+    }
+
+    return pool;
+}
+
+void deleteListElementsPool(ListElementsPool* pool)
+{
+    if (pool != NULL)
+    {
+        cleanupListElementsPool(pool);
+        free(pool);
+        pool = NULL;
+    }
+}
+
+size_t getAvailableElementsCount(ListElementsPool* pool)
+{
+    size_t count = 0;
+
+    if (pool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)pool->content;
+        ASSERT(content != NULL, "Invalid list elements pool content!");
+
+        if (content != NULL)
+        {
+            count = content->availableItemsCount;
+        }
+    }
+
+    return count;
+}
+
+ListElement* aquireElement(ListElementsPool* pool)
+{
+    ListElement* aquiredElement = NULL;
+
+    if (pool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)pool->content;
+        ASSERT(content != NULL, "Invalid list elements pool content!");
+
+        if (content != NULL && content->availableItemsCount > 0)
+        {
+            ListElement** dataRefs = content->dataRefs;
+            ASSERT(dataRefs != NULL, "Invalid list elements pool data refs!")
+
+            if (dataRefs != NULL)
+            {
+                const size_t aquiredElementIndex = content->availableItemsCount - 1;
+
+                aquiredElement = dataRefs[aquiredElementIndex];
+                dataRefs[aquiredElementIndex] = NULL;
+                --content->availableItemsCount;
+            }
+        }
+    }
+
+    return aquiredElement;
+}
+
+// TODO: implement double release prevention mechanism if possible
+bool releaseElement(ListElement* element, ListElementsPool* pool)
+{
+    bool success = false;
+
+    if (pool != NULL && element != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)pool->content;
+
+        const bool isValidPool = content != NULL && content->data != NULL && content->dataRefs != NULL && content->itemsCount > 0 && content->itemsCount > content->availableItemsCount;
+        ASSERT(isValidPool, "Invalid list elements pool parameters!")
+
+        if (isValidPool && element >= content->data && element < &content->data[content->itemsCount])
+        {
+            element->next = NULL;
+            element->object.type = 0;
+            element->object.payload = NULL;
+            element->priority = 0;
+            content->dataRefs[content->availableItemsCount] = element;
+            ++content->availableItemsCount;
+            success = true;
+        }
+    }
+
+    return success;
+}
+
 List* createEmptyList()
 {
     List* list = (List*)malloc(sizeof(List));

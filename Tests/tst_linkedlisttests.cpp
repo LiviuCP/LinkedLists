@@ -42,6 +42,8 @@ private slots:
     void testMoveArrayToList();
     void testPrintListElementsToFile();
 
+    void testListElementsPool();
+
 private:
     size_t _getSumOfPriorities(List* list);
 };
@@ -2086,6 +2088,72 @@ void LinkedListTests::testPrintListElementsToFile()
     QVERIFY2(success3, "Third element is not printed correctly");
     QVERIFY2(success4, "Fourth element is not printed correctly");
     QVERIFY2(success5, "Fifth element is not printed correctly");
+}
+
+void LinkedListTests::testListElementsPool()
+{
+    ListElementsPool* pool = createListElementsPool();
+
+    QVERIFY(pool);
+    QVERIFY(getAvailableElementsCount(pool) == 4);
+
+    ListElement* first = aquireElement(pool);
+
+    QVERIFY(first && first->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == 3);
+
+    ListElement* second = aquireElement(pool);
+
+    QVERIFY(second && second->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == 2);
+
+    ListElement* third = aquireElement(pool);
+
+    QVERIFY(third && third->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == 1);
+
+    ListElement* fourth = aquireElement(pool);
+
+    QVERIFY(fourth && fourth->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == 0);
+
+    ListElement* additional = aquireElement(pool);
+
+    QVERIFY(!additional);
+    QVERIFY(getAvailableElementsCount(pool) == 0);
+
+    bool released = false;
+
+    released = releaseElement(first, pool);
+    QVERIFY(released && getAvailableElementsCount(pool) == 1);
+
+    released = releaseElement(second, pool);
+    QVERIFY(released && getAvailableElementsCount(pool) == 2);
+
+    ListElement* newElement = createListElement();
+
+    released = releaseElement(newElement, pool);
+    QVERIFY(!released && getAvailableElementsCount(pool) == 2);
+
+    free(newElement);
+    newElement = nullptr;
+
+    additional = aquireElement(pool);
+
+    QVERIFY(additional && additional->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == 1);
+
+    released = releaseElement(additional, pool);
+    QVERIFY(released);
+
+    released = releaseElement(third, pool);
+    QVERIFY(released);
+
+    released = releaseElement(fourth, pool);
+    QVERIFY(released && getAvailableElementsCount(pool) == 4);
+
+    deleteListElementsPool(pool);
+    pool = nullptr;
 }
 
 size_t LinkedListTests::_getSumOfPriorities(List *list)
