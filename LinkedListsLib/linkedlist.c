@@ -8,8 +8,6 @@
 #include "../Utils/error.h"
 #include "../Utils/testobjects.h"
 
-#define POOL_ITEMS_COUNT 4
-
 typedef struct
 {
     ListElement* data;
@@ -33,19 +31,19 @@ static bool initListElementsPool(ListElementsPool* pool)
 
     if (content != NULL)
     {
-        data = (ListElement*)malloc(POOL_ITEMS_COUNT * sizeof(ListElement));
+        data = (ListElement*)malloc(MAX_POOL_ITEMS_COUNT * sizeof(ListElement));
     }
 
     if (data != NULL)
     {
-        dataRefs = (ListElement**)malloc(POOL_ITEMS_COUNT * sizeof(ListElement*));
+        dataRefs = (ListElement**)malloc(MAX_POOL_ITEMS_COUNT * sizeof(ListElement*));
     }
 
     if (dataRefs != NULL)
     {
         success = true;
 
-        for (size_t index = 0; index < POOL_ITEMS_COUNT; ++index)
+        for (size_t index = 0; index < MAX_POOL_ITEMS_COUNT; ++index)
         {
             data[index].next = NULL;
             data[index].object.type = -1;
@@ -56,8 +54,8 @@ static bool initListElementsPool(ListElementsPool* pool)
 
         content->data = data;
         content->dataRefs = dataRefs;
-        content->itemsCount = POOL_ITEMS_COUNT;
-        content->availableItemsCount = POOL_ITEMS_COUNT;
+        content->itemsCount = MAX_POOL_ITEMS_COUNT;
+        content->availableItemsCount = MAX_POOL_ITEMS_COUNT;
         pool->content = content;
     }
 

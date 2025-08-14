@@ -5,6 +5,8 @@
 
 #include "../Utils/codeutils.h"
 
+#define MAX_POOL_ITEMS_COUNT 1024
+
 struct ListElement
 {
     Object object;
