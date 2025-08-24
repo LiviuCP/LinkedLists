@@ -1,8 +1,6 @@
 #ifndef TESTOBJECTS_H
 #define TESTOBJECTS_H
 
-#include <stdlib.h>
-
 #include "codeutils.h"
 
 typedef enum

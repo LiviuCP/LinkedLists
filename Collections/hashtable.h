@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../LinkedListsLib/linkedlist.h"
+#include "../LinkedListsLib/listelement.h"
 
 typedef struct
 {

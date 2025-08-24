@@ -1,4 +1,6 @@
 #include "stack.h"
+
+#include "../LinkedListsLib/linkedlist.h"
 #include "../Utils/error.h"
 
 #include <stdio.h>

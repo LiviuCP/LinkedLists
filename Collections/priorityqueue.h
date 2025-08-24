@@ -1,8 +1,7 @@
 #ifndef PRIORITYQUEUE_H
 #define PRIORITYQUEUE_H
 
-#include "../LinkedListsLib/linkedlist.h"
-#include "../Utils/codeutils.h"
+#include "../LinkedListsLib/listelement.h"
 
 typedef struct
 {

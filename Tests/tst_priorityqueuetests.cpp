@@ -1,7 +1,6 @@
 #include <QTest>
 
 #include "priorityqueue.h"
-#include "codeutils.h"
 #include "testobjects.h"
 
 #define DELETE_PRIORITY_QUEUE(queue, deleter) \

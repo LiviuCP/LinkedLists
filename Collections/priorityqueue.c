@@ -2,6 +2,8 @@
 #include <string.h>
 
 #include "priorityqueue.h"
+
+#include "../LinkedListsLib/linkedlist.h"
 #include "../Utils/error.h"
 
 PriorityQueue* createPriorityQueue(ListElementsPool* elementsPool)

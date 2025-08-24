@@ -1,8 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "../LinkedListsLib/linkedlist.h"
-#include "../Utils/codeutils.h"
+#include "../LinkedListsLib/listelement.h"
 
 typedef struct
 {

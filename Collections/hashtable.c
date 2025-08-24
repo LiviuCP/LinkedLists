@@ -3,6 +3,7 @@
 
 #include "hashtable.h"
 
+#include "../LinkedListsLib/linkedlist.h"
 #include "../Utils/error.h"
 
 static const int hashEntryType = 'h' + 'a' + 's' + 'h' + 'E' + 'n' + 't' + 'r' + 'y';

@@ -11,6 +11,7 @@ include_directories(../Utils)
 add_library(${PROJECT_NAME} ${LIB_TYPE}
     linkedlistslib.cpp
     linkedlist.c
+    listelement.c
     sort.c
     listprintutils.c
 )
