@@ -9,7 +9,7 @@ int main()
 {
     size_t priority = 0;
     size_t index = 0;
-    List* list = createEmptyList();
+    List* list = createEmptyList(NULL);
 
     if (list != NULL)
     {

@@ -4,30 +4,61 @@
 #include "codeutils.h"
 #include "testobjects.h"
 
+#define DELETE_STACK(stack, deleter) \
+    if (stack) \
+    { \
+        deleteStack(stack, deleter); \
+        stack = nullptr; \
+    }
+
 class StackTests : public QObject
 {
     Q_OBJECT
 
+public:
+    explicit StackTests();
+
 private slots:
     void testElementsAreCorrectlyPushedAndPopped();
     void testClearStack();
+
+    void initTestCase_data();
+    void cleanupTestCase();
+    void init();
+    void cleanup();
+
+private:
+    ListElementsPool* m_Pool;
+    size_t m_TotalAvailablePoolElementsCount;
+
+    Stack* m_Stack1;
 };
+
+StackTests::StackTests()
+    : m_Pool{nullptr}
+    , m_TotalAvailablePoolElementsCount{0}
+    , m_Stack1{nullptr}
+{
+}
 
 void StackTests::testElementsAreCorrectlyPushedAndPopped()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     // first push
-    Stack* stack = createStack();
+    m_Stack1 = createStack(pool);
 
-    QVERIFY(isEmptyStack(stack));
+    QVERIFY(isEmptyStack(m_Stack1));
 
-    pushToStack(stack, SEGMENT, createSegmentPayload(2, 5, 4, 11));
+    pushToStack(m_Stack1, SEGMENT, createSegmentPayload(2, 5, 4, 11));
 
-    QVERIFY2(!isEmptyStack(stack), "The stack is empty, no element has been pushed");
+    QVERIFY2(!isEmptyStack(m_Stack1), "The stack is empty, no element has been pushed");
 
-    pushToStack(stack, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
+    pushToStack(m_Stack1, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
 
     // then pop
-    Object* firstPoppedObject = popFromStack(stack);
+    Object* firstPoppedObject = popFromStack(m_Stack1);
     LocalConditions* firstPoppedObjectPayload = static_cast<LocalConditions*>(firstPoppedObject->payload);
 
     QVERIFY2(firstPoppedObject->type == LOCAL_CONDITIONS &&
@@ -35,9 +66,9 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
              firstPoppedObjectPayload->position->y == -5 &&
              firstPoppedObjectPayload->temperature == 10 &&
              areDecimalNumbersEqual(firstPoppedObjectPayload->humidity, 12.8), "Object has not been correctly popped from list");
-    QVERIFY(!isEmptyStack(stack));
+    QVERIFY(!isEmptyStack(m_Stack1));
 
-    Object* secondPoppedObject = popFromStack(stack);
+    Object* secondPoppedObject = popFromStack(m_Stack1);
     Segment* secondPoppedObjectPayload = static_cast<Segment*>(secondPoppedObject->payload);
 
     QVERIFY2(secondPoppedObject->type == SEGMENT &&
@@ -45,33 +76,70 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
              secondPoppedObjectPayload->start->y == 5 &&
              secondPoppedObjectPayload->stop->x == 4 &&
              secondPoppedObjectPayload->stop->y == 11,   "Object has not been correctly popped from list");
-    QVERIFY(isEmptyStack(stack));
+    QVERIFY(isEmptyStack(m_Stack1));
 
     deleteObject(firstPoppedObject, emptyTestObject);
     firstPoppedObject = nullptr;
     deleteObject(secondPoppedObject, emptyTestObject);
     secondPoppedObject = nullptr;
-    deleteStack(stack, emptyTestObject);
-    stack = nullptr;
 }
 
 void StackTests::testClearStack()
 {
-    Stack* stack = createStack();
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
 
-    pushToStack(stack, SEGMENT, createSegmentPayload(2, 5, 4, 11));
-    pushToStack(stack, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
+    m_Stack1 = createStack(pool);
 
-    clearStack(stack, emptyTestObject);
+    pushToStack(m_Stack1, SEGMENT, createSegmentPayload(2, 5, 4, 11));
+    pushToStack(m_Stack1, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
 
-    QVERIFY2(isEmptyStack(stack), "The stack has not been correctly emptied");
+    clearStack(m_Stack1, emptyTestObject);
 
-    pushToStack(stack, SEGMENT, createSegmentPayload(4, 2, 5, 10));
+    QVERIFY2(isEmptyStack(m_Stack1), "The stack has not been correctly emptied");
 
-    QVERIFY(!isEmptyStack(stack));
+    pushToStack(m_Stack1, SEGMENT, createSegmentPayload(4, 2, 5, 10));
 
-    deleteStack(stack, emptyTestObject);
-    stack = nullptr;
+    QVERIFY(!isEmptyStack(m_Stack1));
+}
+
+void StackTests::initTestCase_data()
+{
+    m_Pool = createListElementsPool();
+    QVERIFY(m_Pool);
+
+    m_TotalAvailablePoolElementsCount = getAvailableElementsCount(m_Pool);
+
+    ListElementsPool* p_NullPool{nullptr};
+
+    QTest::addColumn<ListElementsPool*>("pool");
+
+    QTest::newRow("allocation from pool") << m_Pool;
+    QTest::newRow("no pool allocation") << p_NullPool;
+}
+
+void StackTests::cleanupTestCase()
+{
+    QVERIFY(m_Pool);
+
+    deleteListElementsPool(m_Pool);
+    m_Pool = nullptr;
+    m_TotalAvailablePoolElementsCount = 0;
+}
+
+void StackTests::init()
+{
+    QVERIFY(m_Pool);
+    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+
+    QVERIFY(!m_Stack1);
+}
+
+void StackTests::cleanup()
+{
+    DELETE_STACK(m_Stack1, emptyTestObject);
+
+    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
 }
 
 QTEST_APPLESS_MAIN(StackTests)

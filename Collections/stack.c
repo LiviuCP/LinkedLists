@@ -1,18 +1,16 @@
 #include "stack.h"
-#include "../LinkedListsLib/linkedlist.h"
-
 #include "../Utils/error.h"
 
 #include <stdio.h>
 
-Stack* createStack()
+Stack* createStack(ListElementsPool* elementsPool)
 {
     Stack* result = NULL;
     Stack* stack = (Stack*)malloc(sizeof(Stack));
 
     if (stack != NULL)
     {
-        List* stackContainer = createEmptyList();
+        List* stackContainer = createEmptyList(elementsPool);
 
         if (stackContainer != NULL)
         {
@@ -33,6 +31,8 @@ void deleteStack(Stack* stack, void (*deallocObject)(Object* object))
 {
     if (stack != NULL)
     {
+        ASSERT(stack->container != NULL, "NULL stack container detected!");
+
         deleteList((List*)stack->container, deallocObject);
         stack->container = NULL;
         free(stack);
@@ -71,12 +71,13 @@ Object* popFromStack(Stack* stack)
     if (stack != NULL)
     {
         ListElement* topStackElement = NULL;
+        List* stackContainer = (List*)stack->container;
 
-        ASSERT(stack->container != NULL, "NULL stack container detected");
+        ASSERT(stackContainer != NULL, "NULL stack container detected");
 
-        if (stack->container != NULL)
+        if (stackContainer != NULL)
         {
-            topStackElement = removeFirstListElement((List*)(stack->container));
+            topStackElement = removeFirstListElement(stackContainer);
         }
 
         if (topStackElement != NULL)
@@ -96,7 +97,16 @@ Object* popFromStack(Stack* stack)
             {
                 *newObject = topStackElement->object;
                 result = newObject;
-                free(topStackElement);
+
+                if (stackContainer->elementsPool != NULL)
+                {
+                    releaseElement(topStackElement, stackContainer->elementsPool);
+                }
+                else
+                {
+                    free(topStackElement);
+                }
+
                 topStackElement = NULL;
             }
         }

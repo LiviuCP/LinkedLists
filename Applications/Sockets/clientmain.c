@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
                     sleep(1);
                     printf("Using received priorities to create list:\n\n");
                     sleep(1);
-                    List* list = createEmptyList();
+                    List* list = createEmptyList(NULL);
                     if (list != NULL)
                     {
                         for (size_t index = 0; index < actuallyRequestedCount; ++index)

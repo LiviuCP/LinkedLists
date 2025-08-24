@@ -2,21 +2,20 @@
 #include <string.h>
 
 #include "priorityqueue.h"
-#include "../LinkedListsLib/linkedlist.h"
 #include "../Utils/error.h"
 
-PriorityQueue* createPriorityQueue()
+PriorityQueue* createPriorityQueue(ListElementsPool* elementsPool)
 {
     PriorityQueue* result = NULL;
     PriorityQueue* queue = (PriorityQueue*)malloc(sizeof(PriorityQueue));
 
     if (queue != NULL)
     {
-        List* queueContainer = createEmptyList();
+        List* queueContainer = createEmptyList(elementsPool);
 
         if (queueContainer != NULL)
         {
-            queue->container = (void*)queueContainer;
+            queue->container = queueContainer;
             result = queue;
         }
         else
@@ -49,14 +48,13 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const 
         ASSERT(objectType >= 0, "Attempt to insert an invalid object");
 
         ListElement* newElement = NULL;
+        List* queueContainer = (List*)queue->container;
 
-        if (queue->container != NULL)
+        ASSERT(queueContainer != NULL, "NULL queue container detected");
+
+        if (queueContainer != NULL)
         {
-            newElement = createListElement();
-        }
-        else
-        {
-            ASSERT(false, "NULL queue container detected");
+            newElement = queueContainer->elementsPool != NULL ? aquireElement(queueContainer->elementsPool) : createListElement();
         }
 
         if (newElement != NULL)
@@ -69,11 +67,11 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const 
 
             if (currentElement == NULL)
             {
-                appendToList((List*)queue->container, newElement);
+                appendToList(queueContainer, newElement);
             }
             else if (currentElement->priority < newElement->priority)
             {
-                prependToList((List*)queue->container, newElement);
+                prependToList(queueContainer, newElement);
             }
             else
             {
@@ -93,7 +91,7 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const 
                 }
                 if (!success) // append to list if all elements have lower priority
                 {
-                    appendToList((List*)queue->container, newElement);
+                    appendToList(queueContainer, newElement);
                     success = true;
                 }
             }
@@ -111,14 +109,13 @@ Object* removeFromPriorityQueue(PriorityQueue* queue)
     if (queue != NULL)
     {
         ListElement* removedElement = NULL;
+        List* queueContainer = (List*)queue->container;
+
+        ASSERT(queueContainer != NULL, "NULL queue container detected");
 
         if (queue->container != NULL)
         {
             removedElement = removeFirstListElement((List*)(queue->container));
-        }
-        else
-        {
-            ASSERT(false, "NULL queue container detected");
         }
 
         if (removedElement != NULL)
@@ -140,7 +137,16 @@ Object* removeFromPriorityQueue(PriorityQueue* queue)
                 result = newObject;
                 removedElement->object.type = -1;
                 removedElement->object.payload = NULL;
-                free(removedElement);
+
+                if (queueContainer->elementsPool != NULL)
+                {
+                    releaseElement(removedElement, queueContainer->elementsPool);
+                }
+                else
+                {
+                    free(removedElement);
+                }
+
                 removedElement = NULL;
             }
         }
@@ -153,13 +159,11 @@ void clearPriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* obje
 {
     if (queue != NULL)
     {
+        ASSERT(queue->container != NULL, "NULL queue container detected");
+
         if (queue->container != NULL)
         {
             clearList((List*)queue->container, deallocObject);
-        }
-        else
-        {
-            ASSERT(false, "NULL queue container detected");
         }
     }
 }
@@ -190,9 +194,7 @@ PriorityQueueIterator pqbegin(const PriorityQueue* queue)
     {
         if (queue->container != NULL)
         {
-            List* list = (List*)(queue->container);
-            result.queueItem = getFirstListElement(list);
-            list = NULL;
+            result.queueItem = getFirstListElement((List*)(queue->container));
         }
         else
         {

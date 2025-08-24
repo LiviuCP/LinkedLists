@@ -51,7 +51,7 @@ int main()
 
         if (payloadSize > 0)
         {
-            list = createListFromPrioritiesArray(readAddress, payloadSize);
+            list = createListFromPrioritiesArray(readAddress, payloadSize, NULL);
             if (list != NULL)
             {
                 sortAscendingByPriority(list);

@@ -12,7 +12,7 @@ void fillListFromQueue(List* list, const size_t expectedElementsNr, const long* 
 
 int main()
 {
-    List* receiverList = createEmptyList();
+    List* receiverList = createEmptyList(NULL);
     if (receiverList != NULL)
     {
         const size_t expectedElementsNr = 6;

@@ -11,7 +11,7 @@ void fillListFromPipe(List* list, const char* pipeName, size_t* nrOfBytes, size_
 
 int main()
 {
-    List* receiverList = createEmptyList();
+    List* receiverList = createEmptyList(NULL);
 
     if (receiverList != NULL)
     {

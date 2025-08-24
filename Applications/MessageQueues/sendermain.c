@@ -18,7 +18,7 @@ int main()
 
     createQueueFile();
 
-    List* senderList = createListFromPrioritiesArray(priorities, 6);
+    List* senderList = createListFromPrioritiesArray(priorities, 6, NULL);
 
     if (senderList != NULL)
     {

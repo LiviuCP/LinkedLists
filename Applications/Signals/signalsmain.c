@@ -32,7 +32,7 @@ int main()
         setGracefulTerminationHandler();
 
         puts("[CHILD] Creating list...\n");
-        list = createListFromPrioritiesArray(priorities, nrOfPriorities);
+        list = createListFromPrioritiesArray(priorities, nrOfPriorities, NULL);
         sleep(1);
 
         if (list == NULL)

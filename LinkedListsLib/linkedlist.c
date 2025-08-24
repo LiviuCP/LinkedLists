@@ -8,7 +8,248 @@
 #include "../Utils/error.h"
 #include "../Utils/testobjects.h"
 
-List* createEmptyList()
+typedef struct
+{
+    ListElement* data;
+    ListElement** dataRefs;
+    size_t itemsCount;
+    size_t availableItemsCount;
+} ListElementsPoolContent;
+
+static bool initListElementsPool(ListElementsPool* elementsPool)
+{
+    bool success = false;
+
+    ListElementsPoolContent* content = NULL;
+    ListElement* data = NULL;
+    ListElement** dataRefs = NULL;
+
+    if (elementsPool != NULL)
+    {
+        content = malloc(sizeof(ListElementsPoolContent));
+    }
+
+    if (content != NULL)
+    {
+        data = (ListElement*)malloc(MAX_POOL_ITEMS_COUNT * sizeof(ListElement));
+    }
+
+    if (data != NULL)
+    {
+        dataRefs = (ListElement**)malloc(MAX_POOL_ITEMS_COUNT * sizeof(ListElement*));
+    }
+
+    if (dataRefs != NULL)
+    {
+        success = true;
+
+        for (size_t index = 0; index < MAX_POOL_ITEMS_COUNT; ++index)
+        {
+            data[index].next = NULL;
+            data[index].object.type = -1;
+            data[index].object.payload = NULL;
+            data[index].priority = 0;
+            dataRefs[index] = &data[index];
+        }
+
+        content->data = data;
+        content->dataRefs = dataRefs;
+        content->itemsCount = MAX_POOL_ITEMS_COUNT;
+        content->availableItemsCount = MAX_POOL_ITEMS_COUNT;
+        elementsPool->content = content;
+    }
+
+    if (!success)
+    {
+        if (content != NULL)
+        {
+            free(content);
+            content = NULL;
+        }
+
+        if (data != NULL)
+        {
+            free(data);
+            data = NULL;
+        }
+
+        if (dataRefs != NULL)
+        {
+            free(dataRefs);
+            dataRefs = NULL;
+        }
+    }
+
+    return success;
+}
+
+static void cleanupListElementsPool(ListElementsPool* elementsPool)
+{
+    if (elementsPool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
+
+        if (content != NULL)
+        {
+            if (content->data != NULL)
+            {
+                free(content->data);
+                content->data = NULL;
+            }
+
+            if (content->dataRefs != NULL)
+            {
+                free(content->dataRefs);
+                content->dataRefs = NULL;
+            }
+
+            free(elementsPool->content);
+            elementsPool->content = NULL;
+            content = NULL;
+        }
+    }
+}
+
+/* This function is for private use only; it erases the list elements without deallocating the payload of the Object
+   Should be used with caution (might cause memory leaks) and only when sure that references to each Object data (type + payload) are contained within another list
+*/
+static void clearListWithoutObjectsDeallocation(List* list)
+{
+    ASSERT(list != NULL, "Invalid list (NULL)!");
+
+    if (list != NULL)
+    {
+        ListElement* currentElementToDelete = list->first;
+
+        while (currentElementToDelete != NULL)
+        {
+            ListElement* elementToDelete = currentElementToDelete;
+            currentElementToDelete = currentElementToDelete->next;
+            elementToDelete->next = NULL;
+
+            if (list->elementsPool != NULL)
+            {
+                releaseElement(elementToDelete, list->elementsPool);
+            }
+            else
+            {
+                free(elementToDelete);
+            }
+
+            elementToDelete = NULL;
+        }
+
+        list->first = NULL;
+        list->last = NULL;
+    }
+}
+
+ListElementsPool* createListElementsPool()
+{
+    ListElementsPool* elementsPool = (ListElementsPool*)malloc(sizeof(ListElementsPool));
+
+    if (elementsPool != NULL)
+    {
+        const bool success = initListElementsPool(elementsPool);
+
+        if (!success)
+        {
+            free(elementsPool);
+            elementsPool = NULL;
+        }
+    }
+
+    return elementsPool;
+}
+
+void deleteListElementsPool(ListElementsPool* elementsPool)
+{
+    if (elementsPool != NULL)
+    {
+        cleanupListElementsPool(elementsPool);
+        free(elementsPool);
+        elementsPool = NULL;
+    }
+}
+
+size_t getAvailableElementsCount(ListElementsPool* elementsPool)
+{
+    size_t count = 0;
+
+    if (elementsPool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
+        ASSERT(content != NULL, "Invalid list elements elementsPool content!");
+
+        if (content != NULL)
+        {
+            count = content->availableItemsCount;
+        }
+    }
+
+    return count;
+}
+
+/* TODO:
+   - implement mechanism for additional allocations of elements in case all elements are assigned and further requests are made
+   - implement mechanism for allocation of element batches (e.g. when initializing a list with multiple elements)
+*/
+ListElement* aquireElement(ListElementsPool* elementsPool)
+{
+    ListElement* aquiredElement = NULL;
+
+    if (elementsPool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
+        ASSERT(content != NULL, "Invalid list elements elementsPool content!");
+
+        if (content != NULL && content->availableItemsCount > 0)
+        {
+            ListElement** dataRefs = content->dataRefs;
+            ASSERT(dataRefs != NULL, "Invalid list elements elementsPool data refs!")
+
+            if (dataRefs != NULL)
+            {
+                const size_t aquiredElementIndex = content->availableItemsCount - 1;
+
+                aquiredElement = dataRefs[aquiredElementIndex];
+                dataRefs[aquiredElementIndex] = NULL;
+                --content->availableItemsCount;
+            }
+        }
+    }
+
+    return aquiredElement;
+}
+
+// TODO: implement double release prevention mechanism if possible
+bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
+{
+    bool success = false;
+
+    if (elementsPool != NULL && element != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
+
+        const bool isValidPool = content != NULL && content->data != NULL && content->dataRefs != NULL && content->itemsCount > 0 && content->itemsCount > content->availableItemsCount;
+        ASSERT(isValidPool, "Invalid list elements elementsPool parameters!")
+
+        if (isValidPool && element >= content->data && element < &content->data[content->itemsCount])
+        {
+            element->next = NULL;
+            element->object.type = -1;
+            element->object.payload = NULL;
+            element->priority = 0;
+            content->dataRefs[content->availableItemsCount] = element;
+            ++content->availableItemsCount;
+            success = true;
+        }
+    }
+
+    return success;
+}
+
+List* createEmptyList(ListElementsPool* elementsPool)
 {
     List* list = (List*)malloc(sizeof(List));
 
@@ -16,18 +257,42 @@ List* createEmptyList()
     {
         list->first = NULL;
         list->last = NULL;
+        list->elementsPool = elementsPool;
     }
 
     return list;
 }
 
-List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize)
+List* createEmptyLists(size_t count, ListElementsPool* elementsPool)
+{
+    List* first = NULL;
+
+    if (count > 0)
+    {
+        first = (List*)calloc(count, sizeof(List));
+    }
+
+    if (first)
+    {
+        for (size_t index = 0; index < count; ++index)
+        {
+            List* current = &first[index];
+            current->first = NULL;
+            current->last = NULL;
+            current->elementsPool = elementsPool;
+        }
+    }
+
+    return first;
+}
+
+List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize, ListElementsPool* elementsPool)
 {
     List* list = NULL;
 
     if (prioritiesArray != NULL && arraySize > 0)
     {
-        list = createEmptyList();
+        list = createEmptyList(elementsPool);
 
         if (list != NULL)
         {
@@ -63,6 +328,7 @@ void deleteList(List* list, void (*deallocObject)(Object* object))
         if (list->first != NULL)
         {
             clearList(list, deallocObject);
+            list->elementsPool = NULL; // elementsPool is not owned by list, hence removing any reference to it is sufficient
         }
 
         free(list);
@@ -88,18 +354,23 @@ ListElement* createListElement()
 
 ListElement* createAndAppendToList(List* list, size_t priority)
 {
-    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
+    ListElement* element = NULL;
 
-    if (element != NULL)
+    if (list != NULL)
     {
-        element->next = NULL;
-        element->priority = priority;
+        element = list->elementsPool != NULL ? aquireElement(list->elementsPool) : (ListElement*)malloc(sizeof(ListElement));
 
-        // empty object
-        element->object.type = -1;
-        element->object.payload = NULL;
+        if (element != NULL)
+        {
+            element->next = NULL;
+            element->priority = priority;
 
-        appendToList(list, element);
+            // empty object
+            element->object.type = -1;
+            element->object.payload = NULL;
+
+            appendToList(list, element);
+        }
     }
 
     return element;
@@ -131,18 +402,23 @@ void appendToList(List* list, ListElement* newElement)
 
 ListElement* createAndPrependToList(List* list, size_t priority)
 {
-    ListElement* element = (ListElement*)malloc(sizeof(ListElement));
+    ListElement* element = NULL;
 
-    if (element != NULL)
+    if (list != NULL)
     {
-        element->next = NULL;
-        element->priority = priority;
+        element = list->elementsPool != NULL ? aquireElement(list->elementsPool) : (ListElement*)malloc(sizeof(ListElement));
 
-        // empty object
-        element->object.type = -1;
-        element->object.payload = NULL;
+        if (element != NULL)
+        {
+            element->next = NULL;
+            element->priority = priority;
 
-        prependToList(list, element);
+            // empty object
+            element->object.type = -1;
+            element->object.payload = NULL;
+
+            prependToList(list, element);
+        }
     }
 
     return element;
@@ -166,16 +442,19 @@ void prependToList(List* list, ListElement* newElement)
 
 ListElement* createAndInsertAfter(ListIterator it, size_t priority)
 {
+    ListElement* result = NULL;
     ASSERT(it.list != NULL, "Iterator points to NULL list");
 
-    ListElement* result = NULL;
-    ListElement* nextElement = createListElement();
-
-    if (nextElement != NULL)
+    if (it.list != NULL)
     {
-        result = nextElement;
-        nextElement->priority = priority;
-        insertAfter(it, nextElement);
+        ListElement* const nextElement = it.list->elementsPool != NULL ? aquireElement(it.list->elementsPool) : createListElement();
+
+        if (nextElement != NULL)
+        {
+            result = nextElement;
+            nextElement->priority = priority;
+            insertAfter(it, nextElement);
+        }
     }
 
     return result;
@@ -217,16 +496,19 @@ void insertAfter(ListIterator it, ListElement* nextElement)
 
 ListElement* createAndInsertBefore(ListIterator it, size_t priority)
 {
+    ListElement* result = NULL;
     ASSERT(it.list != NULL, "Iterator points to NULL list");
 
-    ListElement* result = NULL;
-    ListElement* previousElement = createListElement();
-
-    if (previousElement != NULL)
+    if (it.list != NULL)
     {
-        previousElement->priority = priority;
-        result = previousElement;
-        insertBefore(it, previousElement);
+        ListElement* const previousElement = it.list->elementsPool != NULL ? aquireElement(it.list->elementsPool) : createListElement();
+
+        if (previousElement != NULL)
+        {
+            previousElement->priority = priority;
+            result = previousElement;
+            insertBefore(it, previousElement);
+        }
     }
 
     return result;
@@ -419,13 +701,28 @@ void clearList(List* list, void (*deallocObject)(Object* object))
         list->first = NULL;
         list->last = NULL;
 
-        while (currentElement != NULL)
+        if (list->elementsPool != NULL)
         {
-            deallocObject(&currentElement->object);
-            ListElement* elementToDelete = currentElement;
-            currentElement = currentElement->next;
-            free(elementToDelete);
-            elementToDelete = NULL;
+            while (currentElement != NULL)
+            {
+                deallocObject(&currentElement->object);
+                ListElement* elementToDelete = currentElement;
+                currentElement = currentElement->next;
+                const bool released = releaseElement(elementToDelete, list->elementsPool);
+                ASSERT(released, "Element not contained in elementsPool!");
+                elementToDelete = NULL;
+            }
+        }
+        else
+        {
+            while (currentElement != NULL)
+            {
+                deallocObject(&currentElement->object);
+                ListElement* elementToDelete = currentElement;
+                currentElement = currentElement->next;
+                free(elementToDelete);
+                elementToDelete = NULL;
+            }
         }
     }
 }
@@ -597,24 +894,53 @@ void moveContentToList(List* source, List* destination)
     {
         ASSERT(source->last != NULL, "Null pointer detected for last source list element");
 
-        if (destination->first != NULL)
+        if (destination->last != NULL)
         {
-            ASSERT(destination->last != NULL, "Null pointer detected for last destination list element");
+            ASSERT(destination->first != NULL, "Null pointer detected for first destination list element");
+            List* temp = createEmptyList(destination->elementsPool);
+            bool unsuccessfulElementAllocationOccurred = false;
 
-            if (destination->last != NULL)
+            if (temp != NULL)
             {
-                destination->last->next = source->first;
+                ListElement* currentSourceElement = source->first;
+
+                while (currentSourceElement != NULL && !unsuccessfulElementAllocationOccurred)
+                {
+                    ListElement* elementToAppend = createAndAppendToList(temp, currentSourceElement->priority);
+                    unsuccessfulElementAllocationOccurred = elementToAppend == NULL;
+                    elementToAppend->object.type = currentSourceElement->object.type;
+                    elementToAppend->object.payload = currentSourceElement->object.payload;
+                    currentSourceElement = currentSourceElement->next;
+                }
+            }
+
+            if (!unsuccessfulElementAllocationOccurred)
+            {
+                destination->last->next = temp->first;
+                destination->last = temp->last;
+                temp->first = NULL;
+                temp->last = NULL;
+                free(temp);
+                temp = NULL;
+
+                clearListWithoutObjectsDeallocation(source); // reference of elements Object data (type + payload) kept by destination list
+            }
+            else
+            {
+                clearListWithoutObjectsDeallocation(temp); // reference of elements Object data (type + payload) kept by source list
+
+                free(temp);
+                temp = NULL;
             }
         }
         else
         {
-            ASSERT(destination->last == NULL, "Non-null pointer detected for last destination list element");
             destination->first = source->first;
+            destination->elementsPool = source->elementsPool;
+            destination->last = source->last;
+            source->first = NULL;
+            source->last = NULL;
         }
-
-        destination->last = source->last;
-        source->first = NULL;
-        source->last = NULL;
     }
 }
 
@@ -631,7 +957,7 @@ ListElement* copyContentToList(const List* source, List* destination, bool (*cop
     {
         ASSERT(source->last != NULL, "Null pointer detected for last source list element");
 
-        List* temp = createEmptyList();
+        List* temp = createEmptyList(destination->elementsPool);
 
         if (temp != NULL)
         {
@@ -657,8 +983,21 @@ ListElement* copyContentToList(const List* source, List* destination, bool (*cop
             if (temp != NULL)
             {
                 result = temp->first;
-                moveContentToList(temp, destination);
-                deleteList(temp, deallocObject);
+
+                if (destination->last != NULL)
+                {
+                    destination->last->next = temp->first;
+                }
+                else
+                {
+                    destination->first = temp->first;
+                }
+
+                destination->last = temp->last;
+
+                temp->first = NULL;
+                temp->last = NULL;
+                free(temp);
                 temp = NULL;
             }
         }

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "../LinkedListsLib/linkedlist.h"
+
 typedef struct
 {
     char* key;
@@ -12,7 +14,7 @@ typedef struct
 
 typedef struct
 {
-    void** hashBuckets;
+    void* hashBuckets;
     size_t hashSize;
 } HashTable;
 
@@ -20,7 +22,7 @@ typedef struct
 extern "C" {
 #endif
 
-HashTable* createHashTable(const size_t hashSize);
+HashTable* createHashTable(const size_t hashSize, ListElementsPool* elementsPool);
 void deleteHashTable(HashTable* hashTable);
 bool insertHashEntry(const char* key, const char* value, HashTable* hashTable);
 void eraseHashEntry(const char* key, HashTable* hashTable);

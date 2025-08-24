@@ -2,7 +2,6 @@
 #include <string.h>
 
 #include "hashtable.h"
-#include "../LinkedListsLib/linkedlist.h"
 
 #include "../Utils/error.h"
 
@@ -12,57 +11,33 @@ static const int hashEntryType = 'h' + 'a' + 's' + 'h' + 'E' + 'n' + 't' + 'r' +
 static bool _retrieveHashIndex(const char* key, size_t* hashIndex, const size_t hashSize);
 static HashEntry* _createHashEntry(const char* key, const char* value);
 static bool _updateHashEntry(HashEntry* hashEntry, const char* value);
-static HashEntry* _getMatchingKeyHashEntry(const List *currentBucket, const char* key);
+static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char* key);
 static void _deleteHashEntry(Object* object); // custom deleter for hash table
+static ListElement* _removeElementFromBucket(const char* key, List* bucket);
+static List* _getCurrentBucket(const char* key, HashTable* hashTable);
 
-HashTable* createHashTable(const size_t hashSize)
+HashTable* createHashTable(const size_t hashSize, ListElementsPool* elementsPool)
 {
     HashTable* result = NULL;
 
     if (hashSize > 0)
     {
-        List** hashBuckets = (List**)calloc(hashSize, sizeof(List*));
+        List* hashBuckets = createEmptyLists(hashSize, elementsPool);
 
         if (hashBuckets != NULL)
         {
-            bool allListsCreated = true;
+            HashTable* hashTable = (HashTable*)malloc(sizeof(HashTable));
 
-            for (size_t index = 0; index < hashSize; ++index)
+            if (hashTable != NULL)
             {
-                hashBuckets[index] = createEmptyList();
-                if (hashBuckets[index] == NULL)
-                {
-                    allListsCreated = false;
-                    break;
-                }
-            }
-
-            if (allListsCreated)
-            {
-                HashTable* hashTable = (HashTable*)malloc(sizeof(HashTable));
-
-                if (hashTable != NULL)
-                {
-                    hashTable->hashBuckets = (void*)hashBuckets;
-                    hashTable->hashSize = hashSize;
-                    result = hashTable;
-                }
+                hashTable->hashBuckets = hashBuckets;
+                hashTable->hashSize = hashSize;
+                result = hashTable;
             }
         }
 
-        if (result == NULL)
+        if (result == NULL && hashBuckets != NULL)
         {
-            if (hashBuckets != NULL)
-            {
-                for (size_t index = 0; index < hashSize; ++index)
-                {
-                    if (hashBuckets[index] != NULL)
-                    {
-                        deleteList(hashBuckets[index], deleteObjectPayload);
-                        hashBuckets[index] = NULL;
-                    }
-                }
-            }
             free(hashBuckets);
             hashBuckets = NULL;
         }
@@ -77,13 +52,20 @@ void deleteHashTable(HashTable* hashTable)
 
     if (hashTable != NULL)
     {
-        for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
+        List* hashBuckets = (List*)hashTable->hashBuckets;
+        ASSERT(hashBuckets != NULL, "Invalid hash buckets detected!");
+
+        if (hashBuckets != NULL)
         {
-            deleteList((List*)(hashTable->hashBuckets)[hashIndex], _deleteHashEntry);
+            for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
+            {
+                clearList(&hashBuckets[hashIndex], _deleteHashEntry);
+            }
+
+            free(hashTable->hashBuckets);
+            hashTable->hashBuckets = NULL;
         }
 
-        free(hashTable->hashBuckets);
-        hashTable->hashBuckets = NULL;
         free(hashTable);
         hashTable = NULL;
     }
@@ -92,62 +74,51 @@ void deleteHashTable(HashTable* hashTable)
 bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
 {
     bool success = false;
+    HashEntry* hashEntry = NULL;
+    List* currentBucket = NULL;
 
     if (key != NULL && value != NULL && hashTable != NULL && strlen(key) > 0 && strlen(value) > 0)
     {
-        List* currentBucket = NULL;
+        currentBucket = _getCurrentBucket(key, hashTable);
+        hashEntry = _getMatchingKeyHashEntry(currentBucket, key);
+    }
 
-        if (hashTable->hashSize > 0 && hashTable->hashBuckets != NULL)
+    if (hashEntry != NULL)
+    {
+        if (strcmp(hashEntry->value, value) != 0)
         {
-            size_t hashIndex;
-            _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
-            currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
+            success = _updateHashEntry(hashEntry, value);
         }
-        else
+    }
+    else
+    {
+        hashEntry = _createHashEntry(key, value);
+
+        if (hashEntry != NULL)
         {
-            ASSERT(false, "Invalid hash table");
-        }
+            ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
 
-        ASSERT(currentBucket != NULL, "NULL hash table bucket");
-
-        HashEntry* matchingKeyHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
-
-        if (matchingKeyHashEntry != NULL)
-        {
-            if (strcmp(matchingKeyHashEntry->value, value) != 0)
+            if (newElement != NULL)
             {
-                success = _updateHashEntry(matchingKeyHashEntry, value);
+                assignObjectContentToListElement(newElement, hashEntryType, hashEntry);
+                success = true;
             }
-        }
-        else
-        {
-            HashEntry* newHashEntry = _createHashEntry(key, value);
-
-            if (newHashEntry != NULL)
+            else
             {
-                ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
+                ASSERT(hashEntry->key && hashEntry->value, "Invalid hash entry!");
 
-                if (newElement != NULL)
+                if (hashEntry->key)
                 {
-                    assignObjectContentToListElement(newElement, hashEntryType, newHashEntry);
-                    success = true;
+                    free(hashEntry->key);
                 }
-                else
+
+                if (hashEntry->value)
                 {
-                    ASSERT(newHashEntry->key && newHashEntry->value, "Invalid hash entry!");
-
-                    if (newHashEntry->key)
-                    {
-                        free(newHashEntry->key);
-                    }
-
-                    if (newHashEntry->value)
-                    {
-                        free(newHashEntry->value);
-                    }
-
-                    free(newHashEntry);
+                    free(hashEntry->value);
                 }
+
+                free(hashEntry);
+                hashEntry = NULL;
             }
         }
     }
@@ -157,54 +128,30 @@ bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
 
 void eraseHashEntry(const char* key, HashTable* hashTable)
 {
-    if (key!= NULL && strlen(key) > 0 && hashTable != NULL)
-    {
-        List* currentBucket = NULL;
+    List* currentBucket = _getCurrentBucket(key, hashTable);
+    ListElement* removedElement = NULL;
 
-        if (hashTable->hashSize > 0 && hashTable->hashBuckets != NULL)
+    ASSERT(currentBucket != NULL, "NULL bucket detected in hash table");
+
+    if (currentBucket != NULL)
+    {
+        removedElement = _removeElementFromBucket(key, currentBucket);
+    }
+
+    if (removedElement != NULL)
+    {
+        _deleteHashEntry(&(removedElement->object));
+
+        if (currentBucket->elementsPool != NULL)
         {
-            size_t hashIndex;
-            _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
-            currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
+            releaseElement(removedElement, currentBucket->elementsPool);
         }
         else
         {
-            ASSERT(false, "Invalid hash table");
-        }
-
-        ASSERT(currentBucket != NULL, "NULL bucket detected in hash table");
-
-        ListElement* removedElement = NULL;
-        ListIterator it = lbegin(currentBucket);
-
-        while (!areIteratorsEqual(it, lend(currentBucket)))
-        {
-            if (!it.current)
-            {
-                ASSERT(false, "Iterator points to empty list");
-                break;
-            }
-
-            ASSERT(it.current->object.type == hashEntryType && it.current->object.payload != NULL,
-                             "Invalid list element object detected in hash table");
-
-            HashEntry* currentHashEntry = (HashEntry*)(it.current->object.payload);
-
-            if (strcmp(currentHashEntry->key, key) == 0)
-            {
-                removedElement = removeCurrentListElement(it);
-                break;
-            }
-
-            lnext(&it);
-        }
-
-        if (removedElement != NULL)
-        {
-            _deleteHashEntry(&(removedElement->object));
             free(removedElement);
-            removedElement = NULL;
         }
+
+        removedElement = NULL;
     }
 }
 
@@ -220,14 +167,13 @@ const char* getHashEntryValue(const char* key, const HashTable* hashTable)
         {
             size_t hashIndex;
             _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
-            currentBucket = (List*)(hashTable->hashBuckets)[hashIndex];
+            List* hashBuckets = (List*)hashTable->hashBuckets;
+            currentBucket = &hashBuckets[hashIndex];
         }
         else
         {
             ASSERT(false, "Invalid hash table");
         }
-
-        ASSERT(currentBucket != NULL, "NULL hash table bucket");
 
         HashEntry* matchingHashEntry = _getMatchingKeyHashEntry(currentBucket, key);
 
@@ -246,9 +192,18 @@ size_t getHashTableEntriesCount(const HashTable* hashTable)
 
     if (hashTable != NULL)
     {
-        for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
+        if (hashTable->hashBuckets != NULL)
         {
-            hashTableEntriesCount += getListSize((List*)(hashTable->hashBuckets)[hashIndex]);
+            List* hashBuckets = (List*)hashTable->hashBuckets;
+
+            for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
+            {
+                hashTableEntriesCount += getListSize(&hashBuckets[hashIndex]);
+            }
+        }
+        else
+        {
+            ASSERT(false, "Invalid hash buckets detected!");
         }
     }
 
@@ -416,5 +371,61 @@ static void _deleteHashEntry(Object* object)
             ASSERT(false, "Invalid hash entry, deleter cannot be applied");
         }
     }
+}
+
+static ListElement* _removeElementFromBucket(const char* key, List* bucket)
+{
+    ListElement* removedElement = NULL;
+
+    if (bucket != NULL)
+    {
+        ListIterator it = lbegin(bucket);
+
+        while (!areIteratorsEqual(it, lend(bucket)))
+        {
+            if (!it.current)
+            {
+                ASSERT(false, "Iterator points to empty list");
+                break;
+            }
+
+            ASSERT(it.current->object.type == hashEntryType && it.current->object.payload != NULL,
+                   "Invalid list element object detected in hash table");
+
+            HashEntry* currentHashEntry = (HashEntry*)(it.current->object.payload);
+
+            if (strcmp(currentHashEntry->key, key) == 0)
+            {
+                removedElement = removeCurrentListElement(it);
+                break;
+            }
+
+            lnext(&it);
+        }
+    }
+
+    return removedElement;
+}
+
+static List* _getCurrentBucket(const char* key, HashTable* hashTable)
+{
+    List* currentBucket = NULL;
+
+    if (key!= NULL && strlen(key) > 0 && hashTable != NULL)
+    {
+        if (hashTable->hashSize > 0 && hashTable->hashBuckets != NULL)
+        {
+            size_t hashIndex;
+            _retrieveHashIndex(key, &hashIndex, hashTable->hashSize);
+            List* hashBuckets = (List*)hashTable->hashBuckets;
+            currentBucket = &hashBuckets[hashIndex];
+        }
+        else
+        {
+            ASSERT(false, "Invalid hash table");
+        }
+    }
+
+    return currentBucket;
 }
 

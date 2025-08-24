@@ -42,7 +42,7 @@ int main()
         if (read(fileDescriptors[READ_SIDE], buffer, sizeof(buffer)) > 0)
         {
             printf("[PID: %d] Done\n\n", getpid());
-            List* receiverList = createEmptyList();
+            List* receiverList = createEmptyList(NULL);
 
             if (receiverList != NULL)
             {
@@ -80,7 +80,7 @@ int main()
         close(fileDescriptors[READ_SIDE]);
         const size_t priorities[] = {5, 2, 7, 3, 4};
 
-        List* senderList = createListFromPrioritiesArray(priorities, LIST_SIZE);
+        List* senderList = createListFromPrioritiesArray(priorities, LIST_SIZE, NULL);
 
         if (senderList != NULL)
         {

@@ -68,7 +68,7 @@ void putPrioritiesIntoList(const std::vector<size_t> receivedPriorities)
     std::this_thread::sleep_for(std::chrono::milliseconds{500});
     std::cout << "Constructing list and sorting descending...";
     std::this_thread::sleep_for(std::chrono::seconds{1});
-    List* list{createListFromPrioritiesArray(&receivedPriorities[0], receivedPriorities.size())};
+    List* list{createListFromPrioritiesArray(&receivedPriorities[0], receivedPriorities.size(), NULL)};
     sortDescendingByPriority(list);
     std::cout << "DONE" << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds{2});

@@ -7,9 +7,19 @@
 #include "codeutils.h"
 #include "testobjects.h"
 
+#define DELETE_LIST(list, deleter) \
+    if (list) \
+    { \
+        deleteList(list, deleter); \
+        list = nullptr; \
+    }
+
 class LinkedListTests : public QObject
 {
     Q_OBJECT
+
+public:
+    explicit LinkedListTests();
 
 private slots:
     void testListIsCorrectlyCreatedAndCleared();
@@ -42,27 +52,71 @@ private slots:
     void testMoveArrayToList();
     void testPrintListElementsToFile();
 
+    void testListElementsPool();
+
+    void initTestCase_data();
+    void cleanupTestCase();
+    void init();
+    void cleanup();
+
 private:
+    void _markListForDeletion(List* list);
+    void _markListElementForCleanup(ListElement* element, bool shouldRelease);
+    void _clearListElementsMarkedForCleanup();
+
     size_t _getSumOfPriorities(List* list);
+
+    ListElementsPool* m_Pool;
+    size_t m_TotalAvailablePoolElementsCount;
+
+    List* m_List1;
+    List* m_List2;
+    List* m_List3;
+    List* m_List4;
+    List* m_List5;
+    List* m_List6;
+    List* m_List7;
+    List* m_List8;
+
+    // lists that are not test class members marked for deletion (deleted when running cleanup()) - do not add members (e.g. m_pList1) here
+    std::vector<List*> m_ListsMarkedForDeletion;
+
+    // elements collected from test cases that need to be discarded (released to pool or freed)
+    std::vector<ListElement*> m_ListElementsMarkedForRelease;
+    std::vector<ListElement*> m_ListElementsMarkedForDeletion;
 };
+
+LinkedListTests::LinkedListTests()
+    : m_Pool{nullptr}
+    , m_TotalAvailablePoolElementsCount{0}
+    , m_List1{nullptr}
+    , m_List2{nullptr}
+    , m_List3{nullptr}
+    , m_List4{nullptr}
+    , m_List5{nullptr}
+    , m_List6{nullptr}
+    , m_List7{nullptr}
+    , m_List8{nullptr}
+{
+}
 
 void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 9);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 9, pool);
 
-        QVERIFY2(getListSize(list) == 9, "List size is not correct");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 7, "First and last element are not correctly referenced");
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 4)->priority == 3 && getListElementAtIndex(list, 8)->priority == 7,
+        QVERIFY2(getListSize(m_List1) == 9, "List size is not correct");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 7, "First and last element are not correctly referenced");
+        QVERIFY2(getListElementAtIndex(m_List1, 0)->priority == 6 && getListElementAtIndex(m_List1, 4)->priority == 3 && getListElementAtIndex(m_List1, 8)->priority == 7,
                  "The element is not correctly retrieved based on index");
-        QVERIFY(getListElementAtIndex(list, 4)->object.type == -1 && getListElementAtIndex(list, 4)->object.payload == nullptr);
+        QVERIFY(getListElementAtIndex(m_List1, 4)->object.type == -1 && getListElementAtIndex(m_List1, 4)->object.payload == nullptr);
 
-        clearList(list, deleteObjectPayload);
-        QVERIFY2(isEmptyList(list), "The list has not been correctly emptied");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        clearList(m_List1, deleteObjectPayload);
+        QVERIFY2(isEmptyList(m_List1), "The list has not been correctly emptied");
     }
 
     {
@@ -93,714 +147,649 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
 
 void LinkedListTests::testAppendElement()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
-    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
-    createAndAppendToList(list, 8);
+    m_List1 = createListFromPrioritiesArray(prioritiesArray, 9, pool);
+    createAndAppendToList(m_List1, 8);
 
-    QVERIFY2(getListSize(list) == 10 && getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 9)->priority == 8, "Element has not been correctly created and appended");
-    QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 8, "First and last element are not correctly referenced");
-    QVERIFY(getListElementAtIndex(list, 9)->object.type == -1 && getListElementAtIndex(list, 9)->object.payload == nullptr);
-
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
+    QVERIFY2(getListSize(m_List1) == 10 && getListElementAtIndex(m_List1, 0)->priority == 6 && getListElementAtIndex(m_List1, 9)->priority == 8, "Element has not been correctly created and appended");
+    QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 8, "First and last element are not correctly referenced");
+    QVERIFY(getListElementAtIndex(m_List1, 9)->object.type == -1 && getListElementAtIndex(m_List1, 9)->object.payload == nullptr);
 }
 
 void LinkedListTests::testPrependElement()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
-    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
-    createAndPrependToList(list, 8);
+    m_List1 = createListFromPrioritiesArray(prioritiesArray, 9, pool);
+    createAndPrependToList(m_List1, 8);
 
-    QVERIFY2(getListSize(list) == 10 && getListElementAtIndex(list, 0)->priority == 8 && getListElementAtIndex(list, 9)->priority == 7, "Element has not been correctly created and prepended");
-    QVERIFY2(getFirstListElement(list)->priority == 8 && getLastListElement(list)->priority == 7, "First and last element are not correctly referenced");
-    QVERIFY(getListElementAtIndex(list, 0)->object.type == -1 && getListElementAtIndex(list, 0)->object.payload == nullptr);
-
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
+    QVERIFY2(getListSize(m_List1) == 10 && getListElementAtIndex(m_List1, 0)->priority == 8 && getListElementAtIndex(m_List1, 9)->priority == 7, "Element has not been correctly created and prepended");
+    QVERIFY2(getFirstListElement(m_List1)->priority == 8 && getLastListElement(m_List1)->priority == 7, "First and last element are not correctly referenced");
+    QVERIFY(getListElementAtIndex(m_List1, 0)->object.type == -1 && getListElementAtIndex(m_List1, 0)->object.payload == nullptr);
 }
 
 void LinkedListTests::testRemoveFirstElement()
 {
-    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 8};
-    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
-    ListElement* firstElement = removeFirstListElement(list);
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
 
-    QVERIFY2(getListSize(list) == 8 && getListElementAtIndex(list, 0)->priority == 2 && getListElementAtIndex(list, 7)->priority == 8, "Element has not been correctly created and appended");
-    QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 8, "First and last element are not correctly referenced");
+    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 8};
+
+    m_List1 = createListFromPrioritiesArray(prioritiesArray, 9, pool);
+    ListElement* firstElement = removeFirstListElement(m_List1);
+
+    QVERIFY2(getListSize(m_List1) == 8 && getListElementAtIndex(m_List1, 0)->priority == 2 && getListElementAtIndex(m_List1, 7)->priority == 8, "Element has not been correctly created and appended");
+    QVERIFY2(getFirstListElement(m_List1)->priority == 2 && getLastListElement(m_List1)->priority == 8, "First and last element are not correctly referenced");
     QVERIFY(firstElement->next == nullptr && firstElement->priority == 6 && firstElement->object.type == -1 && firstElement->object.payload == nullptr);
 
-    free(firstElement);
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
+    _markListElementForCleanup(firstElement, pool != nullptr);
 }
 
 void LinkedListTests::testRemoveLastElement()
 {
-    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 8};
-    List* list = createListFromPrioritiesArray(prioritiesArray, 9);
-    ListElement* lastElement = removeLastListElement(list);
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
 
-    QVERIFY2(getListSize(list) == 8 && getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 7)->priority == 9, "Element has not been correctly created and appended");
-    QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 9, "First and last element are not correctly referenced");
+    const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 8};
+
+    m_List1 = createListFromPrioritiesArray(prioritiesArray, 9, pool);
+    ListElement* lastElement = removeLastListElement(m_List1);
+
+    QVERIFY2(getListSize(m_List1) == 8 && getListElementAtIndex(m_List1, 0)->priority == 6 && getListElementAtIndex(m_List1, 7)->priority == 9, "Element has not been correctly created and appended");
+    QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 9, "First and last element are not correctly referenced");
     QVERIFY(lastElement->next == nullptr && lastElement->priority == 8 && lastElement->object.type == -1 && lastElement->object.payload == nullptr);
 
-    free(lastElement);
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
+    _markListElementForCleanup(lastElement, pool != nullptr);
 }
 
 void LinkedListTests::testInsertElementBefore()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[4]{6, 2, 5, 4};
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List1);
         createAndInsertBefore(it, 10);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 10 &&
-                 getListElementAtIndex(list, 1)->priority == 6 &&
-                 getListElementAtIndex(list, 2)->priority == 2 &&
-                 getListElementAtIndex(list, 3)->priority == 5 &&
-                 getListElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
-        QVERIFY2(getFirstListElement(list)->priority == 10 && getLastListElement(list)->priority == 4, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 0)->object.type == -1 && getListElementAtIndex(list, 0)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List1) == 5 &&
+                 getListElementAtIndex(m_List1, 0)->priority == 10 &&
+                 getListElementAtIndex(m_List1, 1)->priority == 6 &&
+                 getListElementAtIndex(m_List1, 2)->priority == 2 &&
+                 getListElementAtIndex(m_List1, 3)->priority == 5 &&
+                 getListElementAtIndex(m_List1, 4)->priority == 4,   "The previous element has not been correctly inserted");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 10 && getLastListElement(m_List1)->priority == 4, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List1, 0)->object.type == -1 && getListElementAtIndex(m_List1, 0)->object.payload == nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List2);
         lnext(&it);
         createAndInsertBefore(it, 10);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 10 &&
-                 getListElementAtIndex(list, 2)->priority == 2 &&
-                 getListElementAtIndex(list, 3)->priority == 5 &&
-                 getListElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 1)->object.type == -1 && getListElementAtIndex(list, 1)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List2) == 5 &&
+                 getListElementAtIndex(m_List2, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 10 &&
+                 getListElementAtIndex(m_List2, 2)->priority == 2 &&
+                 getListElementAtIndex(m_List2, 3)->priority == 5 &&
+                 getListElementAtIndex(m_List2, 4)->priority == 4,   "The previous element has not been correctly inserted");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 6 && getLastListElement(m_List2)->priority == 4, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List2, 1)->object.type == -1 && getListElementAtIndex(m_List2, 1)->object.payload == nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List3);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         createAndInsertBefore(it, 10);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 5 &&
-                 getListElementAtIndex(list, 3)->priority == 10 &&
-                 getListElementAtIndex(list, 4)->priority == 4,   "The previous element has not been correctly inserted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 3)->object.type == -1 && getListElementAtIndex(list, 3)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List3) == 5 &&
+                 getListElementAtIndex(m_List3, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List3, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List3, 2)->priority == 5 &&
+                 getListElementAtIndex(m_List3, 3)->priority == 10 &&
+                 getListElementAtIndex(m_List3, 4)->priority == 4,   "The previous element has not been correctly inserted");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 6 && getLastListElement(m_List3)->priority == 4, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List3, 3)->object.type == -1 && getListElementAtIndex(m_List3, 3)->object.payload == nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List4 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List4);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         createAndInsertBefore(it, 10);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 5 &&
-                 getListElementAtIndex(list, 3)->priority == 4 &&
-                 getListElementAtIndex(list, 4)->priority == 10,   "The previous element has not been correctly inserted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 10, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 4)->object.type == -1 && getListElementAtIndex(list, 4)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List4) == 5 &&
+                 getListElementAtIndex(m_List4, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List4, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List4, 2)->priority == 5 &&
+                 getListElementAtIndex(m_List4, 3)->priority == 4 &&
+                 getListElementAtIndex(m_List4, 4)->priority == 10,   "The previous element has not been correctly inserted");
+        QVERIFY2(getFirstListElement(m_List4)->priority == 6 && getLastListElement(m_List4)->priority == 10, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List4, 4)->object.type == -1 && getListElementAtIndex(m_List4, 4)->object.payload == nullptr);
     }
 
     {
-        List* list = createEmptyList();
-        ListIterator it = lbegin(list);
+        m_List5 = createEmptyList(pool);
+        ListIterator it = lbegin(m_List5);
         createAndInsertBefore(it, 10);
 
-        QVERIFY2(getListSize(list) == 1 && getListElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
-        QVERIFY2(getFirstListElement(list)->priority == 10 && getLastListElement(list)->priority == 10, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 0)->object.type == -1 && getListElementAtIndex(list, 0)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List5) == 1 && getListElementAtIndex(m_List5, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
+        QVERIFY2(getFirstListElement(m_List5)->priority == 10 && getLastListElement(m_List5)->priority == 10, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List5, 0)->object.type == -1 && getListElementAtIndex(m_List5, 0)->object.payload == nullptr);
     }
 }
 
 void LinkedListTests::testInsertElementAfter()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[4]{6, 2, 5, 4};
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List1);
         createAndInsertAfter(it, 10);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 10 &&
-                 getListElementAtIndex(list, 2)->priority == 2 &&
-                 getListElementAtIndex(list, 3)->priority == 5 &&
-                 getListElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 1)->object.type == -1 && getListElementAtIndex(list, 1)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List1) == 5 &&
+                 getListElementAtIndex(m_List1, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List1, 1)->priority == 10 &&
+                 getListElementAtIndex(m_List1, 2)->priority == 2 &&
+                 getListElementAtIndex(m_List1, 3)->priority == 5 &&
+                 getListElementAtIndex(m_List1, 4)->priority == 4,   "The next element has not been correctly inserted");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 4, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List1, 1)->object.type == -1 && getListElementAtIndex(m_List1, 1)->object.payload == nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List2);
         lnext(&it);
         createAndInsertAfter(it, 10);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 10 &&
-                 getListElementAtIndex(list, 3)->priority == 5 &&
-                 getListElementAtIndex(list, 4)->priority == 4,   "The next element has not been correctly inserted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 2)->object.type == -1 && getListElementAtIndex(list, 2)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List2) == 5 &&
+                 getListElementAtIndex(m_List2, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List2, 2)->priority == 10 &&
+                 getListElementAtIndex(m_List2, 3)->priority == 5 &&
+                 getListElementAtIndex(m_List2, 4)->priority == 4,   "The next element has not been correctly inserted");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 6 && getLastListElement(m_List2)->priority == 4, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List2, 2)->object.type == -1 && getListElementAtIndex(m_List2, 2)->object.payload == nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List3);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         createAndInsertAfter(it, 10);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 5 &&
-                 getListElementAtIndex(list, 3)->priority == 4 &&
-                 getListElementAtIndex(list, 4)->priority == 10,   "The next element has not been correctly inserted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 10, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 4)->object.type == -1 && getListElementAtIndex(list, 4)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List3) == 5 &&
+                 getListElementAtIndex(m_List3, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List3, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List3, 2)->priority == 5 &&
+                 getListElementAtIndex(m_List3, 3)->priority == 4 &&
+                 getListElementAtIndex(m_List3, 4)->priority == 10,   "The next element has not been correctly inserted");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 6 && getLastListElement(m_List3)->priority == 10, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List3, 4)->object.type == -1 && getListElementAtIndex(m_List3, 4)->object.payload == nullptr);
     }
 
     {
-        List* list = createEmptyList();
-        ListIterator it = lbegin(list);
+        m_List4 = createEmptyList(pool);
+        ListIterator it = lbegin(m_List4);
         createAndInsertAfter(it, 10);
 
-        QVERIFY2(getListSize(list) == 1 && getListElementAtIndex(list, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
-        QVERIFY2(getFirstListElement(list)->priority == 10 && getLastListElement(list)->priority == 10, "First and last element are not correctly referenced");
-        QVERIFY(getListElementAtIndex(list, 0)->object.type == -1 && getListElementAtIndex(list, 0)->object.payload == nullptr);
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List4) == 1 && getListElementAtIndex(m_List4, 0)->priority == 10, "The element has not been correctly inserted into an empty list");
+        QVERIFY2(getFirstListElement(m_List4)->priority == 10 && getLastListElement(m_List4)->priority == 10, "First and last element are not correctly referenced");
+        QVERIFY(getListElementAtIndex(m_List4, 0)->object.type == -1 && getListElementAtIndex(m_List4, 0)->object.payload == nullptr);
     }
 }
 
 void LinkedListTests::testMoveContentToList()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t firstPrioritiesArray[2]{6, 2,};
     const size_t secondPrioritiesArray[2]{7, 4};
 
     {
-        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
-        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
+        m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
+        m_List2 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
 
-        moveContentToList(source, destination);
+        moveContentToList(m_List1, m_List2);
 
-        QVERIFY2(isEmptyList(source) &&
-                 getListSize(destination) == 4 &&
-                 getListElementAtIndex(destination, 0)->priority == 7 &&
-                 getListElementAtIndex(destination, 1)->priority == 4 &&
-                 getListElementAtIndex(destination, 2)->priority == 6 &&
-                 getListElementAtIndex(destination, 3)->priority == 2,   "The source list content has not been correctly moved to destination");
-        QVERIFY2(getFirstListElement(destination)->priority == 7 && getLastListElement(destination)->priority == 2, "First and last element of the destination list are not correctly referenced");
-
-        deleteList(source, deleteObjectPayload);
-        source = nullptr;
-        deleteList(destination, deleteObjectPayload);
-        destination = nullptr;
+        QVERIFY2(isEmptyList(m_List1) &&
+                 getListSize(m_List2) == 4 &&
+                 getListElementAtIndex(m_List2, 0)->priority == 7 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 4 &&
+                 getListElementAtIndex(m_List2, 2)->priority == 6 &&
+                 getListElementAtIndex(m_List2, 3)->priority == 2,   "The source list content has not been correctly moved to destination");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 7 && getLastListElement(m_List2)->priority == 2, "First and last element of the destination list are not correctly referenced");
     }
 
     {
-        List* source = createEmptyList();
-        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
+        m_List3 = createEmptyList(pool);
+        m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
 
-        moveContentToList(source, destination);
+        moveContentToList(m_List3, m_List4);
 
-        QVERIFY2(isEmptyList(source) &&
-                 getListSize(destination) == 2 &&
-                 getListElementAtIndex(destination, 0)->priority == 7 &&
-                 getListElementAtIndex(destination, 1)->priority == 4,   "The source list content has not been correctly moved to destination");
-        QVERIFY2(getFirstListElement(destination)->priority == 7 && getLastListElement(destination)->priority == 4, "First and last element of the destination list are not correctly referenced");
-
-        deleteList(source, deleteObjectPayload);
-        source = nullptr;
-        deleteList(destination, deleteObjectPayload);
-        destination = nullptr;
+        QVERIFY2(isEmptyList(m_List3) &&
+                 getListSize(m_List4) == 2 &&
+                 getListElementAtIndex(m_List4, 0)->priority == 7 &&
+                 getListElementAtIndex(m_List4, 1)->priority == 4,   "The source list content has not been correctly moved to destination");
+        QVERIFY2(getFirstListElement(m_List4)->priority == 7 && getLastListElement(m_List4)->priority == 4, "First and last element of the destination list are not correctly referenced");
     }
 
     {
-        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
-        List* destination = createEmptyList();
+        m_List5 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
+        m_List6 = createEmptyList(pool);
 
-        moveContentToList(source, destination);
+        moveContentToList(m_List5, m_List6);
 
-        QVERIFY2(isEmptyList(source) &&
-                 getListSize(destination) == 2 &&
-                 getListElementAtIndex(destination, 0)->priority == 6 &&
-                 getListElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly moved to destination");
-        QVERIFY2(getFirstListElement(destination)->priority == 6 && getLastListElement(destination)->priority == 2, "First and last element of the destination list are not correctly referenced");
-
-        deleteList(source, deleteObjectPayload);
-        source = nullptr;
-        deleteList(destination, deleteObjectPayload);
-        destination = nullptr;
+        QVERIFY2(isEmptyList(m_List5) &&
+                 getListSize(m_List6) == 2 &&
+                 getListElementAtIndex(m_List6, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List6, 1)->priority == 2,   "The source list content has not been correctly moved to destination");
+        QVERIFY2(getFirstListElement(m_List6)->priority == 6 && getLastListElement(m_List6)->priority == 2, "First and last element of the destination list are not correctly referenced");
     }
 }
 
 void LinkedListTests::testCopyContentToList()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t firstPrioritiesArray[2]{6, 2};
     const size_t secondPrioritiesArray[2]{7, 4};
     const size_t thirdPriorityArray[3]{5, 4, 3};
 
     {
-        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
-        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
+        m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
+        m_List2 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
 
-        copyContentToList(source, destination, copyObjectPlaceholder, deleteObjectPayload);
+        copyContentToList(m_List1, m_List2, copyObjectPlaceholder, deleteObjectPayload);
 
-        QVERIFY2(getListSize(source) == 2 &&
-                 getListSize(destination) == 4 &&
-                 getListElementAtIndex(destination, 0)->priority == 7 &&
-                 getListElementAtIndex(destination, 1)->priority == 4 &&
-                 getListElementAtIndex(destination, 2)->priority == 6 &&
-                 getListElementAtIndex(destination, 3)->priority == 2,   "The source list content has not been correctly copied to destination");
-        QVERIFY(getListElementAtIndex(destination, 2)->object.type == -1 && getListElementAtIndex(destination, 2)->object.payload == nullptr);
-        QVERIFY2(getFirstListElement(destination)->priority == 7 && getLastListElement(destination)->priority == 2, "First and last element of the destination list are not correctly referenced");
-        QVERIFY2(getFirstListElement(source)->priority == 6 && getLastListElement(source)->priority == 2, "First and last element of the source list are not correctly referenced");
-
-        deleteList(source, deleteObjectPayload);
-        source = nullptr;
-        deleteList(destination, deleteObjectPayload);
-        destination = nullptr;
+        QVERIFY2(getListSize(m_List1) == 2 &&
+                 getListSize(m_List2) == 4 &&
+                 getListElementAtIndex(m_List2, 0)->priority == 7 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 4 &&
+                 getListElementAtIndex(m_List2, 2)->priority == 6 &&
+                 getListElementAtIndex(m_List2, 3)->priority == 2,   "The source list content has not been correctly copied to destination");
+        QVERIFY(getListElementAtIndex(m_List2, 2)->object.type == -1 && getListElementAtIndex(m_List2, 2)->object.payload == nullptr);
+        QVERIFY2(getFirstListElement(m_List2)->priority == 7 && getLastListElement(m_List2)->priority == 2, "First and last element of the destination list are not correctly referenced");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 2, "First and last element of the source list are not correctly referenced");
     }
 
     {
-        List* source = createEmptyList();
-        List* destination = createListFromPrioritiesArray(secondPrioritiesArray, 2);
+        m_List3 = createEmptyList(pool);
+        m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
 
-        copyContentToList(source, destination, copyObjectPlaceholder, deleteObjectPayload);
+        copyContentToList(m_List3, m_List4, copyObjectPlaceholder, deleteObjectPayload);
 
-        QVERIFY2(isEmptyList(source) &&
-                 getListSize(destination) == 2 &&
-                 getListElementAtIndex(destination, 0)->priority == 7 &&
-                 getListElementAtIndex(destination, 1)->priority == 4,   "The source list content has not been correctly copied to destination");
-        QVERIFY2(getFirstListElement(destination)->priority == 7 && getLastListElement(destination)->priority == 4, "First and last element of the destination list are not correctly referenced");
-
-        deleteList(source, deleteObjectPayload);
-        source = nullptr;
-        deleteList(destination, deleteObjectPayload);
-        destination = nullptr;
+        QVERIFY2(isEmptyList(m_List3) &&
+                 getListSize(m_List4) == 2 &&
+                 getListElementAtIndex(m_List4, 0)->priority == 7 &&
+                 getListElementAtIndex(m_List4, 1)->priority == 4,   "The source list content has not been correctly copied to destination");
+        QVERIFY2(getFirstListElement(m_List4)->priority == 7 && getLastListElement(m_List4)->priority == 4, "First and last element of the destination list are not correctly referenced");
     }
 
     {
-        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
-        List* destination = createEmptyList();
+        m_List5 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
+        m_List6 = createEmptyList(pool);
 
-        copyContentToList(source, destination, copyObjectPlaceholder, deleteObjectPayload);
+        copyContentToList(m_List5, m_List6, copyObjectPlaceholder, deleteObjectPayload);
 
-        QVERIFY2(getListSize(source) == 2 &&
-                 getListSize(destination) == 2 &&
-                 getListElementAtIndex(destination, 0)->priority == 6 &&
-                 getListElementAtIndex(destination, 1)->priority == 2,   "The source list content has not been correctly copied to destination");
-        QVERIFY(getListElementAtIndex(destination, 1)->object.type == -1 && getListElementAtIndex(destination, 1)->object.payload == nullptr);
-        QVERIFY2(getFirstListElement(destination)->priority == 6 && getLastListElement(destination)->priority == 2, "First and last element of the destination list are not correctly referenced");
-        QVERIFY2(getFirstListElement(source)->priority == 6 && getLastListElement(source)->priority == 2, "First and last element of the source list are not correctly referenced");
-
-        deleteList(source, deleteObjectPayload);
-        source = nullptr;
-        deleteList(destination, deleteObjectPayload);
-        destination = nullptr;
+        QVERIFY2(getListSize(m_List5) == 2 &&
+                 getListSize(m_List6) == 2 &&
+                 getListElementAtIndex(m_List6, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List6, 1)->priority == 2,   "The source list content has not been correctly copied to destination");
+        QVERIFY(getListElementAtIndex(m_List6, 1)->object.type == -1 && getListElementAtIndex(m_List6, 1)->object.payload == nullptr);
+        QVERIFY2(getFirstListElement(m_List6)->priority == 6 && getLastListElement(m_List6)->priority == 2, "First and last element of the destination list are not correctly referenced");
+        QVERIFY2(getFirstListElement(m_List5)->priority == 6 && getLastListElement(m_List5)->priority == 2, "First and last element of the source list are not correctly referenced");
     }
 
     {
-        List* source = createListFromPrioritiesArray(firstPrioritiesArray, 2);
-        List* destination = createListFromPrioritiesArray(thirdPriorityArray, 3);
+        m_List7 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
+        m_List8 = createListFromPrioritiesArray(thirdPriorityArray, 3, pool);
 
-        ListIterator it = lbegin(source);
+        ListIterator it = lbegin(m_List7);
         assignObjectContentToListElement(it.current, SEGMENT, createSegmentPayload(2, 5, 4, 11));
         lnext(&it);
         assignObjectContentToListElement(it.current, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
 
-        copyContentToList(source, destination, customCopyObject, emptyTestObject);
+        copyContentToList(m_List7, m_List8, customCopyObject, emptyTestObject);
 
-        const Segment* copiedSegment = static_cast<Segment*>(getListElementAtIndex(destination, 3)->object.payload);
-        const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getListElementAtIndex(destination, 4)->object.payload);
+        const Segment* copiedSegment = static_cast<Segment*>(getListElementAtIndex(m_List8, 3)->object.payload);
+        const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getListElementAtIndex(m_List8, 4)->object.payload);
 
-        QVERIFY2(getListSize(source) == 2 &&
-                 getListSize(destination) == 5 &&
-                 getListElementAtIndex(destination, 0)->priority == 5 &&
-                 getListElementAtIndex(destination, 0)->object.type == -1 &&
-                 getListElementAtIndex(destination, 0)->object.payload == nullptr &&
-                 getListElementAtIndex(destination, 1)->priority == 4 &&
-                 getListElementAtIndex(destination, 1)->object.type == -1 &&
-                 getListElementAtIndex(destination, 1)->object.payload == nullptr &&
-                 getListElementAtIndex(destination, 2)->priority == 3 &&
-                 getListElementAtIndex(destination, 2)->object.type == -1 &&
-                 getListElementAtIndex(destination, 2)->object.payload == nullptr &&
-                 getListElementAtIndex(destination, 3)->priority == 6 &&
-                 getListElementAtIndex(destination, 3)->object.type == SEGMENT &&
+        QVERIFY2(getListSize(m_List7) == 2 &&
+                 getListSize(m_List8) == 5 &&
+                 getListElementAtIndex(m_List8, 0)->priority == 5 &&
+                 getListElementAtIndex(m_List8, 0)->object.type == -1 &&
+                 getListElementAtIndex(m_List8, 0)->object.payload == nullptr &&
+                 getListElementAtIndex(m_List8, 1)->priority == 4 &&
+                 getListElementAtIndex(m_List8, 1)->object.type == -1 &&
+                 getListElementAtIndex(m_List8, 1)->object.payload == nullptr &&
+                 getListElementAtIndex(m_List8, 2)->priority == 3 &&
+                 getListElementAtIndex(m_List8, 2)->object.type == -1 &&
+                 getListElementAtIndex(m_List8, 2)->object.payload == nullptr &&
+                 getListElementAtIndex(m_List8, 3)->priority == 6 &&
+                 getListElementAtIndex(m_List8, 3)->object.type == SEGMENT &&
                  copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
-                 getListElementAtIndex(destination, 4)->priority == 2 &&
-                 getListElementAtIndex(destination, 4)->object.type == LOCAL_CONDITIONS &&
+                 getListElementAtIndex(m_List8, 4)->priority == 2 &&
+                 getListElementAtIndex(m_List8, 4)->object.type == LOCAL_CONDITIONS &&
                  copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 &&
                  areDecimalNumbersEqual(copiedConditions->humidity, 12.8), "The source list content has not been correctly copied to destination");
-        QVERIFY2(getFirstListElement(destination)->priority == 5 && getLastListElement(destination)->priority == 2, "First and last element of the destination list are not correctly referenced");
-        QVERIFY2(getFirstListElement(source)->priority == 6 && getLastListElement(source)->priority == 2, "First and last element of the source list are not correctly referenced");
+        QVERIFY2(getFirstListElement(m_List8)->priority == 5 && getLastListElement(m_List8)->priority == 2, "First and last element of the destination list are not correctly referenced");
+        QVERIFY2(getFirstListElement(m_List7)->priority == 6 && getLastListElement(m_List7)->priority == 2, "First and last element of the source list are not correctly referenced");
 
-        deleteList(source, emptyTestObject);
-        source = nullptr;
-        deleteList(destination, emptyTestObject);
-        destination = nullptr;
+        for (ListIterator it = lbegin(m_List7); !areIteratorsEqual(it, lend(m_List7)); lnext(&it))
+        {
+            emptyTestObject(&it.current->object);
+        }
+
+        for (ListIterator it = lbegin(m_List8); !areIteratorsEqual(it, lend(m_List8)); lnext(&it))
+        {
+            emptyTestObject(&it.current->object);
+        }
     }
 }
 
 void LinkedListTests::testRemoveElementBefore()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[4]{6, 2, 5, 4};
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List1);
         ListElement* removedElement = removePreviousListElement(it);
 
-        QVERIFY2(getListSize(list) == 4 &&
+        QVERIFY2(getListSize(m_List1) == 4 &&
                  removedElement == nullptr &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 5 &&
-                 getListElementAtIndex(list, 3)->priority == 4,   "The previous element removal does not work correctly");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+                 getListElementAtIndex(m_List1, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List1, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List1, 2)->priority == 5 &&
+                 getListElementAtIndex(m_List1, 3)->priority == 4,   "The previous element removal does not work correctly");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 4, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List2);
         lnext(&it);
         ListElement* removedElement = removePreviousListElement(it);
 
-        QVERIFY2(getListSize(list) == 3 &&
+        QVERIFY2(getListSize(m_List2) == 3 &&
                  removedElement->priority == 6 &&
-                 getListElementAtIndex(list, 0)->priority == 2 &&
-                 getListElementAtIndex(list, 1)->priority == 5 &&
-                 getListElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List2, 0)->priority == 2 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 5 &&
+                 getListElementAtIndex(m_List2, 2)->priority == 4,   "The previous element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 2 && getLastListElement(m_List2)->priority == 4, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List3);
         lnext(&it);
         lnext(&it);
         ListElement* removedElement = removePreviousListElement(it);
 
-        QVERIFY2(getListSize(list) == 3 &&
+        QVERIFY2(getListSize(m_List3) == 3 &&
                  removedElement->priority == 2 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 5 &&
-                 getListElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List3, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List3, 1)->priority == 5 &&
+                 getListElementAtIndex(m_List3, 2)->priority == 4,   "The previous element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 6 && getLastListElement(m_List3)->priority == 4, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List4 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List4);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         ListElement* removedElement = removePreviousListElement(it);
 
-        QVERIFY2(getListSize(list) == 3 &&
+        QVERIFY2(getListSize(m_List4) == 3 &&
                  removedElement->priority == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 4,   "The previous element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List4, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List4, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List4, 2)->priority == 4,   "The previous element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List4)->priority == 6 && getLastListElement(m_List4)->priority == 4, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List5 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List5);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         ListElement* removedElement = removePreviousListElement(it);
 
-        QVERIFY2(getListSize(list) == 3 &&
+        QVERIFY2(getListSize(m_List5) == 3 &&
                  removedElement->priority == 4 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 5,   "The previous element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 5, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List5, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List5, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List5, 2)->priority == 5,   "The previous element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List5)->priority == 6 && getLastListElement(m_List5)->priority == 5, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createEmptyList();
-        createAndAppendToList(list, 5);
-        ListIterator it = lbegin(list);
+        m_List6 = createEmptyList(pool);
+        createAndAppendToList(m_List6, 5);
+        ListIterator it = lbegin(m_List6);
         ListElement* removedElement = removePreviousListElement(it);
 
-        QVERIFY2(getListSize(list) == 1 && removedElement == nullptr && getListElementAtIndex(list, 0)->priority == 5, "The previous element removal does not work correctly");
+        QVERIFY2(getListSize(m_List6) == 1 && removedElement == nullptr && getListElementAtIndex(m_List6, 0)->priority == 5, "The previous element removal does not work correctly");
 
         lnext(&it);
         removedElement = removePreviousListElement(it);
 
-        QVERIFY2(isEmptyList(list) && removedElement->priority == 5, "The only existing list element has not been correctly removed");
+        QVERIFY2(isEmptyList(m_List6) && removedElement->priority == 5, "The only existing list element has not been correctly removed");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 }
 
 void LinkedListTests::testRemoveElementAfter()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[4]{6, 2, 5, 4};
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List1);
         ListElement* removedElement = removeNextListElement(it);
 
-        QVERIFY2(getListSize(list) == 3 &&
+        QVERIFY2(getListSize(m_List1) == 3 &&
                  removedElement->priority == 2 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 5 &&
-                 getListElementAtIndex(list, 2)->priority == 4,   "The next element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List1, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List1, 1)->priority == 5 &&
+                 getListElementAtIndex(m_List1, 2)->priority == 4,   "The next element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 4, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List2);
         lnext(&it);
         ListElement* removedElement = removeNextListElement(it);
 
-        QVERIFY2(getListSize(list) == 3 &&
+        QVERIFY2(getListSize(m_List2) == 3 &&
                  removedElement->priority == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 4,   "The next element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List2, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List2, 2)->priority == 4,   "The next element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 6 && getLastListElement(m_List2)->priority == 4, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List3);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         ListElement* removedElement = removeNextListElement(it);
 
-        QVERIFY2(getListSize(list) == 4 &&
+        QVERIFY2(getListSize(m_List3) == 4 &&
                  removedElement == nullptr &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2 &&
-                 getListElementAtIndex(list, 2)->priority == 5 &&
-                 getListElementAtIndex(list, 3)->priority == 4,   "The next element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+                 getListElementAtIndex(m_List3, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List3, 1)->priority == 2 &&
+                 getListElementAtIndex(m_List3, 2)->priority == 5 &&
+                 getListElementAtIndex(m_List3, 3)->priority == 4,   "The next element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 6 && getLastListElement(m_List3)->priority == 4, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createEmptyList();
-        createAndAppendToList(list, 5);
-        ListIterator it = lbegin(list);
+        m_List4 = createEmptyList(pool);
+        createAndAppendToList(m_List4, 5);
+        ListIterator it = lbegin(m_List4);
         ListElement* removedElement = removeNextListElement(it);
 
-        QVERIFY2(getListSize(list) == 1 && removedElement == nullptr && getListElementAtIndex(list, 0)->priority == 5, "The only existing list element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 5 && getLastListElement(list)->priority == 5, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List4) == 1 && removedElement == nullptr && getListElementAtIndex(m_List4, 0)->priority == 5, "The only existing list element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List4)->priority == 5 && getLastListElement(m_List4)->priority == 5, "First and last element of the list are not correctly referenced");
     }
 }
 
 void LinkedListTests::testRemoveCurrentElement()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[3]{6, 2, 5};
-    {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
 
-        ListIterator it = lbegin(list);
+    {
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 3, pool);
+
+        ListIterator it = lbegin(m_List1);
         ListElement* removedElement = removeCurrentListElement(it);
 
-        QVERIFY2(getListSize(list) == 2 &&
+        QVERIFY2(getListSize(m_List1) == 2 &&
                  removedElement->priority == 6 &&
-                 getListElementAtIndex(list, 0)->priority == 2 &&
-                 getListElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 5, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List1, 0)->priority == 2 &&
+                 getListElementAtIndex(m_List1, 1)->priority == 5,   "The current element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 2 && getLastListElement(m_List1)->priority == 5, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 3, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List2);
         lnext(&it);
         ListElement* removedElement = removeCurrentListElement(it);
 
-        QVERIFY2(getListSize(list) == 2 &&
+        QVERIFY2(getListSize(m_List2) == 2 &&
                  removedElement->priority == 2 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 5,   "The current element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 5, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List2, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 5,   "The current element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 6 && getLastListElement(m_List2)->priority == 5, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 3, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List3);
         lnext(&it);
         lnext(&it);
         ListElement* removedElement = removeCurrentListElement(it);
 
-        QVERIFY2(getListSize(list) == 2 &&
+        QVERIFY2(getListSize(m_List3) == 2 &&
                  removedElement->priority == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 2,   "The current element has not been correctly removed");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 2, "First and last element of the list are not correctly referenced");
+                 getListElementAtIndex(m_List3, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List3, 1)->priority == 2,   "The current element has not been correctly removed");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 6 && getLastListElement(m_List3)->priority == 2, "First and last element of the list are not correctly referenced");
         QVERIFY(removedElement->object.type == -1 && removedElement->object.payload == nullptr);
 
-        free(removedElement);
-        removedElement = nullptr;
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        _markListElementForCleanup(removedElement, pool != nullptr);
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
+        m_List4 = createListFromPrioritiesArray(prioritiesArray, 3, pool);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List4);
         lnext(&it);
         lnext(&it);
         lnext(&it);
         ListElement* removedElement = removeCurrentListElement(it);
 
-        QVERIFY2(getListSize(list) == 3 &&
+        QVERIFY2(getListSize(m_List4) == 3 &&
                  removedElement == nullptr,   "The current element removal does not work correctly");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 5, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List4)->priority == 6 && getLastListElement(m_List4)->priority == 5, "First and last element of the list are not correctly referenced");
     }
 }
 
 void LinkedListTests::testSwapElements()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[5]{6, 2, 5, 4, 7};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 5, pool);
 
-        ListIterator firstIt = lbegin(list);
+        ListIterator firstIt = lbegin(m_List1);
         ListIterator secondIt = firstIt;
 
         lnext(&firstIt);
@@ -810,101 +799,91 @@ void LinkedListTests::testSwapElements()
 
         swapListElements(firstIt, secondIt);
 
-        QVERIFY2(getListSize(list) == 5 &&
-                 getListElementAtIndex(list, 0)->priority == 6 &&
-                 getListElementAtIndex(list, 1)->priority == 4 &&
-                 getListElementAtIndex(list, 2)->priority == 5 &&
-                 getListElementAtIndex(list, 3)->priority == 2 &&
-                 getListElementAtIndex(list, 4)->priority == 7,   "The elements have not been correctly swapped");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 7, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List1) == 5 &&
+                 getListElementAtIndex(m_List1, 0)->priority == 6 &&
+                 getListElementAtIndex(m_List1, 1)->priority == 4 &&
+                 getListElementAtIndex(m_List1, 2)->priority == 5 &&
+                 getListElementAtIndex(m_List1, 3)->priority == 2 &&
+                 getListElementAtIndex(m_List1, 4)->priority == 7,   "The elements have not been correctly swapped");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 7, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createEmptyList();
-        createAndAppendToList(list, 2);
+        m_List2 = createEmptyList(pool);
+        createAndAppendToList(m_List2, 2);
 
-        swapListElements(lbegin(list), lbegin(list));
+        swapListElements(lbegin(m_List2), lbegin(m_List2));
 
-        QVERIFY(getListSize(list) == 1);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
+        QVERIFY(getListSize(m_List2) == 1);
+        QVERIFY2(getListElementAtIndex(m_List2, 0)->priority == 2, "The swap function does not work correctly");
 
-        swapListElements(lbegin(list), lend(list));
+        swapListElements(lbegin(m_List2), lend(m_List2));
 
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 2, "The swap function does not work correctly");
-        QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 2, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListElementAtIndex(m_List2, 0)->priority == 2, "The swap function does not work correctly");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 2 && getLastListElement(m_List2)->priority == 2, "First and last element of the list are not correctly referenced");
     }
 }
 
 void LinkedListTests::testReverseList()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t firstPrioritiesArray[4]{6, 2, 5, 4};
     const size_t secondPrioritiesArray[2]{6, 2};
 
     {
-        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 4);
-        reverseList(list);
+        m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 4, pool);
+        reverseList(m_List1);
 
-        QVERIFY2(getListSize(list) == 4 &&
-                 getListElementAtIndex(list, 0)->priority == 4 &&
-                 getListElementAtIndex(list, 1)->priority == 5 &&
-                 getListElementAtIndex(list, 2)->priority == 2 &&
-                 getListElementAtIndex(list, 3)->priority == 6,   "The list has not been correctly reversed");
-        QVERIFY2(getFirstListElement(list)->priority == 4 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List1) == 4 &&
+                 getListElementAtIndex(m_List1, 0)->priority == 4 &&
+                 getListElementAtIndex(m_List1, 1)->priority == 5 &&
+                 getListElementAtIndex(m_List1, 2)->priority == 2 &&
+                 getListElementAtIndex(m_List1, 3)->priority == 6,   "The list has not been correctly reversed");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 4 && getLastListElement(m_List1)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 2);
-        reverseList(list);
+        m_List2 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
+        reverseList(m_List2);
 
-        QVERIFY2(getListSize(list) == 2 &&
-                 getListElementAtIndex(list, 0)->priority == 2 &&
-                 getListElementAtIndex(list, 1)->priority == 6,   "The list has not been correctly reversed");
-        QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List2) == 2 &&
+                 getListElementAtIndex(m_List2, 0)->priority == 2 &&
+                 getListElementAtIndex(m_List2, 1)->priority == 6,   "The list has not been correctly reversed");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 2 && getLastListElement(m_List2)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createEmptyList();
-        createAndAppendToList(list, 2);
-        reverseList(list);
+        m_List3 = createEmptyList(pool);
+        createAndAppendToList(m_List3, 2);
+        reverseList(m_List3);
 
-        QVERIFY2(getListSize(list) == 1 && getListElementAtIndex(list, 0)->priority == 2, "The list has not been correctly reversed");
-        QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 2, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getListSize(m_List3) == 1 && getListElementAtIndex(m_List3, 0)->priority == 2, "The list has not been correctly reversed");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 2 && getLastListElement(m_List3)->priority == 2, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createEmptyList();
-        reverseList(list);
+        m_List4 = createEmptyList(pool);
+        reverseList(m_List4);
 
-        QVERIFY2(isEmptyList(list), "The list has not been correctly reversed");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(isEmptyList(m_List4), "The list has not been correctly reversed");
     }
 }
 
 void LinkedListTests::testBatchReverseList()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t prioritiesArray[8]{6, 2, 5, 4, 1, 2, 7, 8};
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4, pool);
         ListElement* lastReversedElement = batchReverseList(list, 0);
 
+        _markListForDeletion(list); // in case any QVERIFY fails no memory leak will occur (the list is deleted by cleanup() method)
+
         QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 4 &&
@@ -914,15 +893,14 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4, pool);
         ListElement* lastReversedElement = batchReverseList(list, 1);
 
+        _markListForDeletion(list);
+
         QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 4 &&
@@ -932,14 +910,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4, pool);
         ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 5);
 
@@ -950,14 +927,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 5,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 5, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4, pool);
         ListElement* lastReversedElement = batchReverseList(list, 3);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
@@ -968,14 +944,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 5 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4, pool);
         ListElement* lastReversedElement = batchReverseList(list, 4);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
@@ -986,14 +961,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 6,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 4 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 4, pool);
         ListElement* lastReversedElement = batchReverseList(list, 5);
+
+        _markListForDeletion(list);
 
         QVERIFY(!lastReversedElement);
 
@@ -1004,14 +978,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 3)->priority == 4,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 4, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 5, pool);
         ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 5);
 
@@ -1023,14 +996,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 4)->priority == 1,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 5, pool);
         ListElement* lastReversedElement = batchReverseList(list, 3);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
@@ -1042,14 +1014,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 4)->priority == 1,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 5 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 7);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 7, pool);
         ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 1);
 
@@ -1063,14 +1034,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 6)->priority == 7,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 7, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 7);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 7, pool);
         ListElement* lastReversedElement = batchReverseList(list, 3);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 4);
 
@@ -1084,14 +1054,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 6)->priority == 7,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 5 && getLastListElement(list)->priority == 7, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 8, pool);
         ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 7);
 
@@ -1106,14 +1075,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 7)->priority == 7,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 7, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 8, pool);
         ListElement* lastReversedElement = batchReverseList(list, 3);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 4);
 
@@ -1128,14 +1096,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 7)->priority == 8,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 5 && getLastListElement(list)->priority == 8, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 8);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 8, pool);
         ListElement* lastReversedElement = batchReverseList(list, 4);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 1);
 
@@ -1150,16 +1117,15 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 7)->priority == 1,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 4 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     // some additional (corner) cases
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 2, pool);
         ListElement* lastReversedElement = batchReverseList(list, 0);
 
+        _markListForDeletion(list);
+
         QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 2 &&
@@ -1167,15 +1133,14 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 2, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 2, pool);
         ListElement* lastReversedElement = batchReverseList(list, 1);
 
+        _markListForDeletion(list);
+
         QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 2 &&
@@ -1183,14 +1148,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 2, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 2, pool);
         ListElement* lastReversedElement = batchReverseList(list, 2);
+
+        _markListForDeletion(list);
 
         QVERIFY(lastReversedElement && lastReversedElement->priority == 6);
 
@@ -1199,14 +1163,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 6,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 2 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 2, pool);
         ListElement* lastReversedElement = batchReverseList(list, 3);
+
+        _markListForDeletion(list);
 
         QVERIFY(!lastReversedElement);
 
@@ -1215,14 +1178,13 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 1)->priority == 2,   "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 2, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 1);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 1, pool);
         ListElement* lastReversedElement = batchReverseList(list, 0);
+
+        _markListForDeletion(list);
 
         QVERIFY(!lastReversedElement);
 
@@ -1230,44 +1192,41 @@ void LinkedListTests::testBatchReverseList()
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 1);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 1, pool);
         ListElement* lastReversedElement = batchReverseList(list, 1);
 
+        _markListForDeletion(list);
+
         QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 1 &&
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createListFromPrioritiesArray(prioritiesArray, 1);
+        List* list = createListFromPrioritiesArray(prioritiesArray, 1, pool);
         ListElement* lastReversedElement = batchReverseList(list, 2);
 
+        _markListForDeletion(list);
+
         QVERIFY(!lastReversedElement);
 
         QVERIFY2(getListSize(list) == 1 &&
                  getListElementAtIndex(list, 0)->priority == 6, "The list has not been correctly batch reversed");
 
         QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createEmptyList();
+        List* list = createEmptyList(pool);
         ListElement* lastReversedElement = batchReverseList(list, 0);
+
+        _markListForDeletion(list);
 
         QVERIFY(!lastReversedElement);
         QVERIFY(isEmptyList(list));
@@ -1276,486 +1235,412 @@ void LinkedListTests::testBatchReverseList()
 
         QVERIFY(!lastReversedElement);
         QVERIFY(isEmptyList(list));
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 }
 
 void LinkedListTests::testSortAscendingByPriority()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item first
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item first
 
-        sortAscendingByPriority(list);
+        sortAscendingByPriority(m_List1);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List1) == 6);
+        QVERIFY2(getListElementAtIndex(m_List1, 0)->priority == 1 && _getSumOfPriorities(m_List1) == 19 && isSortedAscendingByPriority(m_List1), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 1 && getLastListElement(m_List1)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[6]{3, 2, 1, 5, 2, 6};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item last
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item last
 
-        sortAscendingByPriority(list);
+        sortAscendingByPriority(m_List2);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List2) == 6);
+        QVERIFY2(getListElementAtIndex(m_List2, 0)->priority == 1 && _getSumOfPriorities(m_List2) == 19 && isSortedAscendingByPriority(m_List2), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 1 && getLastListElement(m_List2)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[6]{1, 6, 2, 5, 3, 2};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item first
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item first
 
-        sortAscendingByPriority(list);
+        sortAscendingByPriority(m_List3);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List3) == 6);
+        QVERIFY2(getListElementAtIndex(m_List3, 0)->priority == 1 && _getSumOfPriorities(m_List3) == 19 && isSortedAscendingByPriority(m_List3), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 1 && getLastListElement(m_List3)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[6]{2, 3, 5, 2, 6, 1};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item last
+        m_List4 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item last
 
-        sortAscendingByPriority(list);
+        sortAscendingByPriority(m_List4);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List4) == 6);
+        QVERIFY2(getFirstListElement(m_List4)->priority == 1 && getLastListElement(m_List4)->priority == 6, "First and last element of the list are not correctly referenced");
+        QVERIFY2(getListElementAtIndex(m_List4, 0)->priority == 1 && _getSumOfPriorities(m_List4) == 19 && isSortedAscendingByPriority(m_List4), "The list hasn't been correctly sorted");
     }
 
     {
         const size_t prioritiesArray[6]{2, 3, 1, 2, 6, 5};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // random
+        m_List5 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // random
 
-        sortAscendingByPriority(list);
+        sortAscendingByPriority(m_List5);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List5) == 6);
+        QVERIFY2(getListElementAtIndex(m_List5, 0)->priority == 1 && _getSumOfPriorities(m_List5) == 19 && isSortedAscendingByPriority(m_List5), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List5)->priority == 1 && getLastListElement(m_List5)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[2]{6, 5};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
-        sortAscendingByPriority(list);
+        m_List6 = createListFromPrioritiesArray(prioritiesArray, 2, pool);
+        sortAscendingByPriority(m_List6);
 
-        QVERIFY(getListSize(list) == 2);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 5 && getListElementAtIndex(list, 1)->priority == 6, "The list hasn't been correctly sorted ");
-        QVERIFY2(getFirstListElement(list)->priority == 5 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List6) == 2);
+        QVERIFY2(getListElementAtIndex(m_List6, 0)->priority == 5 && getListElementAtIndex(m_List6, 1)->priority == 6, "The list hasn't been correctly sorted ");
+        QVERIFY2(getFirstListElement(m_List6)->priority == 5 && getLastListElement(m_List6)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createEmptyList();
-        createAndAppendToList(list, 1);
+        m_List7 = createEmptyList(pool);
+        createAndAppendToList(m_List7, 1);
 
-        sortAscendingByPriority(list);
+        sortAscendingByPriority(m_List7);
 
-        QVERIFY(getListSize(list) == 1);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List7) == 1);
+        QVERIFY2(getListElementAtIndex(m_List7, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
+        QVERIFY2(getFirstListElement(m_List7)->priority == 1 && getLastListElement(m_List7)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 }
 
 void LinkedListTests::testSortDescendingByPriority()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item first
-        sortDescendingByPriority(list);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item first
+        sortDescendingByPriority(m_List1);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List1) == 6);
+        QVERIFY2(getListElementAtIndex(m_List1, 0)->priority == 6 && _getSumOfPriorities(m_List1) == 19 && isSortedDescendingByPriority(m_List1), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[6]{3, 2, 1, 5, 2, 6};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // highest prio item last
-        sortDescendingByPriority(list);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item last
+        sortDescendingByPriority(m_List2);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List2) == 6);
+        QVERIFY2(getListElementAtIndex(m_List2, 0)->priority == 6 && _getSumOfPriorities(m_List2) == 19 && isSortedDescendingByPriority(m_List2), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List2)->priority == 6 && getLastListElement(m_List2)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[6]{1, 6, 2, 5, 3, 2};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item first
-        sortDescendingByPriority(list);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item first
+        sortDescendingByPriority(m_List3);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List3) == 6);
+        QVERIFY2(getListElementAtIndex(m_List3, 0)->priority == 6 && _getSumOfPriorities(m_List3) == 19 && isSortedDescendingByPriority(m_List3), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List3)->priority == 6 && getLastListElement(m_List3)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[6]{2, 3, 5, 2, 6, 1};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // lowest prio item last
-        sortDescendingByPriority(list);
+        m_List4 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item last
+        sortDescendingByPriority(m_List4);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List4) == 6);
+        QVERIFY2(getListElementAtIndex(m_List4, 0)->priority == 6 && _getSumOfPriorities(m_List4) == 19 && isSortedDescendingByPriority(m_List4), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List4)->priority == 6 && getLastListElement(m_List4)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[6]{2, 3, 1, 2, 6, 5};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6); // random
-        sortDescendingByPriority(list);
+        m_List5 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // random
+        sortDescendingByPriority(m_List5);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List5) == 6);
+        QVERIFY2(getListElementAtIndex(m_List5, 0)->priority == 6 && _getSumOfPriorities(m_List5) == 19 && isSortedDescendingByPriority(m_List5), "The list hasn't been correctly sorted");
+        QVERIFY2(getFirstListElement(m_List5)->priority == 6 && getLastListElement(m_List5)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     {
         const size_t prioritiesArray[2]{5, 6};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 2);
-        sortDescendingByPriority(list);
+        m_List6 = createListFromPrioritiesArray(prioritiesArray, 2, pool);
+        sortDescendingByPriority(m_List6);
 
-        QVERIFY(getListSize(list) == 2);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && getListElementAtIndex(list, 1)->priority == 5, "The list hasn't been correctly sorted ");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 5, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List6) == 2);
+        QVERIFY2(getListElementAtIndex(m_List6, 0)->priority == 6 && getListElementAtIndex(m_List6, 1)->priority == 5, "The list hasn't been correctly sorted ");
+        QVERIFY2(getFirstListElement(m_List6)->priority == 6 && getLastListElement(m_List6)->priority == 5, "First and last element of the list are not correctly referenced");
     }
 
     {
-        List* list = createEmptyList();
-        createAndAppendToList(list, 1);
+        m_List7 = createEmptyList(pool);
+        createAndAppendToList(m_List7, 1);
 
-        sortDescendingByPriority(list);
+        sortDescendingByPriority(m_List7);
 
-        QVERIFY(getListSize(list) == 1);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List7) == 1);
+        QVERIFY2(getListElementAtIndex(m_List7, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
+        QVERIFY2(getFirstListElement(m_List7)->priority == 1 && getLastListElement(m_List7)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 }
 
 void LinkedListTests::testSortAscendingByPriorityUsingRandomAccess()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t firstPrioritiesArray[6]{2, 3, 5, 2, 6, 1};
     const size_t secondPrioritiesArray[8]{2, 3, 5, 2, 6, 1, 8, 7};
     const size_t thirdPrioritiesArray[12]{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6};
 
     // insertion sort
     {
-        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
-        sortByRandomAccess(list, insertionSortAscendingByPriority);
+        m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
+        sortByRandomAccess(m_List1, insertionSortAscendingByPriority);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+        QVERIFY(getListSize(m_List1) == 6);
+        QVERIFY2(getListElementAtIndex(m_List1, 0)->priority == 1 && _getSumOfPriorities(m_List1) == 19 && isSortedAscendingByPriority(m_List1),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List1)->priority == 1 && getLastListElement(m_List1)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     // heap sort
     {
-        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
-        sortByRandomAccess(list, heapSortAscendingByPriority);
+        m_List2 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
+        sortByRandomAccess(m_List2, heapSortAscendingByPriority);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 19 && isSortedAscendingByPriority(list),
+        QVERIFY(getListSize(m_List2) == 6);
+        QVERIFY2(getListElementAtIndex(m_List2, 0)->priority == 1 && _getSumOfPriorities(m_List2) == 19 && isSortedAscendingByPriority(m_List2),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 6, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List2)->priority == 1 && getLastListElement(m_List2)->priority == 6, "First and last element of the list are not correctly referenced");
     }
 
     // merge sort
     {
-        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
-        sortByRandomAccess(list, mergeSortAscendingByPriority);
+        m_List3 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
+        sortByRandomAccess(m_List3, mergeSortAscendingByPriority);
 
-        QVERIFY(getListSize(list) == 8);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
+        QVERIFY(getListSize(m_List3) == 8);
+        QVERIFY2(getListElementAtIndex(m_List3, 0)->priority == 1 && _getSumOfPriorities(m_List3) == 34 && isSortedAscendingByPriority(m_List3),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 8, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List3)->priority == 1 && getLastListElement(m_List3)->priority == 8, "First and last element of the list are not correctly referenced");
     }
 
     // quick sort
     {
-        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
-        sortByRandomAccess(list, quickSortAscendingByPriority);
+        m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
+        sortByRandomAccess(m_List4, quickSortAscendingByPriority);
 
-        QVERIFY(getListSize(list) == 8);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 34 && isSortedAscendingByPriority(list),
+        QVERIFY(getListSize(m_List4) == 8);
+        QVERIFY2(getListElementAtIndex(m_List4, 0)->priority == 1 && _getSumOfPriorities(m_List4) == 34 && isSortedAscendingByPriority(m_List4),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 8, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List4)->priority == 1 && getLastListElement(m_List4)->priority == 8, "First and last element of the list are not correctly referenced");
     }
 
 #ifdef UNIX_OS
     // enhanced merge sort
     {
-        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
-        sortByRandomAccess(list, enhancedMergeSortAscendingByPriority);
+        m_List5 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
+        sortByRandomAccess(m_List5, enhancedMergeSortAscendingByPriority);
 
-        QVERIFY(getListSize(list) == 12);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
+        QVERIFY(getListSize(m_List5) == 12);
+        QVERIFY2(getListElementAtIndex(m_List5, 0)->priority == 1 && _getSumOfPriorities(m_List5) == 58 && isSortedAscendingByPriority(m_List5),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 9, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List5)->priority == 1 && getLastListElement(m_List5)->priority == 9, "First and last element of the list are not correctly referenced");
     }
 
     // quick merge sort
     {
-        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
-        sortByRandomAccess(list, quickMergeSortAscendingByPriority);
+        m_List6 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
+        sortByRandomAccess(m_List6, quickMergeSortAscendingByPriority);
 
-        QVERIFY(getListSize(list) == 12);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
+        QVERIFY(getListSize(m_List6) == 12);
+        QVERIFY2(getListElementAtIndex(m_List6, 0)->priority == 1 && _getSumOfPriorities(m_List6) == 58 && isSortedAscendingByPriority(m_List6),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 9, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List6)->priority == 1 && getLastListElement(m_List6)->priority == 9, "First and last element of the list are not correctly referenced");
     }
 
     // enhanced quick sort
     {
-        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
-        sortByRandomAccess(list, enhancedQuickSortAscendingByPriority);
+        m_List7 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
+        sortByRandomAccess(m_List7, enhancedQuickSortAscendingByPriority);
 
-        QVERIFY(getListSize(list) == 12);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 1 && _getSumOfPriorities(list) == 58 && isSortedAscendingByPriority(list),
+        QVERIFY(getListSize(m_List7) == 12);
+        QVERIFY2(getListElementAtIndex(m_List7, 0)->priority == 1 && _getSumOfPriorities(m_List7) == 58 && isSortedAscendingByPriority(m_List7),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 1 && getLastListElement(list)->priority == 9, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List7)->priority == 1 && getLastListElement(m_List7)->priority == 9, "First and last element of the list are not correctly referenced");
     }
 #endif
 }
 
 void LinkedListTests::testSortDescendingByPriorityUsingRandomAccess()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     const size_t firstPrioritiesArray[6]{2, 3, 5, 2, 6, 1};
     const size_t secondPrioritiesArray[8]{2, 3, 5, 2, 6, 1, 8, 7};
     const size_t thirdPrioritiesArray[12]{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6};
 
     // insertion sort
     {
-        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
-        sortByRandomAccess(list, insertionSortDescendingByPriority);
+        m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
+        sortByRandomAccess(m_List1, insertionSortDescendingByPriority);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
+        QVERIFY(getListSize(m_List1) == 6);
+        QVERIFY2(getListElementAtIndex(m_List1, 0)->priority == 6 && _getSumOfPriorities(m_List1) == 19 && isSortedDescendingByPriority(m_List1),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     // heap sort
     {
-        List* list = createListFromPrioritiesArray(firstPrioritiesArray, 6);
-        sortByRandomAccess(list, insertionSortDescendingByPriority);
+        m_List2 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
+        sortByRandomAccess(m_List2, insertionSortDescendingByPriority);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 6 && _getSumOfPriorities(list) == 19 && isSortedDescendingByPriority(list),
+        QVERIFY(getListSize(m_List2) == 6);
+        QVERIFY2(getListElementAtIndex(m_List2, 0)->priority == 6 && _getSumOfPriorities(m_List2) == 19 && isSortedDescendingByPriority(m_List2),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List2)->priority == 6 && getLastListElement(m_List2)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     // merge sort
     {
-        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
-        sortByRandomAccess(list, insertionSortDescendingByPriority);
+        m_List3 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
+        sortByRandomAccess(m_List3, insertionSortDescendingByPriority);
 
-        QVERIFY(getListSize(list) == 8);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
+        QVERIFY(getListSize(m_List3) == 8);
+        QVERIFY2(getListElementAtIndex(m_List3, 0)->priority == 8 && _getSumOfPriorities(m_List3) == 34 && isSortedDescendingByPriority(m_List3),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 8 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List3)->priority == 8 && getLastListElement(m_List3)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     // quick sort
     {
-        List* list = createListFromPrioritiesArray(secondPrioritiesArray, 8);
-        sortByRandomAccess(list, insertionSortDescendingByPriority);
+        m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
+        sortByRandomAccess(m_List4, insertionSortDescendingByPriority);
 
-        QVERIFY(getListSize(list) == 8);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 8 && _getSumOfPriorities(list) == 34 && isSortedDescendingByPriority(list),
+        QVERIFY(getListSize(m_List4) == 8);
+        QVERIFY2(getListElementAtIndex(m_List4, 0)->priority == 8 && _getSumOfPriorities(m_List4) == 34 && isSortedDescendingByPriority(m_List4),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 8 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List4)->priority == 8 && getLastListElement(m_List4)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
 #ifdef UNIX_OS
     // enhanced merge sort
     {
-        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
-        sortByRandomAccess(list, enhancedMergeSortDescendingByPriority);
+        m_List5 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
+        sortByRandomAccess(m_List5, enhancedMergeSortDescendingByPriority);
 
-        QVERIFY(getListSize(list) == 12);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
+        QVERIFY(getListSize(m_List5) == 12);
+        QVERIFY2(getListElementAtIndex(m_List5, 0)->priority == 9 && _getSumOfPriorities(m_List5) == 58 && isSortedDescendingByPriority(m_List5),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 9 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List5)->priority == 9 && getLastListElement(m_List5)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     // quick merge sort
     {
-        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
-        sortByRandomAccess(list, quickMergeSortDescendingByPriority);
+        m_List6 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
+        sortByRandomAccess(m_List6, quickMergeSortDescendingByPriority);
 
-        QVERIFY(getListSize(list) == 12);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
+        QVERIFY(getListSize(m_List6) == 12);
+        QVERIFY2(getListElementAtIndex(m_List6, 0)->priority == 9 && _getSumOfPriorities(m_List6) == 58 && isSortedDescendingByPriority(m_List6),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 9 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List6)->priority == 9 && getLastListElement(m_List6)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 
     // enhanced quick sort
     {
-        List* list = createListFromPrioritiesArray(thirdPrioritiesArray, 12);
-        sortByRandomAccess(list, enhancedQuickSortDescendingByPriority);
+        m_List7 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
+        sortByRandomAccess(m_List7, enhancedQuickSortDescendingByPriority);
 
-        QVERIFY(getListSize(list) == 12);
-        QVERIFY2(getListElementAtIndex(list, 0)->priority == 9 && _getSumOfPriorities(list) == 58 && isSortedDescendingByPriority(list),
+        QVERIFY(getListSize(m_List7) == 12);
+        QVERIFY2(getListElementAtIndex(m_List7, 0)->priority == 9 && _getSumOfPriorities(m_List7) == 58 && isSortedDescendingByPriority(m_List7),
                  "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(list)->priority == 9 && getLastListElement(list)->priority == 1, "First and last element of the list are not correctly referenced");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(getFirstListElement(m_List7)->priority == 9 && getLastListElement(m_List7)->priority == 1, "First and last element of the list are not correctly referenced");
     }
 #endif
 }
 
 void LinkedListTests::testIterators()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[4]{6, 2, 5, 9};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
-        ListIterator it = lbegin(list);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
+        ListIterator it = lbegin(m_List1);
 
-        QVERIFY(getListSize(list) == 4);
+        QVERIFY(getListSize(m_List1) == 4);
 
-        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 6, "The begin iterator is not correctly generated");
+        QVERIFY2(!areIteratorsEqual(it, lend(m_List1)) && it.current->priority == 6, "The begin iterator is not correctly generated");
         lnext(&it);
-        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 2, "The iterator is not correctly incremented");
+        QVERIFY2(!areIteratorsEqual(it, lend(m_List1)) && it.current->priority == 2, "The iterator is not correctly incremented");
         lnext(&it);
-        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 5, "The iterator is not correctly incremented");
+        QVERIFY2(!areIteratorsEqual(it, lend(m_List1)) && it.current->priority == 5, "The iterator is not correctly incremented");
         lnext(&it);
-        QVERIFY2(!areIteratorsEqual(it, lend(list)) && it.current->priority == 9, "The iterator is not correctly incremented");
+        QVERIFY2(!areIteratorsEqual(it, lend(m_List1)) && it.current->priority == 9, "The iterator is not correctly incremented");
         lnext(&it);
-        QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
+        QVERIFY2(areIteratorsEqual(it, lend(m_List1)), "The iterator is not correctly incremented");
         lnext(&it);
-        QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(areIteratorsEqual(it, lend(m_List1)), "The iterator is not correctly incremented");
     }
 
     {
-        List* list = createEmptyList();
-        ListIterator it = lbegin(list);
+        m_List2 = createEmptyList(pool);
+        ListIterator it = lbegin(m_List2);
 
-        QVERIFY(isEmptyList(list));
+        QVERIFY(isEmptyList(m_List2));
 
-        QVERIFY2(areIteratorsEqual(it, lend(list)), "The list is empty but the begin and end iterators are not equal");
+        QVERIFY2(areIteratorsEqual(it, lend(m_List2)), "The list is empty but the begin and end iterators are not equal");
         lnext(&it);
-        QVERIFY2(areIteratorsEqual(it, lend(list)), "The iterator is not correctly incremented");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY2(areIteratorsEqual(it, lend(m_List2)), "The iterator is not correctly incremented");
     }
 }
 
 void LinkedListTests::testAssignRemoveObject()
 {
-    List* list = createEmptyList();
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
+    m_List1 = createEmptyList(pool);
+
     // Point
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 3;
     point->y = 4;
-    assignObjectContentToListElement(createAndAppendToList(list, 2), POINT, static_cast<void*>(point));
+    assignObjectContentToListElement(createAndAppendToList(m_List1, 2), POINT, static_cast<void*>(point));
     point = nullptr;
     // int
     int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 5;
-    assignObjectContentToListElement(createAndAppendToList(list, 3), INTEGER, static_cast<void*>(distance));
+    assignObjectContentToListElement(createAndAppendToList(m_List1, 3), INTEGER, static_cast<void*>(distance));
     distance = nullptr;
     // float
     double* angle = static_cast<double*>(malloc(sizeof(double)));
     *angle = 1.25;
-    assignObjectContentToListElement(createAndAppendToList(list, 1), DECIMAL, static_cast<void*>(angle));
+    assignObjectContentToListElement(createAndAppendToList(m_List1, 1), DECIMAL, static_cast<void*>(angle));
     angle = nullptr;
     // no object
-    Q_UNUSED(createAndPrependToList(list, 10));
+    Q_UNUSED(createAndPrependToList(m_List1, 10));
 
-    QVERIFY(getListSize(list) == 4);
+    QVERIFY(getListSize(m_List1) == 4);
 
-    ListIterator it = lbegin(list);
+    ListIterator it = lbegin(m_List1);
     QVERIFY2(it.current->object.type == -1 && it.current->object.payload == nullptr, "Default object is incorrect (should be empty)");
     lnext(&it);
     QVERIFY2(it.current->object.type == POINT && (static_cast<Point*>(it.current->object.payload))->x == 3
@@ -1765,9 +1650,9 @@ void LinkedListTests::testAssignRemoveObject()
     lnext(&it);
     QVERIFY2(it.current->object.type == DECIMAL && areDecimalNumbersEqual(*(static_cast<double*>(it.current->object.payload)), 1.25), "Object has been incorrectly assigned");
 
-    Object* removedObject = static_cast<Object*>(detachContentFromListElement(getListElementAtIndex(list, 2)));
-    QVERIFY2(getListElementAtIndex(list, 2)->object.type == -1 &&
-             getListElementAtIndex(list, 2)->object.payload == nullptr &&
+    Object* removedObject = static_cast<Object*>(detachContentFromListElement(getListElementAtIndex(m_List1, 2)));
+    QVERIFY2(getListElementAtIndex(m_List1, 2)->object.type == -1 &&
+             getListElementAtIndex(m_List1, 2)->object.payload == nullptr &&
              removedObject->type == INTEGER &&
              (*(static_cast<int*>(removedObject->payload)) == 5), "Incorrect object removal from list element");
 
@@ -1775,115 +1660,107 @@ void LinkedListTests::testAssignRemoveObject()
     free(removedObject);
     removedObject = nullptr;
 
-    QVERIFY(getListSize(list) == 4);
-
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
+    QVERIFY(getListSize(m_List1) == 4);
 }
 
 void LinkedListTests::testIsElementContained()
 {
-    ListElement* firstElement = createListElement();
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
+    ListElement* firstElement = pool ? aquireElement(pool) : createListElement();
+    QVERIFY(firstElement);
     firstElement->priority = 10;
 
-    ListElement* secondElement = createListElement();
+    ListElement* secondElement = pool ? aquireElement(pool) : createListElement();
+    QVERIFY(secondElement);
     secondElement->priority = 10;
 
-    List* list = createEmptyList();
-    createAndAppendToList(list, 7);
-    appendToList(list, firstElement);
-    createAndAppendToList(list, 5);
-    createAndPrependToList(list, 4);
+    m_List1 = createEmptyList(pool);
+    createAndAppendToList(m_List1, 7);
+    appendToList(m_List1, firstElement);
+    createAndAppendToList(m_List1, 5);
+    createAndPrependToList(m_List1, 4);
 
-    QVERIFY(getListSize(list) == 4);
-    QVERIFY2(isListElementContained(firstElement, list), "Element is marked as not contained in the list (should be");
-    QVERIFY2(!isListElementContained(secondElement, list), "Element is marked as contained in the list (should NOT be");
+    QVERIFY(getListSize(m_List1) == 4);
+    QVERIFY2(isListElementContained(firstElement, m_List1), "Element is marked as not contained in the list (should be");
+    QVERIFY2(!isListElementContained(secondElement, m_List1), "Element is marked as contained in the list (should NOT be");
 
-    deleteList(list, deleteObjectPayload);
-    free(secondElement);
+    _markListElementForCleanup(secondElement, pool != nullptr);
 }
 
 void LinkedListTests::testIsSortedAscendingByPriority()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(!isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List1) == 6);
+        QVERIFY2(!isSortedAscendingByPriority(m_List1), "The list is incorrectly marked as sorted ascending by priority");
     }
 
     {
         const size_t prioritiesArray[6]{1, 2, 2, 3, 5, 6};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List2) == 6);
+        QVERIFY2(isSortedAscendingByPriority(m_List2), "The list is incorrectly marked as sorted ascending by priority");
     }
 
     {
         const size_t prioritiesArray[6]{5, 5, 5, 5, 5, 5};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(isSortedAscendingByPriority(list), "The list is incorrectly marked as sorted ascending by priority");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List3) == 6);
+        QVERIFY2(isSortedAscendingByPriority(m_List3), "The list is incorrectly marked as sorted ascending by priority");
     }
 }
 
 void LinkedListTests::testIsSortedDescendingByPriority()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(!isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List1) == 6);
+        QVERIFY2(!isSortedDescendingByPriority(m_List1), "The list is incorrectly marked as sorted descending by priority");
     }
 
     {
         const size_t prioritiesArray[6]{6, 5, 4, 2, 2, 1};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+        m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List2) == 6);
+        QVERIFY2(isSortedDescendingByPriority(m_List2), "The list is incorrectly marked as sorted descending by priority");
     }
 
     {
         const size_t prioritiesArray[6]{5, 5, 5, 5, 5, 5};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 6);
+        m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
 
-        QVERIFY(getListSize(list) == 6);
-        QVERIFY2(isSortedDescendingByPriority(list), "The list is incorrectly marked as sorted descending by priority");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List3) == 6);
+        QVERIFY2(isSortedDescendingByPriority(m_List3), "The list is incorrectly marked as sorted descending by priority");
     }
 }
 
 void LinkedListTests::testGetPreviousElement()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[3]{6, 2, 5};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 3);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 3, pool);
 
-        QVERIFY(getListSize(list) == 3);
+        QVERIFY(getListSize(m_List1) == 3);
 
-        ListIterator it = lbegin(list);
+        ListIterator it = lbegin(m_List1);
         QVERIFY2(getPreviousListElement(it) == nullptr, "Previous list element is not correctly determined");
 
         lnext(&it);
@@ -1894,119 +1771,135 @@ void LinkedListTests::testGetPreviousElement()
 
         lnext(&it);
         QVERIFY2(getPreviousListElement(it)->priority == 5, "Previous list element is not correctly determined");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 
     {
-        List* list = createEmptyList();
-        ListIterator it = lbegin(list);
+        m_List2 = createEmptyList(pool);
+        ListIterator it = lbegin(m_List2);
 
-        QVERIFY(isEmptyList(list));
+        QVERIFY(isEmptyList(m_List2));
         QVERIFY2(getPreviousListElement(it) == nullptr, "Previous list element is not correctly determined");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
     }
 }
 
 void LinkedListTests::testGetFirstAndLastElement()
 {
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
     {
         const size_t prioritiesArray[4]{6, 2, 5, 9};
-        List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+        m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
 
-        QVERIFY(getListSize(list) == 4);
-        QVERIFY2(getFirstListElement(list)->priority == 6, "The first list element is not correctly retrieved");
-        QVERIFY2(getLastListElement(list)->priority == 9, "The last list element is not correctly retrieved");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(getListSize(m_List1) == 4);
+        QVERIFY2(getFirstListElement(m_List1)->priority == 6, "The first list element is not correctly retrieved");
+        QVERIFY2(getLastListElement(m_List1)->priority == 9, "The last list element is not correctly retrieved");
     }
 
     {
-        List* list = createEmptyList();
+        m_List2 = createEmptyList(pool);
 
-        QVERIFY(isEmptyList(list));
-        QVERIFY2(getFirstListElement(list) == nullptr, "The first list element is not correctly retrieved");
-        QVERIFY2(getLastListElement(list) == nullptr, "The last list element is not correctly retrieved");
-
-        deleteList(list, deleteObjectPayload);
-        list = nullptr;
+        QVERIFY(isEmptyList(m_List2));
+        QVERIFY2(getFirstListElement(m_List2) == nullptr, "The first list element is not correctly retrieved");
+        QVERIFY2(getLastListElement(m_List2) == nullptr, "The last list element is not correctly retrieved");
     }
 }
 
 void LinkedListTests::testMoveListToArray()
 {
-    const size_t prioritiesArray[4]{6, 2, 5, 9};
-    List* list = createListFromPrioritiesArray(prioritiesArray, 4);
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
 
-    QVERIFY(getListSize(list) == 4);
+    const size_t prioritiesArray[4]{6, 2, 5, 9};
+
+    m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
+
+    QVERIFY(getListSize(m_List1) == 4);
 
     size_t arraySize;
-    ListElement** array = moveListToArray(list, &arraySize);
+    ListElement** array = moveListToArray(m_List1, &arraySize);
 
-    QVERIFY2(isEmptyList(list) &&
+    QVERIFY2(isEmptyList(m_List1) &&
              arraySize == 4 &&
              array[0]->next == nullptr && array[0]->priority == 6 &&
              array[1]->next == nullptr && array[1]->priority == 2 &&
              array[2]->next == nullptr && array[2]->priority == 5 &&
              array[3]->next == nullptr && array[3]->priority == 9 ,  "The list content has been incorrectly moved to array");
 
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
     for (size_t index = 0; index < arraySize; ++index)
     {
-        free(array[index]);
-        array[index] = nullptr;
+        _markListElementForCleanup(array[index], pool != nullptr);
     }
+
     free(array);
     array = nullptr;
 }
 
 void LinkedListTests::testMoveArrayToList()
 {
-    List* list = createEmptyList();
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
+    m_List1 = createEmptyList(pool);
     ListElement** array = static_cast<ListElement**>(calloc(4, sizeof(ListElement*)));
 
-    array[0] = createListElement();
-    array[1] = createListElement();
-    array[2] = createListElement();
-    array[3] = createListElement();
+    array[0] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(array[0], pool != nullptr);
+
+    QVERIFY(array[0]);
+
+    array[1] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(array[1], pool != nullptr);
+
+    QVERIFY(array[1]);
+
+    array[2] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(array[2], pool != nullptr);
+
+    QVERIFY(array[2]);
+
+    array[3] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(array[3], pool != nullptr);
+
+    QVERIFY(array[3]);
+
     array[0]->priority = 6;
     array[1]->priority = 2;
     array[2]->priority = 5;
     array[3]->priority = 9;
 
-    QVERIFY(isEmptyList(list));
+    QVERIFY(isEmptyList(m_List1));
 
-    moveArrayToList(array, 4, list);
+    // previous cleanup markings were performed to prevent memory leaks; upon reaching this point the elements should be unmarked as the they would get transferred to the list (no longer "free")
+    _clearListElementsMarkedForCleanup();
+
+    moveArrayToList(array, 4, m_List1);
 
     QVERIFY2(array[0] == nullptr &&
              array[1] == nullptr &&
              array[2] == nullptr &&
              array[3] == nullptr &&
-             getListSize(list) == 4 &&
-             getListElementAtIndex(list, 0)->priority == 6 &&
-             getListElementAtIndex(list, 1)->priority == 2 &&
-             getListElementAtIndex(list, 2)->priority == 5 &&
-             getListElementAtIndex(list, 3)->priority == 9, "The array content has been incorrectly moved to list");
-    QVERIFY2(getFirstListElement(list)->priority == 6 && getLastListElement(list)->priority == 9, "First and last element of the list are not correctly referenced");
-    QVERIFY(getListElementAtIndex(list, 1)->object.type == -1 && getListElementAtIndex(list, 1)->object.payload == nullptr);
+             getListSize(m_List1) == 4 &&
+             getListElementAtIndex(m_List1, 0)->priority == 6 &&
+             getListElementAtIndex(m_List1, 1)->priority == 2 &&
+             getListElementAtIndex(m_List1, 2)->priority == 5 &&
+             getListElementAtIndex(m_List1, 3)->priority == 9, "The array content has been incorrectly moved to list");
+    QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 9, "First and last element of the list are not correctly referenced");
+    QVERIFY(getListElementAtIndex(m_List1, 1)->object.type == -1 && getListElementAtIndex(m_List1, 1)->object.payload == nullptr);
 
     free(array);
     array = nullptr;
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
 }
 
 void LinkedListTests::testPrintListElementsToFile()
 {
-    const size_t prioritiesArray[5]{3, 2, 5, 9, 4};
-    List* list = createListFromPrioritiesArray(prioritiesArray, 5);
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
 
-    QVERIFY(getListSize(list) == 5);
+    const size_t prioritiesArray[5]{3, 2, 5, 9, 4};
+    m_List1 = createListFromPrioritiesArray(prioritiesArray, 5, pool);
+
+    QVERIFY(getListSize(m_List1) == 5);
 
 #ifdef _WIN32
     const char* testDataFile = "C:\\test.txt";
@@ -2017,20 +1910,20 @@ void LinkedListTests::testPrintListElementsToFile()
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 5;
     point->y = 7;
-    assignObjectContentToListElement(getListElementAtIndex(list, 0), POINT, static_cast<void*>(point));
+    assignObjectContentToListElement(getListElementAtIndex(m_List1, 0), POINT, static_cast<void*>(point));
     point = nullptr;
 
     int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 4;
-    assignObjectContentToListElement(getListElementAtIndex(list, 2), INTEGER, static_cast<void*>(distance));
+    assignObjectContentToListElement(getListElementAtIndex(m_List1, 2), INTEGER, static_cast<void*>(distance));
     distance = nullptr;
 
     double* angle = static_cast<double*>(malloc(sizeof(double)));
     *angle = 1.44;
-    assignObjectContentToListElement(getListElementAtIndex(list, 3), DECIMAL, static_cast<void*>(angle));
+    assignObjectContentToListElement(getListElementAtIndex(m_List1, 3), DECIMAL, static_cast<void*>(angle));
     angle = nullptr;
 
-    printListContentToFile(list, testDataFile, "");
+    printListContentToFile(m_List1, testDataFile, "");
 
     char* buffer = static_cast<char*>(malloc(100));
     FILE* readTestData = fopen(testDataFile, "r");
@@ -2077,8 +1970,6 @@ void LinkedListTests::testPrintListElementsToFile()
     readTestData = nullptr;
     free(buffer);
     buffer = nullptr;
-    deleteList(list, deleteObjectPayload);
-    list = nullptr;
 
     // checks performed at the end to avoid memory leaks
     QVERIFY2(success1, "First element is not printed correctly");
@@ -2086,6 +1977,224 @@ void LinkedListTests::testPrintListElementsToFile()
     QVERIFY2(success3, "Third element is not printed correctly");
     QVERIFY2(success4, "Fourth element is not printed correctly");
     QVERIFY2(success5, "Fifth element is not printed correctly");
+}
+
+void LinkedListTests::testListElementsPool()
+{
+    m_List1 = createEmptyList(nullptr);
+    QVERIFY(m_List1);
+
+    ListElementsPool* pool = createListElementsPool();
+    QVERIFY(pool);
+
+    const size_t initialPoolElementsCount = getAvailableElementsCount(pool);
+    QVERIFY(initialPoolElementsCount == MAX_POOL_ITEMS_COUNT);
+    QVERIFY(initialPoolElementsCount >= 8); // safety net to prevent overflows, see below
+
+    ListElement* element = aquireElement(pool);
+
+    QVERIFY(element && element->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount - 1);
+
+    prependToList(m_List1, element);
+
+    element = aquireElement(pool);
+
+    QVERIFY(element && element->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount - 2);
+
+    appendToList(m_List1, element);
+
+    QVERIFY(getListSize(m_List1) == 2);
+
+    for (size_t index = 0; index < initialPoolElementsCount - 3; ++index)
+    {
+        element = aquireElement(pool);
+        QVERIFY(element);
+
+        if (index % 2)
+        {
+            prependToList(m_List1, element);
+        }
+        else
+        {
+            appendToList(m_List1, element);
+        }
+    }
+
+    QVERIFY(getAvailableElementsCount(pool) == 1);
+    QVERIFY(getListSize(m_List1) == initialPoolElementsCount - 1);
+
+    element = aquireElement(pool);
+
+    QVERIFY(element && element->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == 0);
+
+    appendToList(m_List1, element);
+    QVERIFY(getListSize(m_List1) == initialPoolElementsCount);
+
+    element = aquireElement(pool);
+
+    QVERIFY(!element);
+    QVERIFY(getAvailableElementsCount(pool) == 0);
+
+    bool released = false;
+
+    element = removeLastListElement(m_List1);
+    QVERIFY(element);
+
+    released = releaseElement(element, pool);
+    QVERIFY(released && getAvailableElementsCount(pool) == 1);
+
+    element = removeFirstListElement(m_List1);
+    QVERIFY(element);
+
+    released = releaseElement(element, pool);
+    QVERIFY(released && getAvailableElementsCount(pool) == 2);
+
+    ListElement* newElement = createListElement();
+
+    released = releaseElement(newElement, pool);
+    QVERIFY(!released && getAvailableElementsCount(pool) == 2);
+
+    free(newElement);
+    newElement = nullptr;
+
+    element = aquireElement(pool);
+
+    QVERIFY(element && element->priority == 0);
+    QVERIFY(getAvailableElementsCount(pool) == 1);
+
+    released = releaseElement(element, pool);
+    QVERIFY(released && getAvailableElementsCount(pool) == 2);
+
+    size_t listElementsCount = getListSize(m_List1);
+    QVERIFY(listElementsCount == initialPoolElementsCount - 2);
+
+    for (size_t index = 0; index < listElementsCount; ++index)
+    {
+        element = index % 2 == 0 ? removeLastListElement(m_List1) : removeFirstListElement(m_List1);
+        QVERIFY(element);
+        released = releaseElement(element, pool);
+        QVERIFY(released);
+        element = nullptr;
+    }
+
+    QVERIFY(isEmptyList(m_List1));
+    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount);
+
+    released = releaseElement(nullptr, pool);
+    QVERIFY(!released && getAvailableElementsCount(pool) == initialPoolElementsCount);
+
+    deleteListElementsPool(pool);
+    pool = nullptr;
+}
+
+void LinkedListTests::initTestCase_data()
+{
+    m_Pool = createListElementsPool();
+    QVERIFY(m_Pool);
+
+    m_TotalAvailablePoolElementsCount = getAvailableElementsCount(m_Pool);
+
+    ListElementsPool* p_NullPool{nullptr};
+
+    QTest::addColumn<ListElementsPool*>("pool");
+
+    QTest::newRow("allocation from pool") << m_Pool;
+    QTest::newRow("no pool allocation") << p_NullPool;
+}
+
+void LinkedListTests::cleanupTestCase()
+{
+    QVERIFY(m_Pool);
+
+    deleteListElementsPool(m_Pool);
+    m_Pool = nullptr;
+    m_TotalAvailablePoolElementsCount = 0;
+}
+
+void LinkedListTests::init()
+{
+    QVERIFY(m_Pool);
+    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+
+    QVERIFY(!m_List1);
+    QVERIFY(!m_List2);
+    QVERIFY(!m_List3);
+    QVERIFY(!m_List4);
+    QVERIFY(!m_List5);
+    QVERIFY(!m_List6);
+    QVERIFY(!m_List7);
+    QVERIFY(!m_List8);
+
+    QVERIFY(m_ListsMarkedForDeletion.empty());
+    QVERIFY(m_ListElementsMarkedForRelease.empty());
+    QVERIFY(m_ListElementsMarkedForDeletion.empty());
+}
+
+void LinkedListTests::cleanup()
+{
+    DELETE_LIST(m_List1, deleteObjectPayload);
+    DELETE_LIST(m_List2, deleteObjectPayload);
+    DELETE_LIST(m_List3, deleteObjectPayload);
+    DELETE_LIST(m_List4, deleteObjectPayload);
+    DELETE_LIST(m_List5, deleteObjectPayload);
+    DELETE_LIST(m_List6, deleteObjectPayload);
+    DELETE_LIST(m_List7, deleteObjectPayload);
+    DELETE_LIST(m_List8, deleteObjectPayload);
+
+    for (auto list : m_ListsMarkedForDeletion)
+    {
+        DELETE_LIST(list, deleteObjectPayload);
+    }
+
+    for (auto& element : m_ListElementsMarkedForRelease)
+    {
+        if (element)
+        {
+            releaseElement(element, m_Pool);
+            element = nullptr;
+        }
+    }
+
+    for (auto& element : m_ListElementsMarkedForDeletion)
+    {
+        if (element)
+        {
+            free(element);
+            element = nullptr;
+        }
+    }
+
+    m_ListElementsMarkedForRelease.clear();
+    m_ListElementsMarkedForDeletion.clear();
+    m_ListsMarkedForDeletion.clear();
+
+    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+}
+
+void LinkedListTests::_markListForDeletion(List* list)
+{
+    if (list)
+    {
+        m_ListsMarkedForDeletion.push_back(list);
+    }
+}
+
+void LinkedListTests::_markListElementForCleanup(ListElement* element, bool shouldRelease)
+{
+    if (element)
+    {
+        auto& freeElementsCollector = shouldRelease ? m_ListElementsMarkedForRelease : m_ListElementsMarkedForDeletion;
+        freeElementsCollector.push_back(element);
+    }
+}
+
+void LinkedListTests::_clearListElementsMarkedForCleanup()
+{
+    m_ListElementsMarkedForRelease.clear();
+    m_ListElementsMarkedForDeletion.clear();
 }
 
 size_t LinkedListTests::_getSumOfPriorities(List *list)

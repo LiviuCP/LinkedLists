@@ -16,7 +16,7 @@ int main()
     const size_t priorities[] = {5, 2, 7, 3, 4};
     const char* fifoName = "/tmp/linkedlistpipe";
 
-    List* senderList = createListFromPrioritiesArray(priorities, 5);
+    List* senderList = createListFromPrioritiesArray(priorities, 5, NULL);
 
     if (senderList != NULL)
     {

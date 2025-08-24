@@ -5,6 +5,8 @@
 
 #include "../Utils/codeutils.h"
 
+#define MAX_POOL_ITEMS_COUNT 1024
+
 struct ListElement
 {
     Object object;
@@ -15,10 +17,18 @@ struct ListElement
 
 typedef struct ListElement ListElement;
 
+// TODO: move pool to separate file (along with ListElement)
+typedef struct
+{
+    void* content;
+}
+ListElementsPool;
+
 typedef struct
 {
     ListElement* first;
     ListElement* last; // required for constant time element appending
+    ListElementsPool* elementsPool;
 }
 List;
 
@@ -33,8 +43,17 @@ ListIterator;
 extern "C"{
 #endif
 
-List* createEmptyList();                                                                                // don't use for stack created lists (heap-only)
-List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize);             // don't use for stack created lists (heap-only)
+ListElementsPool* createListElementsPool();
+void deleteListElementsPool(ListElementsPool* elementsPool);
+size_t getAvailableElementsCount(ListElementsPool* elementsPool);
+ListElement* aquireElement(ListElementsPool* elementsPool);
+bool releaseElement(ListElement* element, ListElementsPool* elementsPool);
+
+List* createEmptyList(ListElementsPool* elementsPool);                                                  // don't use for stack created lists (heap-only)
+List* createEmptyLists(size_t count, ListElementsPool* elementsPool);                                   // don't use for stack created lists (heap-only)
+List* createListFromPrioritiesArray(const size_t* prioritiesArray,
+                                    const size_t arraySize,
+                                    ListElementsPool* elementsPool);                                    // don't use for stack created lists (heap-only)
 void deleteList(List* list, void (*deallocObject)(Object* object));                                     // don't use for stack created lists (heap-only)
 
 ListElement* createListElement();                                                                       // don't use for stack created lists (heap-only)
@@ -53,6 +72,7 @@ ListElement* removeLastListElement(List* list);
 ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
 ListElement* removeCurrentListElement(ListIterator it);
+
 void clearList(List* list, void (*deallocObject)(Object* object));                                      // don't use for stack created lists (heap-only)
 void detachListElements(List* list);                                                                    // use this function instead of clearList() for stack created lists
 
