@@ -2052,6 +2052,9 @@ void LinkedListTests::testListElementsPool()
     released = releaseElement(element, pool);
     QVERIFY(released && getAvailableElementsCount(pool) == 2);
 
+    released = releaseElement(element, pool);
+    QVERIFY(!released);
+
     ListElement* newElement = createListElement();
 
     released = releaseElement(newElement, pool);
