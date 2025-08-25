@@ -1,10 +1,5 @@
 #include "bitoperations.h"
 
-#define BYTE_SIZE 8
-#define NIBBLE_SIZE BYTE_SIZE/2
-#define LSB_MASK 1u
-#define MSB_MASK 128u
-
 byte_t rotateLeft(const byte_t byte, const size_t nrOfRotations)
 {
     byte_t result = byte;

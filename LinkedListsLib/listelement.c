@@ -7,11 +7,11 @@
 
 typedef struct
 {
-    ListElement* data;
-    ListElement** dataRefs;
-    byte_t* availability;
-    size_t itemsCount;
-    size_t availableItemsCount;
+    ListElement* elements;
+    ListElement** elementRefs;
+    byte_t* availabilityFlags;
+    size_t totalCount;
+    size_t availableCount;
 } ListElementsPoolContent;
 
 // "private" (supporting) functions
@@ -74,7 +74,7 @@ size_t getAvailableElementsCount(ListElementsPool* elementsPool)
 
         if (content != NULL)
         {
-            count = content->availableItemsCount;
+            count = content->availableCount;
         }
     }
 
@@ -94,28 +94,31 @@ ListElement* aquireElement(ListElementsPool* elementsPool)
         ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
         ASSERT(content != NULL, "Invalid list elements pool content!");
 
-        if (content != NULL && content->availableItemsCount > 0)
+        if (content != NULL && content->availableCount > 0)
         {
-            ListElement** dataRefs = content->dataRefs;
-            ASSERT(dataRefs != NULL, "Invalid list elements pool data refs!");
+            ListElement** elementRefs = content->elementRefs;
+            byte_t* availabilityFlags = content->availabilityFlags;
 
-            byte_t* availability = content->availability;
-            ASSERT(availability != NULL, "Invalid list elements pool availability checker!");
+            ASSERT(elementRefs != NULL, "Invalid list elements pool data refs!");
+            ASSERT(availabilityFlags != NULL, "Invalid list elements pool availability flags!");
 
-            if (dataRefs != NULL && availability != NULL)
+            if (elementRefs != NULL && availabilityFlags != NULL)
             {
-                const size_t aquiredElementIndex = content->availableItemsCount - 1;
+                const size_t elementRefIndex = content->availableCount - 1;
 
-                aquiredElement = dataRefs[aquiredElementIndex];
-                dataRefs[aquiredElementIndex] = NULL;
-                --content->availableItemsCount;
+                aquiredElement = elementRefs[elementRefIndex];
+                elementRefs[elementRefIndex] = NULL;
+                --content->availableCount;
 
-                if (aquiredElement >= content->data && aquiredElement < content->data + content->itemsCount)
+                const ListElement* firstElement = content->elements;
+
+                if (aquiredElement >= firstElement && aquiredElement < firstElement + content->totalCount)
                 {
-                    const size_t absoluteElementIndex = aquiredElement - content->data;
-                    const size_t availabilityByteIndex = absoluteElementIndex / 8;
-                    const size_t availabilityBitIndex = 7 - absoluteElementIndex % 8;
-                    availability[availabilityByteIndex] &= ~(1 << availabilityBitIndex);
+                    const size_t elementIndex = aquiredElement - firstElement;
+                    const size_t byteIndex = elementIndex / BYTE_SIZE;
+                    const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
+                    const byte_t elementBitMask = LSB_MASK << bitIndex;
+                    availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
                 }
                 else
                 {
@@ -128,7 +131,6 @@ ListElement* aquireElement(ListElementsPool* elementsPool)
     return aquiredElement;
 }
 
-// TODO: implement double release prevention mechanism if possible
 bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
 {
     bool success = false;
@@ -137,26 +139,37 @@ bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
     {
         ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
 
-        const bool isValidPool = content != NULL && content->data != NULL && content->dataRefs != NULL && content->availability != NULL && content->itemsCount > 0 && content->itemsCount > content->availableItemsCount;
-        ASSERT(isValidPool, "Invalid list elements elementsPool parameters!")
+        const bool isValidPool = content != NULL &&
+                                 content->elements != NULL &&
+                                 content->elementRefs != NULL &&
+                                 content->availabilityFlags != NULL &&
+                                 content->totalCount > 0 &&
+                                 content->totalCount >= content->availableCount;
 
-        if (isValidPool && element >= content->data && element < &content->data[content->itemsCount])
+        ASSERT(isValidPool, "Invalid list elements elementsPool parameters!");
+
+        const ListElement* firstElement = content->elements;
+
+        if (isValidPool && element >= firstElement && element < firstElement + content->totalCount)
         {
-            const size_t absoluteElementIndex = element - content->data;
-            const size_t availabilityByteIndex = absoluteElementIndex / 8;
-            const size_t availabilityBitIndex = 7 - absoluteElementIndex % 8;
+            const size_t elementIndex = element - firstElement;
+            const size_t byteIndex = elementIndex / BYTE_SIZE;
+            const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
+            const byte_t elementBitMask = LSB_MASK << bitIndex;
+            const bool isElementAvailableInPool = content->availabilityFlags[byteIndex] & elementBitMask; // test element availability bit
 
-            const bool isElementAvailableInPool = content->availability[availabilityByteIndex] & (1 << availabilityBitIndex);
-
+            // only "unavailable" (aquired) elements can be released
             if (!isElementAvailableInPool)
             {
+                ASSERT(content->availableCount < content->totalCount, "Count of available elements should be lower than total!");
+
                 element->next = NULL;
                 element->object.type = -1;
                 element->object.payload = NULL;
                 element->priority = 0;
-                content->dataRefs[content->availableItemsCount] = element;
-                content->availability[availabilityByteIndex] ^= (1 << availabilityBitIndex);
-                ++content->availableItemsCount;
+                content->elementRefs[content->availableCount] = element;
+                content->availabilityFlags[byteIndex] |= elementBitMask; // set bit, element is available again for aquiring
+                ++content->availableCount;
                 success = true;
             }
         }
@@ -303,10 +316,11 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
     bool success = false;
 
     ListElementsPoolContent* content = NULL;
-    ListElement* data = NULL;
-    ListElement** dataRefs = NULL;
-    byte_t* availability = NULL;
-    const size_t availabilityBytesCount = MAX_POOL_ITEMS_COUNT / 8 + (MAX_POOL_ITEMS_COUNT % 8 > 0 ? 1 : 0);
+    ListElement* elements = NULL;
+    ListElement** elementRefs = NULL;
+    byte_t* availabilityFlags = NULL;
+    const size_t totalCount = MAX_POOLED_ELEMENTS_COUNT;
+    const size_t availabilityBytesCount = totalCount / BYTE_SIZE + (totalCount % BYTE_SIZE > 0 ? 1 : 0);
 
     if (elementsPool != NULL)
     {
@@ -315,42 +329,43 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
 
     if (content != NULL)
     {
-        data = (ListElement*)malloc(MAX_POOL_ITEMS_COUNT * sizeof(ListElement));
+        elements = (ListElement*)malloc(totalCount * sizeof(ListElement));
     }
 
-    if (data != NULL)
+    if (elements != NULL)
     {
-        dataRefs = (ListElement**)malloc(MAX_POOL_ITEMS_COUNT * sizeof(ListElement*));
+        elementRefs = (ListElement**)malloc(totalCount * sizeof(ListElement*));
     }
 
-    if (dataRefs != NULL)
+    if (elementRefs != NULL)
     {
-        availability = (byte_t*)malloc(availabilityBytesCount);
+        availabilityFlags = (byte_t*)malloc(availabilityBytesCount);
     }
 
-    if (availability != NULL)
+    if (availabilityFlags != NULL)
     {
         success = true;
 
-        for (size_t index = 0; index < MAX_POOL_ITEMS_COUNT; ++index)
+        for (size_t index = 0; index < totalCount; ++index)
         {
-            data[index].next = NULL;
-            data[index].object.type = -1;
-            data[index].object.payload = NULL;
-            data[index].priority = 0;
-            dataRefs[index] = &data[index];
+            elements[index].next = NULL;
+            elements[index].object.type = -1;
+            elements[index].object.payload = NULL;
+            elements[index].priority = 0;
+            elementRefs[index] = &elements[index];
         }
 
         for (size_t index = 0; index < availabilityBytesCount; ++index)
         {
-            availability[index] = 255; // 11111111b
+            availabilityFlags[index] = MAX_BYTE_VALUE;
         }
 
-        content->data = data;
-        content->dataRefs = dataRefs;
-        content->availability = availability;
-        content->itemsCount = MAX_POOL_ITEMS_COUNT;
-        content->availableItemsCount = MAX_POOL_ITEMS_COUNT;
+        content->elements = elements;
+        content->elementRefs = elementRefs;
+        content->availabilityFlags = availabilityFlags;
+        content->totalCount = totalCount;
+        ASSERT(content->totalCount > 0, "Total pooled elements count should not be 0!");
+        content->availableCount = content->totalCount;
         elementsPool->content = content;
     }
 
@@ -362,22 +377,22 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
             content = NULL;
         }
 
-        if (data != NULL)
+        if (elements != NULL)
         {
-            free(data);
-            data = NULL;
+            free(elements);
+            elements = NULL;
         }
 
-        if (dataRefs != NULL)
+        if (elementRefs != NULL)
         {
-            free(dataRefs);
-            dataRefs = NULL;
+            free(elementRefs);
+            elementRefs = NULL;
         }
 
-        if (availability != NULL)
+        if (availabilityFlags != NULL)
         {
-            free(availability);
-            availability = NULL;
+            free(availabilityFlags);
+            availabilityFlags = NULL;
         }
     }
 
@@ -392,22 +407,22 @@ static void cleanupListElementsPool(ListElementsPool* elementsPool)
 
         if (content != NULL)
         {
-            if (content->data != NULL)
+            if (content->elements != NULL)
             {
-                free(content->data);
-                content->data = NULL;
+                free(content->elements);
+                content->elements = NULL;
             }
 
-            if (content->dataRefs != NULL)
+            if (content->elementRefs != NULL)
             {
-                free(content->dataRefs);
-                content->dataRefs = NULL;
+                free(content->elementRefs);
+                content->elementRefs = NULL;
             }
 
-            if (content->availability != NULL)
+            if (content->availabilityFlags != NULL)
             {
-                free(content->availability);
-                content->availability = NULL;
+                free(content->availabilityFlags);
+                content->availabilityFlags = NULL;
             }
 
             free(elementsPool->content);

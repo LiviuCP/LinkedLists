@@ -1979,6 +1979,7 @@ void LinkedListTests::testPrintListElementsToFile()
     QVERIFY2(success5, "Fifth element is not printed correctly");
 }
 
+// TODO: refactor this test to prevent crash in case of FAIL
 void LinkedListTests::testListElementsPool()
 {
     m_List1 = createEmptyList(nullptr);
@@ -1987,27 +1988,27 @@ void LinkedListTests::testListElementsPool()
     ListElementsPool* pool = createListElementsPool();
     QVERIFY(pool);
 
-    const size_t initialPoolElementsCount = getAvailableElementsCount(pool);
-    QVERIFY(initialPoolElementsCount == MAX_POOL_ITEMS_COUNT);
-    QVERIFY(initialPoolElementsCount >= 8); // safety net to prevent overflows, see below
+    const size_t initialPooledElementsCount = getAvailableElementsCount(pool);
+    QVERIFY(initialPooledElementsCount == MAX_POOLED_ELEMENTS_COUNT);
+    QVERIFY(initialPooledElementsCount >= 8); // safety net to prevent overflows, see below
 
     ListElement* element = aquireElement(pool);
 
     QVERIFY(element && element->priority == 0);
-    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount - 1);
+    QVERIFY(getAvailableElementsCount(pool) == initialPooledElementsCount - 1);
 
     prependToList(m_List1, element);
 
     element = aquireElement(pool);
 
     QVERIFY(element && element->priority == 0);
-    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount - 2);
+    QVERIFY(getAvailableElementsCount(pool) == initialPooledElementsCount - 2);
 
     appendToList(m_List1, element);
 
     QVERIFY(getListSize(m_List1) == 2);
 
-    for (size_t index = 0; index < initialPoolElementsCount - 3; ++index)
+    for (size_t index = 0; index < initialPooledElementsCount - 3; ++index)
     {
         element = aquireElement(pool);
         QVERIFY(element);
@@ -2023,7 +2024,7 @@ void LinkedListTests::testListElementsPool()
     }
 
     QVERIFY(getAvailableElementsCount(pool) == 1);
-    QVERIFY(getListSize(m_List1) == initialPoolElementsCount - 1);
+    QVERIFY(getListSize(m_List1) == initialPooledElementsCount - 1);
 
     element = aquireElement(pool);
 
@@ -2031,7 +2032,7 @@ void LinkedListTests::testListElementsPool()
     QVERIFY(getAvailableElementsCount(pool) == 0);
 
     appendToList(m_List1, element);
-    QVERIFY(getListSize(m_List1) == initialPoolElementsCount);
+    QVERIFY(getListSize(m_List1) == initialPooledElementsCount);
 
     element = aquireElement(pool);
 
@@ -2072,7 +2073,7 @@ void LinkedListTests::testListElementsPool()
     QVERIFY(released && getAvailableElementsCount(pool) == 2);
 
     size_t listElementsCount = getListSize(m_List1);
-    QVERIFY(listElementsCount == initialPoolElementsCount - 2);
+    QVERIFY(listElementsCount == initialPooledElementsCount - 2);
 
     for (size_t index = 0; index < listElementsCount; ++index)
     {
@@ -2084,10 +2085,10 @@ void LinkedListTests::testListElementsPool()
     }
 
     QVERIFY(isEmptyList(m_List1));
-    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount);
+    QVERIFY(getAvailableElementsCount(pool) == initialPooledElementsCount);
 
     released = releaseElement(nullptr, pool);
-    QVERIFY(!released && getAvailableElementsCount(pool) == initialPoolElementsCount);
+    QVERIFY(!released && getAvailableElementsCount(pool) == initialPooledElementsCount);
 
     deleteListElementsPool(pool);
     pool = nullptr;
