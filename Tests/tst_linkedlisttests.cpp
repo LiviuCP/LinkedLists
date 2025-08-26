@@ -69,6 +69,8 @@ private:
     ListElementsPool* m_Pool;
     size_t m_TotalAvailablePoolElementsCount;
 
+    ListElementsPool* m_TempPool; // temporary pool, to be cleaned up (if necessary) after each test run
+
     List* m_List1;
     List* m_List2;
     List* m_List3;
@@ -89,6 +91,7 @@ private:
 LinkedListTests::LinkedListTests()
     : m_Pool{nullptr}
     , m_TotalAvailablePoolElementsCount{0}
+    , m_TempPool{nullptr}
     , m_List1{nullptr}
     , m_List2{nullptr}
     , m_List3{nullptr}
@@ -1981,35 +1984,36 @@ void LinkedListTests::testPrintListElementsToFile()
 
 void LinkedListTests::testListElementsPool()
 {
-    m_List1 = createEmptyList(nullptr);
+    m_TempPool = createListElementsPool();
+    QVERIFY(m_TempPool);
+
+    // in this case the temp pool is assigned to m_List1 only to prevent elements deletion from list (in case of test fail); the aquiring/releasing of elements occurs externally
+    m_List1 = createEmptyList(m_TempPool);
     QVERIFY(m_List1);
 
-    ListElementsPool* pool = createListElementsPool();
-    QVERIFY(pool);
+    const size_t initialPooledElementsCount = getAvailableElementsCount(m_TempPool);
+    QVERIFY(initialPooledElementsCount == MAX_POOLED_ELEMENTS_COUNT);
+    QVERIFY(initialPooledElementsCount >= 8); // safety net to prevent overflows, see below
 
-    const size_t initialPoolElementsCount = getAvailableElementsCount(pool);
-    QVERIFY(initialPoolElementsCount == MAX_POOL_ITEMS_COUNT);
-    QVERIFY(initialPoolElementsCount >= 8); // safety net to prevent overflows, see below
-
-    ListElement* element = aquireElement(pool);
+    ListElement* element = aquireElement(m_TempPool);
 
     QVERIFY(element && element->priority == 0);
-    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount - 1);
+    QVERIFY(getAvailableElementsCount(m_TempPool) == initialPooledElementsCount - 1);
 
     prependToList(m_List1, element);
 
-    element = aquireElement(pool);
+    element = aquireElement(m_TempPool);
 
     QVERIFY(element && element->priority == 0);
-    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount - 2);
+    QVERIFY(getAvailableElementsCount(m_TempPool) == initialPooledElementsCount - 2);
 
     appendToList(m_List1, element);
 
     QVERIFY(getListSize(m_List1) == 2);
 
-    for (size_t index = 0; index < initialPoolElementsCount - 3; ++index)
+    for (size_t index = 0; index < initialPooledElementsCount - 3; ++index)
     {
-        element = aquireElement(pool);
+        element = aquireElement(m_TempPool);
         QVERIFY(element);
 
         if (index % 2)
@@ -2022,72 +2026,72 @@ void LinkedListTests::testListElementsPool()
         }
     }
 
-    QVERIFY(getAvailableElementsCount(pool) == 1);
-    QVERIFY(getListSize(m_List1) == initialPoolElementsCount - 1);
+    QVERIFY(getAvailableElementsCount(m_TempPool) == 1);
+    QVERIFY(getListSize(m_List1) == initialPooledElementsCount - 1);
 
-    element = aquireElement(pool);
+    element = aquireElement(m_TempPool);
 
     QVERIFY(element && element->priority == 0);
-    QVERIFY(getAvailableElementsCount(pool) == 0);
+    QVERIFY(getAvailableElementsCount(m_TempPool) == 0);
 
     appendToList(m_List1, element);
-    QVERIFY(getListSize(m_List1) == initialPoolElementsCount);
+    QVERIFY(getListSize(m_List1) == initialPooledElementsCount);
 
-    element = aquireElement(pool);
+    element = aquireElement(m_TempPool);
 
     QVERIFY(!element);
-    QVERIFY(getAvailableElementsCount(pool) == 0);
+    QVERIFY(getAvailableElementsCount(m_TempPool) == 0);
 
     bool released = false;
 
     element = removeLastListElement(m_List1);
     QVERIFY(element);
 
-    released = releaseElement(element, pool);
-    QVERIFY(released && getAvailableElementsCount(pool) == 1);
+    released = releaseElement(element, m_TempPool);
+    QVERIFY(released && getAvailableElementsCount(m_TempPool) == 1);
 
     element = removeFirstListElement(m_List1);
     QVERIFY(element);
 
-    released = releaseElement(element, pool);
-    QVERIFY(released && getAvailableElementsCount(pool) == 2);
+    released = releaseElement(element, m_TempPool);
+    QVERIFY(released && getAvailableElementsCount(m_TempPool) == 2);
+
+    // releasing an element twice is not allowed
+    released = releaseElement(element, m_TempPool);
+    QVERIFY(!released);
 
     ListElement* newElement = createListElement();
+    _markListElementForCleanup(newElement, false);
 
-    released = releaseElement(newElement, pool);
-    QVERIFY(!released && getAvailableElementsCount(pool) == 2);
+    // releasing an element that doesn't belong to pool is not allowed
+    released = releaseElement(newElement, m_TempPool);
+    QVERIFY(!released && getAvailableElementsCount(m_TempPool) == 2);
 
-    free(newElement);
-    newElement = nullptr;
-
-    element = aquireElement(pool);
+    element = aquireElement(m_TempPool);
 
     QVERIFY(element && element->priority == 0);
-    QVERIFY(getAvailableElementsCount(pool) == 1);
+    QVERIFY(getAvailableElementsCount(m_TempPool) == 1);
 
-    released = releaseElement(element, pool);
-    QVERIFY(released && getAvailableElementsCount(pool) == 2);
+    released = releaseElement(element, m_TempPool);
+    QVERIFY(released && getAvailableElementsCount(m_TempPool) == 2);
 
     size_t listElementsCount = getListSize(m_List1);
-    QVERIFY(listElementsCount == initialPoolElementsCount - 2);
+    QVERIFY(listElementsCount == initialPooledElementsCount - 2);
 
     for (size_t index = 0; index < listElementsCount; ++index)
     {
         element = index % 2 == 0 ? removeLastListElement(m_List1) : removeFirstListElement(m_List1);
         QVERIFY(element);
-        released = releaseElement(element, pool);
+        released = releaseElement(element, m_TempPool);
         QVERIFY(released);
         element = nullptr;
     }
 
     QVERIFY(isEmptyList(m_List1));
-    QVERIFY(getAvailableElementsCount(pool) == initialPoolElementsCount);
+    QVERIFY(getAvailableElementsCount(m_TempPool) == initialPooledElementsCount);
 
-    released = releaseElement(nullptr, pool);
-    QVERIFY(!released && getAvailableElementsCount(pool) == initialPoolElementsCount);
-
-    deleteListElementsPool(pool);
-    pool = nullptr;
+    released = releaseElement(nullptr, m_TempPool);
+    QVERIFY(!released && getAvailableElementsCount(m_TempPool) == initialPooledElementsCount);
 }
 
 void LinkedListTests::initTestCase_data()
@@ -2118,6 +2122,7 @@ void LinkedListTests::init()
 {
     QVERIFY(m_Pool);
     QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+    QVERIFY(!m_TempPool);
 
     QVERIFY(!m_List1);
     QVERIFY(!m_List2);
@@ -2172,6 +2177,13 @@ void LinkedListTests::cleanup()
     m_ListsMarkedForDeletion.clear();
 
     QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+
+    // the temporary pool should be deleted last in order to ensure any list connected to it has the chance to release the aquired elements (if any)
+    if (m_TempPool)
+    {
+        deleteListElementsPool(m_TempPool);
+        m_TempPool = nullptr;
+    }
 }
 
 void LinkedListTests::_markListForDeletion(List* list)

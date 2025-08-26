@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define BYTE_SIZE 8
+#define NIBBLE_SIZE BYTE_SIZE/2
+#define LSB_MASK 1u
+#define MSB_MASK 128u
+#define MAX_BYTE_VALUE 255u
+
 typedef unsigned char byte_t;
 
 #ifdef __cplusplus
