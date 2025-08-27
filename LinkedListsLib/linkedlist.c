@@ -55,10 +55,41 @@ List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t 
     if (prioritiesArray != NULL && arraySize > 0)
     {
         list = createEmptyList(elementsPool);
+    }
 
-        if (list != NULL)
+    if (list != NULL)
+    {
+        bool success = false;
+
+        if (elementsPool != NULL)
         {
-            bool elementCreationFailed = false;
+            ListElement** elementsToAquire = (ListElement**)malloc(arraySize * sizeof(ListElement*));
+
+            if (elementsToAquire != NULL)
+            {
+                success = aquireElements(elementsPool, elementsToAquire, arraySize);
+                const size_t elementsCountToAppend = success ? arraySize : 0;
+
+                for (size_t index = 0; index < elementsCountToAppend; ++index)
+                {
+                    ListElement* element = elementsToAquire[index];
+                    ASSERT(element != NULL, "NULL element aquired from elements pool!");
+
+                    if (element != NULL)
+                    {
+                        initListElement(element);
+                        element->priority = prioritiesArray[index];
+                        appendToList(list, element);
+                    }
+                }
+
+                free(elementsToAquire); // no longer needed, elements got appended to list
+                elementsToAquire = NULL;
+            }
+        }
+        else
+        {
+            success = true;
 
             for (size_t index = 0; index < arraySize; ++index)
             {
@@ -66,16 +97,16 @@ List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t 
 
                 if (!listElement)
                 {
-                    elementCreationFailed = true;
+                    success = false;
                     break;
                 }
             }
+        }
 
-            if (elementCreationFailed)
-            {
-                deleteList(list, deleteObjectPayload);
-                list = NULL;
-            }
+        if (!success)
+        {
+            deleteList(list, deleteObjectPayload);
+            list = NULL;
         }
     }
 

@@ -19,7 +19,6 @@ struct ListElement
 
 typedef struct ListElement ListElement;
 
-// TODO: move pool to separate file (along with ListElement)
 typedef struct
 {
     void* content;
@@ -28,11 +27,13 @@ ListElementsPool;
 
 // don't use for stack created lists (heap-only)
 ListElement* createListElement();
+void initListElement(ListElement* element);
 
 ListElementsPool* createListElementsPool();
 void deleteListElementsPool(ListElementsPool* elementsPool);
 size_t getAvailableElementsCount(ListElementsPool* elementsPool);
 ListElement* aquireElement(ListElementsPool* elementsPool);
+bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size_t requiredElementsCount);
 bool releaseElement(ListElement* element, ListElementsPool* elementsPool);
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload);

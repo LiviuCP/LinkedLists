@@ -24,15 +24,23 @@ ListElement* createListElement()
 
     if (result != NULL)
     {
-        result->next = NULL;
-        result->priority = 0;
-
-        // an empty object should have NULL payload and a negative type
-        result->object.type = -1;
-        result->object.payload = NULL;
+        initListElement(result);
     }
 
     return result;
+}
+
+void initListElement(ListElement* element)
+{
+    if (element != NULL)
+    {
+        element->next = NULL;
+        element->priority = 0;
+
+        // an empty object should have NULL payload and a negative type
+        element->object.type = -1;
+        element->object.payload = NULL;
+    }
 }
 
 ListElementsPool* createListElementsPool()
@@ -81,54 +89,117 @@ size_t getAvailableElementsCount(ListElementsPool* elementsPool)
     return count;
 }
 
-/* TODO:
-   - implement mechanism for additional allocations of elements in case all elements are assigned and further requests are made
-   - implement mechanism for allocation of element batches (e.g. when initializing a list with multiple elements)
-*/
+// TODO: implement mechanism for additional allocations of elements in case all elements are assigned
 ListElement* aquireElement(ListElementsPool* elementsPool)
 {
     ListElement* aquiredElement = NULL;
+    ListElementsPoolContent* content = NULL;
+    ListElement** elementRefs = NULL;
+    byte_t* availabilityFlags = NULL;
 
     if (elementsPool != NULL)
     {
-        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
+        content = (ListElementsPoolContent*)elementsPool->content;
         ASSERT(content != NULL, "Invalid list elements pool content!");
+    }
 
-        if (content != NULL && content->availableCount > 0)
+    if (content != NULL && content->availableCount > 0)
+    {
+        elementRefs = content->elementRefs;
+        availabilityFlags = content->availabilityFlags;
+        ASSERT(elementRefs != NULL, "Invalid list elements pool data refs!");
+        ASSERT(availabilityFlags != NULL, "Invalid list elements pool availability flags!");
+    }
+
+    if (elementRefs != NULL && availabilityFlags != NULL)
+    {
+        const ListElement* firstElement = content->elements;
+        const size_t lastAvailableElementRefIndex = content->availableCount - 1;
+        ListElement* const elementToAquire = elementRefs[lastAvailableElementRefIndex];
+        const bool hasValidAddress = elementToAquire != NULL && elementToAquire >= firstElement && elementToAquire < firstElement + content->totalCount;
+
+        ASSERT(hasValidAddress, "Invalid element address detected");
+
+        if (hasValidAddress)
         {
-            ListElement** elementRefs = content->elementRefs;
-            byte_t* availabilityFlags = content->availabilityFlags;
-
-            ASSERT(elementRefs != NULL, "Invalid list elements pool data refs!");
-            ASSERT(availabilityFlags != NULL, "Invalid list elements pool availability flags!");
-
-            if (elementRefs != NULL && availabilityFlags != NULL)
-            {
-                const size_t elementRefIndex = content->availableCount - 1;
-
-                aquiredElement = elementRefs[elementRefIndex];
-                elementRefs[elementRefIndex] = NULL;
-                --content->availableCount;
-
-                const ListElement* firstElement = content->elements;
-
-                if (aquiredElement >= firstElement && aquiredElement < firstElement + content->totalCount)
-                {
-                    const size_t elementIndex = aquiredElement - firstElement;
-                    const size_t byteIndex = elementIndex / BYTE_SIZE;
-                    const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
-                    const byte_t elementBitMask = LSB_MASK << bitIndex;
-                    availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
-                }
-                else
-                {
-                    ASSERT(false, "Invalid element address detected!");
-                }
-            }
+            aquiredElement = elementRefs[lastAvailableElementRefIndex];
+            const size_t elementIndex = aquiredElement - firstElement;
+            const size_t byteIndex = elementIndex / BYTE_SIZE;
+            const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
+            const byte_t elementBitMask = LSB_MASK << bitIndex;
+            availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
+            elementRefs[lastAvailableElementRefIndex] = NULL;
+            --content->availableCount;
         }
     }
 
     return aquiredElement;
+}
+
+// TODO: implement mechanism for additional allocations of elements in case available elements are insufficient
+bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size_t requiredElementsCount)
+{
+    bool success = false;
+    ListElementsPoolContent* content = NULL;
+    ListElement** elementRefs = NULL;
+    byte_t* availabilityFlags = NULL;
+
+    if (elementsPool != NULL && elements != NULL && requiredElementsCount > 0)
+    {
+        content = (ListElementsPoolContent*)elementsPool->content;
+        ASSERT(content != NULL, "Invalid list elements pool content!");
+    }
+
+    if (content != NULL && content->availableCount >= requiredElementsCount)
+    {
+        elementRefs = content->elementRefs;
+        availabilityFlags = content->availabilityFlags;
+        ASSERT(elementRefs != NULL, "Invalid list elements pool data refs!");
+        ASSERT(availabilityFlags != NULL, "Invalid list elements pool availability flags!");
+    }
+
+    if (elementRefs != NULL && availabilityFlags != NULL)
+    {
+        size_t lastAvailableElementRefIndex = content->availableCount - 1;
+        const ListElement* firstElement = content->elements;
+
+        bool invalidElementAddressDetected = false;
+
+        for (size_t elementsLeftToAquireCount = 0; elementsLeftToAquireCount < requiredElementsCount; ++elementsLeftToAquireCount)
+        {
+            ListElement* elementToAquire = elementRefs[lastAvailableElementRefIndex - elementsLeftToAquireCount];
+
+            if (elementToAquire == NULL || elementToAquire < firstElement || elementToAquire >= firstElement + content->totalCount)
+            {
+                invalidElementAddressDetected = true;
+                break;
+            }
+        }
+
+        ASSERT(!invalidElementAddressDetected, "Invalid element address detected!");
+
+        if (!invalidElementAddressDetected)
+        {
+            success = true;
+
+            for (size_t aquiredElementIndex = 0; aquiredElementIndex < requiredElementsCount; ++aquiredElementIndex)
+            {
+                ListElement* aquiredElement = elementRefs[lastAvailableElementRefIndex];
+                const size_t elementIndex = aquiredElement - firstElement;
+                const size_t byteIndex = elementIndex / BYTE_SIZE;
+                const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
+                const byte_t elementBitMask = LSB_MASK << bitIndex;
+
+                availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
+                elements[aquiredElementIndex] = aquiredElement;
+                elementRefs[lastAvailableElementRefIndex] = NULL;
+                --content->availableCount;
+                --lastAvailableElementRefIndex;
+            }
+        }
+    }
+
+    return success;
 }
 
 bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
@@ -348,11 +419,9 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
 
         for (size_t index = 0; index < totalCount; ++index)
         {
-            elements[index].next = NULL;
-            elements[index].object.type = -1;
-            elements[index].object.payload = NULL;
-            elements[index].priority = 0;
-            elementRefs[index] = &elements[index];
+            ListElement* element = elements + index;
+            initListElement(element);
+            elementRefs[index] = element;
         }
 
         for (size_t index = 0; index < availabilityBytesCount; ++index)

@@ -70,6 +70,7 @@ private:
     size_t m_TotalAvailablePoolElementsCount;
 
     ListElementsPool* m_TempPool; // temporary pool, to be cleaned up (if necessary) after each test run
+    ListElement** m_ElementsToAquire; // used for multiple elements to be aquired from m_TempPool in the same time
 
     List* m_List1;
     List* m_List2;
@@ -92,6 +93,7 @@ LinkedListTests::LinkedListTests()
     : m_Pool{nullptr}
     , m_TotalAvailablePoolElementsCount{0}
     , m_TempPool{nullptr}
+    , m_ElementsToAquire{nullptr}
     , m_List1{nullptr}
     , m_List2{nullptr}
     , m_List3{nullptr}
@@ -2075,6 +2077,46 @@ void LinkedListTests::testListElementsPool()
     released = releaseElement(element, m_TempPool);
     QVERIFY(released && getAvailableElementsCount(m_TempPool) == 2);
 
+    // aquire more than one element
+    const size_t initialElementsToAquireCount = 3;
+    m_ElementsToAquire = (ListElement**)malloc(initialElementsToAquireCount * sizeof(ListElement*));
+    QVERIFY(m_ElementsToAquire);
+
+    for (size_t index = 0; index < initialElementsToAquireCount; ++index)
+    {
+        m_ElementsToAquire[index] = nullptr;
+    }
+
+    bool multipleElementsAquired = aquireElements(m_TempPool, m_ElementsToAquire, initialElementsToAquireCount);
+    QVERIFY(!multipleElementsAquired);
+
+    for (size_t index = 0; index < initialElementsToAquireCount; ++index)
+    {
+        QVERIFY(!m_ElementsToAquire[index]);
+    }
+
+    QVERIFY(getAvailableElementsCount(m_TempPool) == 2);
+
+    const size_t newElementsToAquireCount = initialElementsToAquireCount - 1;
+    multipleElementsAquired = aquireElements(m_TempPool, m_ElementsToAquire, newElementsToAquireCount);
+
+    QVERIFY(multipleElementsAquired);
+
+    for (size_t index = 0; index < newElementsToAquireCount; ++index)
+    {
+        QVERIFY(m_ElementsToAquire[index] && m_ElementsToAquire[index]->priority == 0);
+    }
+
+    QVERIFY(!m_ElementsToAquire[newElementsToAquireCount]); // last position should not be filled-in by aquiring function
+    QVERIFY(getAvailableElementsCount(m_TempPool) == 0);
+
+    for (size_t index = 0; index < newElementsToAquireCount; ++index)
+    {
+        releaseElement(m_ElementsToAquire[index], m_TempPool);
+    }
+
+    QVERIFY(getAvailableElementsCount(m_TempPool) == 2);
+
     size_t listElementsCount = getListSize(m_List1);
     QVERIFY(listElementsCount == initialPooledElementsCount - 2);
 
@@ -2122,7 +2164,9 @@ void LinkedListTests::init()
 {
     QVERIFY(m_Pool);
     QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+
     QVERIFY(!m_TempPool);
+    QVERIFY(!m_ElementsToAquire);
 
     QVERIFY(!m_List1);
     QVERIFY(!m_List2);
@@ -2177,6 +2221,12 @@ void LinkedListTests::cleanup()
     m_ListsMarkedForDeletion.clear();
 
     QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+
+    if (m_ElementsToAquire)
+    {
+        free(m_ElementsToAquire);
+        m_ElementsToAquire = nullptr;
+    }
 
     // the temporary pool should be deleted last in order to ensure any list connected to it has the chance to release the aquired elements (if any)
     if (m_TempPool)
