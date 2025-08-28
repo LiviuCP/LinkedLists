@@ -70,7 +70,7 @@ private:
     size_t m_TotalAvailablePoolElementsCount;
 
     ListElementsPool* m_TempPool; // temporary pool, to be cleaned up (if necessary) after each test run
-    ListElement** m_ElementsToAquire; // used for multiple elements to be aquired from m_TempPool in the same time
+    ListElement** m_ListElementRefs; // used for storing multiple element addreses, to be cleaned up after each test run (elements to be cleaned up separately)
 
     List* m_List1;
     List* m_List2;
@@ -93,7 +93,7 @@ LinkedListTests::LinkedListTests()
     : m_Pool{nullptr}
     , m_TotalAvailablePoolElementsCount{0}
     , m_TempPool{nullptr}
-    , m_ElementsToAquire{nullptr}
+    , m_ListElementRefs{nullptr}
     , m_List1{nullptr}
     , m_List2{nullptr}
     , m_List3{nullptr}
@@ -1846,44 +1846,44 @@ void LinkedListTests::testMoveArrayToList()
     QVERIFY(!pool || pool == m_Pool);
 
     m_List1 = createEmptyList(pool);
-    ListElement** array = static_cast<ListElement**>(calloc(4, sizeof(ListElement*)));
+    m_ListElementRefs = static_cast<ListElement**>(calloc(4, sizeof(ListElement*)));
 
-    array[0] = pool ? aquireElement(pool) : createListElement();
-    _markListElementForCleanup(array[0], pool != nullptr);
+    m_ListElementRefs[0] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[0], pool != nullptr);
 
-    QVERIFY(array[0]);
+    QVERIFY(m_ListElementRefs[0]);
 
-    array[1] = pool ? aquireElement(pool) : createListElement();
-    _markListElementForCleanup(array[1], pool != nullptr);
+    m_ListElementRefs[1] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[1], pool != nullptr);
 
-    QVERIFY(array[1]);
+    QVERIFY(m_ListElementRefs[1]);
 
-    array[2] = pool ? aquireElement(pool) : createListElement();
-    _markListElementForCleanup(array[2], pool != nullptr);
+    m_ListElementRefs[2] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[2], pool != nullptr);
 
-    QVERIFY(array[2]);
+    QVERIFY(m_ListElementRefs[2]);
 
-    array[3] = pool ? aquireElement(pool) : createListElement();
-    _markListElementForCleanup(array[3], pool != nullptr);
+    m_ListElementRefs[3] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[3], pool != nullptr);
 
-    QVERIFY(array[3]);
+    QVERIFY(m_ListElementRefs[3]);
 
-    array[0]->priority = 6;
-    array[1]->priority = 2;
-    array[2]->priority = 5;
-    array[3]->priority = 9;
+    m_ListElementRefs[0]->priority = 6;
+    m_ListElementRefs[1]->priority = 2;
+    m_ListElementRefs[2]->priority = 5;
+    m_ListElementRefs[3]->priority = 9;
 
     QVERIFY(isEmptyList(m_List1));
 
     // previous cleanup markings were performed to prevent memory leaks; upon reaching this point the elements should be unmarked as the they would get transferred to the list (no longer "free")
     _clearListElementsMarkedForCleanup();
 
-    moveArrayToList(array, 4, m_List1);
+    moveArrayToList(m_ListElementRefs, 4, m_List1);
 
-    QVERIFY2(array[0] == nullptr &&
-             array[1] == nullptr &&
-             array[2] == nullptr &&
-             array[3] == nullptr &&
+    QVERIFY2(m_ListElementRefs[0] == nullptr &&
+             m_ListElementRefs[1] == nullptr &&
+             m_ListElementRefs[2] == nullptr &&
+             m_ListElementRefs[3] == nullptr &&
              getListSize(m_List1) == 4 &&
              getListElementAtIndex(m_List1, 0)->priority == 6 &&
              getListElementAtIndex(m_List1, 1)->priority == 2 &&
@@ -1891,9 +1891,6 @@ void LinkedListTests::testMoveArrayToList()
              getListElementAtIndex(m_List1, 3)->priority == 9, "The array content has been incorrectly moved to list");
     QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 9, "First and last element of the list are not correctly referenced");
     QVERIFY(getListElementAtIndex(m_List1, 1)->object.type == -1 && getListElementAtIndex(m_List1, 1)->object.payload == nullptr);
-
-    free(array);
-    array = nullptr;
 }
 
 void LinkedListTests::testPrintListElementsToFile()
@@ -2079,40 +2076,40 @@ void LinkedListTests::testListElementsPool()
 
     // aquire more than one element
     const size_t initialElementsToAquireCount = 3;
-    m_ElementsToAquire = (ListElement**)malloc(initialElementsToAquireCount * sizeof(ListElement*));
-    QVERIFY(m_ElementsToAquire);
+    m_ListElementRefs = (ListElement**)malloc(initialElementsToAquireCount * sizeof(ListElement*));
+    QVERIFY(m_ListElementRefs);
 
     for (size_t index = 0; index < initialElementsToAquireCount; ++index)
     {
-        m_ElementsToAquire[index] = nullptr;
+        m_ListElementRefs[index] = nullptr;
     }
 
-    bool multipleElementsAquired = aquireElements(m_TempPool, m_ElementsToAquire, initialElementsToAquireCount);
+    bool multipleElementsAquired = aquireElements(m_TempPool, m_ListElementRefs, initialElementsToAquireCount);
     QVERIFY(!multipleElementsAquired);
 
     for (size_t index = 0; index < initialElementsToAquireCount; ++index)
     {
-        QVERIFY(!m_ElementsToAquire[index]);
+        QVERIFY(!m_ListElementRefs[index]);
     }
 
     QVERIFY(getAvailableElementsCount(m_TempPool) == 2);
 
     const size_t newElementsToAquireCount = initialElementsToAquireCount - 1;
-    multipleElementsAquired = aquireElements(m_TempPool, m_ElementsToAquire, newElementsToAquireCount);
+    multipleElementsAquired = aquireElements(m_TempPool, m_ListElementRefs, newElementsToAquireCount);
 
     QVERIFY(multipleElementsAquired);
 
     for (size_t index = 0; index < newElementsToAquireCount; ++index)
     {
-        QVERIFY(m_ElementsToAquire[index] && m_ElementsToAquire[index]->priority == 0);
+        QVERIFY(m_ListElementRefs[index] && m_ListElementRefs[index]->priority == 0);
     }
 
-    QVERIFY(!m_ElementsToAquire[newElementsToAquireCount]); // last position should not be filled-in by aquiring function
+    QVERIFY(!m_ListElementRefs[newElementsToAquireCount]); // last position should not be filled-in by aquiring function
     QVERIFY(getAvailableElementsCount(m_TempPool) == 0);
 
     for (size_t index = 0; index < newElementsToAquireCount; ++index)
     {
-        releaseElement(m_ElementsToAquire[index], m_TempPool);
+        releaseElement(m_ListElementRefs[index], m_TempPool);
     }
 
     QVERIFY(getAvailableElementsCount(m_TempPool) == 2);
@@ -2166,7 +2163,7 @@ void LinkedListTests::init()
     QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
 
     QVERIFY(!m_TempPool);
-    QVERIFY(!m_ElementsToAquire);
+    QVERIFY(!m_ListElementRefs);
 
     QVERIFY(!m_List1);
     QVERIFY(!m_List2);
@@ -2222,10 +2219,11 @@ void LinkedListTests::cleanup()
 
     QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
 
-    if (m_ElementsToAquire)
+    // it is assumed that the actual elements have been previously cleaned up (deleted or released) during test run
+    if (m_ListElementRefs)
     {
-        free(m_ElementsToAquire);
-        m_ElementsToAquire = nullptr;
+        free(m_ListElementRefs);
+        m_ListElementRefs = nullptr;
     }
 
     // the temporary pool should be deleted last in order to ensure any list connected to it has the chance to release the aquired elements (if any)
