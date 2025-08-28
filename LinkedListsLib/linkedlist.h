@@ -24,21 +24,40 @@ ListIterator;
 extern "C"{
 #endif
 
-List* createEmptyList(ListElementsPool* elementsPool);                                                  // don't use for stack created lists (heap-only)
-List* createEmptyLists(size_t count, ListElementsPool* elementsPool);                                   // don't use for stack created lists (heap-only)
+/* These functions should only be used for heap-based lists/elements */
+
+List* createEmptyList(ListElementsPool* elementsPool);
+List* createEmptyLists(size_t count, ListElementsPool* elementsPool);
+
 List* createListFromPrioritiesArray(const size_t* prioritiesArray,
                                     const size_t arraySize,
-                                    ListElementsPool* elementsPool);                                    // don't use for stack created lists (heap-only)
-void deleteList(List* list, void (*deallocObject)(Object* object));                                     // don't use for stack created lists (heap-only)
+                                    ListElementsPool* elementsPool);
 
-ListElement* createAndAppendToList(List* list, size_t priority);                                        // don't use for stack created lists (heap-only)
-void appendToList(List* list, ListElement* newElement);
-ListElement* createAndPrependToList(List* list, size_t priority);                                       // don't use for stack created lists (heap-only)
+void deleteList(List* list, void (*deallocObject)(Object* object));
+void clearList(List* list, void (*deallocObject)(Object* object));
+
+ListElement* createAndPrependToList(List* list, size_t priority);
+ListElement* createAndAppendToList(List* list, size_t priority);
+ListElement* createAndInsertBefore(ListIterator it, size_t priority);
+ListElement* createAndInsertAfter(ListIterator it, size_t priority);
+
+void moveContentToList(List* source, List* destination);
+
+ListElement* copyContentToList(const List* source,
+                               List* destination,
+                               bool (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+                               void (*deallocObject)(Object* object));
+
+ListElement** moveListToArray(List* list, size_t* arraySize);
+void moveArrayToList(ListElement** array, const size_t arraySize, List* list);
+
+
+/* These functions can also be used for stack-based lists/elements too */
+
 void prependToList(List* list, ListElement* newElement);
-ListElement* createAndInsertAfter(ListIterator it, size_t priority);                                    // don't use for stack created lists (heap-only)
-void insertAfter(ListIterator it, ListElement* nextElement);
-ListElement* createAndInsertBefore(ListIterator it, size_t priority);                                   // don't use for stack created lists (heap-only)
+void appendToList(List* list, ListElement* newElement);
 void insertBefore(ListIterator it, ListElement* previousElement);
+void insertAfter(ListIterator it, ListElement* nextElement);
 
 ListElement* removeFirstListElement(List* list);
 ListElement* removeLastListElement(List* list);
@@ -46,30 +65,21 @@ ListElement* removePreviousListElement(ListIterator it);
 ListElement* removeNextListElement(ListIterator it);
 ListElement* removeCurrentListElement(ListIterator it);
 
-void clearList(List* list, void (*deallocObject)(Object* object));                                      // don't use for stack created lists (heap-only)
-void detachListElements(List* list);                                                                    // use this function instead of clearList() for stack created lists
-
 void swapListElements(ListIterator firstIt, ListIterator secondIt);
 void reverseList(List* list);
-ListElement* batchReverseList(List* list, size_t batchSize);                                            // reverses the list in groups (batches), each batch having batchSize elements
+ListElement* batchReverseList(List* list, size_t batchSize); // reverses the list in groups (batches), each batch having batchSize elements
 void sortAscendingByPriority(List* list);
 void sortDescendingByPriority(List* list);
 bool sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize));
 
-void moveContentToList(List* source, List* destination);
-
-/* avoid using this function with stack lists/elements */
-ListElement* copyContentToList(const List* source, List* destination, bool (*copyObjectToElement)(const ListElement* source, ListElement* destination), void (*deallocObject)(Object* object));
-
-ListElement** moveListToArray(List* list, size_t* arraySize);                                           // don't use for stack created lists (heap-only)
-void moveArrayToList(ListElement** array, const size_t arraySize, List* list);                          // don't use for stack created lists (heap-only)
-
 size_t getListSize(const List* list);
 bool isEmptyList(const List* list);
+
 ListElement* getListElementAtIndex(const List* list, size_t index); // mainly for testing purposes, emulates the array indexing
 ListElement* getPreviousListElement(ListIterator it);
 ListElement* getFirstListElement(const List* list);
 ListElement* getLastListElement(const List* list);
+
 bool isListElementContained(const ListElement* element, const List* list);
 bool isSortedAscendingByPriority(const List* list);
 bool isSortedDescendingByPriority(const List* list);
@@ -80,6 +90,10 @@ void lnext(ListIterator* iterator);
 bool areIteratorsEqual(ListIterator first, ListIterator second);
 
 void printListContentToFile(const List* list, const char* outFile, const char* header);
+
+
+/* This function should only be used for stack-based lists/elements (stack alternative to clearList()) */
+void detachListElements(List* list);
 
 #ifdef __cplusplus
 }
