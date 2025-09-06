@@ -37,10 +37,9 @@ HashTable* createHashTable(const size_t hashSize, ListElementsPool* elementsPool
             }
         }
 
-        if (result == NULL && hashBuckets != NULL)
+        if (result == NULL)
         {
-            free(hashBuckets);
-            hashBuckets = NULL;
+            FREE(hashBuckets);
         }
     }
 
@@ -108,15 +107,8 @@ bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
             {
                 ASSERT(hashEntry->key && hashEntry->value, "Invalid hash entry!");
 
-                if (hashEntry->key)
-                {
-                    free(hashEntry->key);
-                }
-
-                if (hashEntry->value)
-                {
-                    free(hashEntry->value);
-                }
+                FREE(hashEntry->key);
+                FREE(hashEntry->value);
 
                 free(hashEntry);
                 hashEntry = NULL;
