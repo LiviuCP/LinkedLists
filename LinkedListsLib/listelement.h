@@ -3,7 +3,7 @@
 
 #include "codeutils.h"
 
-#define MAX_POOLED_ELEMENTS_COUNT 1024
+#define ELEMENTS_POOL_SLICE_SIZE 128
 
 #ifdef __cplusplus
 extern "C"{

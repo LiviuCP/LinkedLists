@@ -4,6 +4,20 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define FREE(ptr) \
+    if (ptr) \
+    { \
+        free(ptr); \
+        ptr = NULL; \
+    }
+
+#define DELETE_LIST(list, deleter) \
+    if (list) \
+    { \
+        deleteList(list, deleter); \
+        list = NULL; \
+    }
+
 // used for restricting part of the code from compiling onto non-UNIX systems when containing POSIX threads (pthread.h)
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 #define UNIX_OS
