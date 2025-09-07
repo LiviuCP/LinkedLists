@@ -19,6 +19,15 @@
 
 typedef struct
 {
+    ListElement* elements;
+    byte_t* availabilityFlags;
+    size_t totalElementsCount;
+    size_t availableElementsCount;
+} ListElementsSlice;
+
+typedef struct
+{
+    ListElementsSlice** slices;
     ListElement** elementSlices;
     ListElement** elementRefs;
     byte_t* availabilityFlags;
@@ -26,15 +35,8 @@ typedef struct
     size_t availableCount;
 } ListElementsPoolContent;
 
-typedef struct
-{
-    ListElement* elements;
-    byte_t* availabilityFlags;
-    size_t totalElementsCount;
-    size_t availableElementsCount;
-} ListElementsSlice;
-
 // "private" (supporting) functions
+static bool newInitListElementsPool(ListElementsPool* elementsPool);
 static bool initListElementsPool(ListElementsPool* elementsPool);
 static void clearListElementsPool(ListElementsPool* elementsPool);
 static bool addSlice(ListElementsPool* elementsPool);
@@ -431,6 +433,76 @@ bool customCopyObject(const ListElement* source, ListElement* destination)
                 }
             }
         }
+    }
+
+    return success;
+}
+
+static bool newInitListElementsPool(ListElementsPool* elementsPool)
+{
+    bool success = false;
+
+    ListElementsPoolContent* content = NULL;
+    ListElementsSlice** slices = NULL;
+    ListElement** elementRefs = NULL;
+    const size_t totalCount = ELEMENTS_POOL_SLICE_SIZE;
+
+    if (elementsPool != NULL)
+    {
+        content = malloc(sizeof(ListElementsPoolContent));
+    }
+
+    if (content != NULL)
+    {
+        slices = (ListElementsSlice**)malloc(ELEMENTS_POOL_SLICES_COUNT);
+    }
+
+    if (slices != NULL)
+    {
+        slices[0] = createSlice(totalCount);
+
+        if (slices[0] != NULL)
+        {
+            for (size_t sliceIndex = 1; sliceIndex < ELEMENTS_POOL_SLICES_COUNT; ++sliceIndex)
+            {
+                slices[sliceIndex] = NULL;
+            }
+
+            elementRefs = (ListElement**)malloc(totalCount * sizeof(ListElement*));
+        }
+    }
+
+    if (elementRefs != NULL)
+    {
+        success = true;
+
+        for (size_t index = 0; index < totalCount; ++index)
+        {
+            ListElement* element = slices[0]->elements + index;
+            elementRefs[index] = element;
+        }
+
+        content->slices = slices;
+        content->elementRefs = elementRefs;
+        content->totalCount = totalCount;
+        ASSERT(content->totalCount > 0, "Total pooled elements count should not be 0!");
+        content->availableCount = content->totalCount;
+        elementsPool->content = content;
+    }
+
+    if (!success)
+    {
+        FREE(content);
+
+        if (slices != NULL)
+        {
+            deleteSlice(slices[0]);
+
+            free(slices);
+            slices = NULL;
+        }
+
+        FREE(elementRefs);
     }
 
     return success;
