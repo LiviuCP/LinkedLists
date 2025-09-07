@@ -26,12 +26,22 @@ typedef struct
     size_t availableCount;
 } ListElementsPoolContent;
 
+typedef struct
+{
+    ListElement* elements;
+    byte_t* availabilityFlags;
+    size_t totalElementsCount;
+    size_t availableElementsCount;
+} ListElementsSlice;
+
 // "private" (supporting) functions
 static bool initListElementsPool(ListElementsPool* elementsPool);
 static void clearListElementsPool(ListElementsPool* elementsPool);
 static bool addSlice(ListElementsPool* elementsPool);
 static bool isValidListElementsPool(const ListElementsPool* elementsPool);
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
+static ListElementsSlice* createSlice(size_t elementsCount);
+static void deleteSlice(ListElementsSlice* slice);
 
 ListElement* createListElement()
 {
@@ -704,4 +714,44 @@ static bool retrieveSliceIndex(const ListElement* element, const ListElementsPoo
     }
 
     return isValid;
+}
+
+static ListElementsSlice* createSlice(size_t elementsCount)
+{
+    ListElementsSlice* slice = NULL;
+    const bool isValidElementsCount = elementsCount > 0 && elementsCount % BYTE_SIZE == 0;
+    ASSERT(isValidElementsCount, "Invalid elements count for requested slice (should be > 0 and divisible with byte size)");
+
+    if (isValidElementsCount)
+    {
+        const size_t requiredSliceDataSize = sizeof(ListElementsSlice) + elementsCount * sizeof(ListElement) + elementsCount / BYTE_SIZE;
+        void* sliceData = malloc(requiredSliceDataSize);
+
+        if (sliceData != NULL)
+        {
+            slice = (ListElementsSlice*)sliceData;
+            slice->elements = (ListElement*)((void*)slice + sizeof(ListElementsSlice));
+            slice->availabilityFlags = (byte_t*)((void*)slice->elements + elementsCount * sizeof(ListElement));
+
+            for (size_t index = 0; index < elementsCount; ++index)
+            {
+                initListElement(slice->elements + index);
+            }
+
+            for (size_t index = 0; index < elementsCount / BYTE_SIZE; ++index)
+            {
+                *(slice->availabilityFlags + index) = MAX_BYTE_VALUE;
+            }
+
+            slice->totalElementsCount = elementsCount;
+            slice->availableElementsCount = elementsCount;
+        }
+    }
+
+    return slice;
+}
+
+static void deleteSlice(ListElementsSlice* slice)
+{
+    FREE(slice);
 }
