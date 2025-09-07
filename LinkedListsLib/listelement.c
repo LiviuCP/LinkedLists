@@ -38,7 +38,9 @@ typedef struct
 // "private" (supporting) functions
 static bool newInitListElementsPool(ListElementsPool* elementsPool);
 static bool initListElementsPool(ListElementsPool* elementsPool);
+static void newClearListElementsPool(ListElementsPool* elementsPool);
 static void clearListElementsPool(ListElementsPool* elementsPool);
+static bool newAddSlice(ListElementsPool* elementsPool);
 static bool addSlice(ListElementsPool* elementsPool);
 static bool isValidListElementsPool(const ListElementsPool* elementsPool);
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
@@ -593,6 +595,36 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
     return success;
 }
 
+static void newClearListElementsPool(ListElementsPool* elementsPool)
+{
+    if (elementsPool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
+
+        if (content != NULL)
+        {
+            if (content->slices != NULL)
+            {
+                ListElementsSlice** elementSlices = content->slices;
+
+                for (size_t sliceIndex = 0; sliceIndex < ELEMENTS_POOL_SLICES_COUNT; ++sliceIndex)
+                {
+                    deleteSlice(elementSlices[sliceIndex]);
+                }
+
+                free(content->slices);
+                content->slices = NULL;
+            }
+
+            FREE(content->elementRefs);
+
+            free(elementsPool->content);
+            elementsPool->content = NULL;
+            content = NULL;
+        }
+    }
+}
+
 static void clearListElementsPool(ListElementsPool* elementsPool)
 {
     if (elementsPool != NULL)
@@ -622,6 +654,74 @@ static void clearListElementsPool(ListElementsPool* elementsPool)
             content = NULL;
         }
     }
+}
+
+static bool newAddSlice(ListElementsPool* elementsPool)
+{
+    bool success = false;
+    bool isValidPool = false;
+
+    if (elementsPool)
+    {
+        isValidPool = isValidListElementsPool(elementsPool);
+        ASSERT(isValidPool, "Invalid list elements pool detected!");
+    }
+
+    if (isValidPool)
+    {
+        ListElementsPoolContent* content = elementsPool->content;
+
+        const size_t totalCount = content->totalCount;
+        const size_t newTotalCount = totalCount + ELEMENTS_POOL_SLICE_SIZE;
+        const size_t slicesCount = content->totalCount / ELEMENTS_POOL_SLICE_SIZE;
+        const size_t newSlicesCount = slicesCount + 1;
+
+        ListElementsSlice* newSlice = NULL;
+        ListElement** newElementRefs = NULL;
+
+        if (slicesCount < ELEMENTS_POOL_SLICES_COUNT)
+        {
+            newSlice = createSlice(ELEMENTS_POOL_SLICE_SIZE);
+        }
+
+        if (newSlice != NULL)
+        {
+            newElementRefs = (ListElement**)malloc((newSlicesCount) * ELEMENTS_POOL_SLICE_SIZE * sizeof(ListElement*));
+        }
+
+        if (newElementRefs != NULL)
+        {
+            size_t elementRefIndex = 0;
+
+            for (; elementRefIndex < content->availableCount; ++elementRefIndex)
+            {
+                newElementRefs[elementRefIndex] = content->elementRefs[elementRefIndex];
+                content->elementRefs[elementRefIndex] = NULL;
+            }
+
+            for (size_t sliceElementIndex = 0; sliceElementIndex < ELEMENTS_POOL_SLICE_SIZE; ++sliceElementIndex)
+            {
+                newElementRefs[elementRefIndex] = newSlice->elements + sliceElementIndex;
+                ++elementRefIndex;
+            }
+
+            free(content->elementRefs);
+
+            content->slices[slicesCount] = newSlice;
+            content->elementRefs = newElementRefs;
+            content->totalCount = newTotalCount;
+            content->availableCount += ELEMENTS_POOL_SLICE_SIZE;
+
+            success = true;
+        }
+        else
+        {
+            deleteSlice(newSlice);
+            FREE(newElementRefs);
+        }
+    }
+
+    return success;
 }
 
 static bool addSlice(ListElementsPool* elementsPool)
