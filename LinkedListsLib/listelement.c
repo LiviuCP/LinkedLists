@@ -42,6 +42,7 @@ static void newClearListElementsPool(ListElementsPool* elementsPool);
 static void clearListElementsPool(ListElementsPool* elementsPool);
 static bool newAddSlice(ListElementsPool* elementsPool);
 static bool addSlice(ListElementsPool* elementsPool);
+static bool newIsValidListElementsPool(const ListElementsPool* elementsPool);
 static bool isValidListElementsPool(const ListElementsPool* elementsPool);
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
 static ListElementsSlice* createSlice(size_t elementsCount);
@@ -821,6 +822,41 @@ static bool addSlice(ListElementsPool* elementsPool)
     }
 
     return success;
+}
+
+static bool newIsValidListElementsPool(const ListElementsPool* elementsPool)
+{
+    static_assert(ELEMENTS_POOL_SLICE_SIZE > 0, "Invalid slice size!");
+
+    bool isValid = false;
+    ASSERT(elementsPool != NULL, "The list elements pool to be checked should NOT be NULL!");
+
+    if (elementsPool != NULL)
+    {
+        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
+
+        isValid = content != NULL &&
+                  content->slices != NULL &&
+                  content->elementRefs != NULL &&
+                  content->totalCount >= ELEMENTS_POOL_SLICE_SIZE &&
+                  content->totalCount >= content->availableCount;
+
+        if (isValid)
+        {
+            const size_t slicesCount = content->totalCount / ELEMENTS_POOL_SLICE_SIZE;
+
+            for (size_t sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex)
+            {
+                if (content->slices[sliceIndex] == NULL)
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    return isValid;
 }
 
 static bool isValidListElementsPool(const ListElementsPool* elementsPool)
