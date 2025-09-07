@@ -2,6 +2,7 @@
 
 #include "linkedlist.h"
 #include "codeutils.h"
+#include "testobjects.h"
 
 #define ALLOC_LIST_ELEMENT_REFS(listElementRefs, count) \
     listElementRefs = (ListElement**)malloc(count * sizeof(ListElement*)); \
@@ -50,7 +51,9 @@ public:
 private slots:
     void testAquiringSinglePoolElement();
     void testAquiringMultiplePoolElements();
+    void testAssignRemoveObject();
 
+    void initTestCase_data();
     void cleanupTestCase();
     void init();
     void cleanup();
@@ -58,6 +61,9 @@ private slots:
 private:
     void _markListElementForDeletion(ListElement* element);
     void _markListElementRefsForDeletion(ListElement** elementRefs);
+
+    ListElementsPool* m_Pool;
+    size_t m_TotalAvailablePoolElementsCount;
 
     // temporary pools, to be cleaned up (if necessary) after each test run
     ListElementsPool* m_TempPool1;
@@ -76,7 +82,9 @@ private:
 };
 
 ListElementTests::ListElementTests()
-    : m_TempPool1{nullptr}
+    : m_Pool{nullptr}
+    , m_TotalAvailablePoolElementsCount{0}
+    , m_TempPool1{nullptr}
     , m_TempPool2{nullptr}
     , m_List1{nullptr}
 {
@@ -370,8 +378,80 @@ void ListElementTests::testAquiringMultiplePoolElements()
     QVERIFY(!multipleElementsAquired);
 }
 
+void ListElementTests::testAssignRemoveObject()
+{
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
+    m_List1 = createEmptyList(pool);
+
+    // Point
+    Point* point = static_cast<Point*>(malloc(sizeof(Point)));
+    point->x = 3;
+    point->y = 4;
+    assignObjectContentToListElement(createAndAppendToList(m_List1, 2), POINT, static_cast<void*>(point));
+    point = nullptr;
+    // int
+    int* distance = static_cast<int*>(malloc(sizeof(int)));
+    *distance = 5;
+    assignObjectContentToListElement(createAndAppendToList(m_List1, 3), INTEGER, static_cast<void*>(distance));
+    distance = nullptr;
+    // float
+    double* angle = static_cast<double*>(malloc(sizeof(double)));
+    *angle = 1.25;
+    assignObjectContentToListElement(createAndAppendToList(m_List1, 1), DECIMAL, static_cast<void*>(angle));
+    angle = nullptr;
+    // no object
+    Q_UNUSED(createAndPrependToList(m_List1, 10));
+
+    QVERIFY(getListSize(m_List1) == 4);
+
+    ListIterator it = lbegin(m_List1);
+    QVERIFY2(it.current->object.type == -1 && it.current->object.payload == nullptr, "Default object is incorrect (should be empty)");
+    lnext(&it);
+    QVERIFY2(it.current->object.type == POINT && (static_cast<Point*>(it.current->object.payload))->x == 3
+             && (static_cast<Point*>(it.current->object.payload))->y == 4, "Object has been incorrectly assigned");
+    lnext(&it);
+    QVERIFY2(it.current->object.type == INTEGER && *(static_cast<int*>(it.current->object.payload)) == 5, "Object has been incorrectly assigned");
+    lnext(&it);
+    QVERIFY2(it.current->object.type == DECIMAL && areDecimalNumbersEqual(*(static_cast<double*>(it.current->object.payload)), 1.25), "Object has been incorrectly assigned");
+
+    Object* removedObject = static_cast<Object*>(detachContentFromListElement(getListElementAtIndex(m_List1, 2)));
+    QVERIFY2(getListElementAtIndex(m_List1, 2)->object.type == -1 &&
+             getListElementAtIndex(m_List1, 2)->object.payload == nullptr &&
+             removedObject->type == INTEGER &&
+             (*(static_cast<int*>(removedObject->payload)) == 5), "Incorrect object removal from list element");
+
+    deleteObjectPayload(removedObject);
+    free(removedObject);
+    removedObject = nullptr;
+
+    QVERIFY(getListSize(m_List1) == 4);
+}
+
+void ListElementTests::initTestCase_data()
+{
+    m_Pool = createListElementsPool();
+    QVERIFY(m_Pool);
+
+    m_TotalAvailablePoolElementsCount = getAvailableElementsCount(m_Pool);
+
+    ListElementsPool* p_NullPool{nullptr};
+
+    QTest::addColumn<ListElementsPool*>("pool");
+
+    QTest::newRow("allocation from pool") << m_Pool;
+    QTest::newRow("no pool allocation") << p_NullPool;
+}
+
 void ListElementTests::cleanupTestCase()
 {
+    QVERIFY(m_Pool);
+
+    deleteListElementsPool(m_Pool);
+    m_Pool = nullptr;
+    m_TotalAvailablePoolElementsCount = 0;
+
     QVERIFY(!m_TempPool1);
     QVERIFY(!m_TempPool2);
     QVERIFY(!m_List1);
@@ -382,6 +462,9 @@ void ListElementTests::cleanupTestCase()
 
 void ListElementTests::init()
 {
+    QVERIFY(m_Pool);
+    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+
     QVERIFY(!m_TempPool1);
     QVERIFY(!m_TempPool2);
     QVERIFY(!m_List1);

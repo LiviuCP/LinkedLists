@@ -30,7 +30,6 @@ private slots:
     void testReverseList();
     void testBatchReverseList();
     void testIterators();
-    void testAssignRemoveObject();
     void testIsElementContained();
     void testGetPreviousElement();
     void testGetFirstAndLastElement();
@@ -1258,57 +1257,6 @@ void LinkedListTests::testIterators()
         lnext(&it);
         QVERIFY2(areIteratorsEqual(it, lend(m_List2)), "The iterator is not correctly incremented");
     }
-}
-
-void LinkedListTests::testAssignRemoveObject()
-{
-    QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
-
-    m_List1 = createEmptyList(pool);
-
-    // Point
-    Point* point = static_cast<Point*>(malloc(sizeof(Point)));
-    point->x = 3;
-    point->y = 4;
-    assignObjectContentToListElement(createAndAppendToList(m_List1, 2), POINT, static_cast<void*>(point));
-    point = nullptr;
-    // int
-    int* distance = static_cast<int*>(malloc(sizeof(int)));
-    *distance = 5;
-    assignObjectContentToListElement(createAndAppendToList(m_List1, 3), INTEGER, static_cast<void*>(distance));
-    distance = nullptr;
-    // float
-    double* angle = static_cast<double*>(malloc(sizeof(double)));
-    *angle = 1.25;
-    assignObjectContentToListElement(createAndAppendToList(m_List1, 1), DECIMAL, static_cast<void*>(angle));
-    angle = nullptr;
-    // no object
-    Q_UNUSED(createAndPrependToList(m_List1, 10));
-
-    QVERIFY(getListSize(m_List1) == 4);
-
-    ListIterator it = lbegin(m_List1);
-    QVERIFY2(it.current->object.type == -1 && it.current->object.payload == nullptr, "Default object is incorrect (should be empty)");
-    lnext(&it);
-    QVERIFY2(it.current->object.type == POINT && (static_cast<Point*>(it.current->object.payload))->x == 3
-             && (static_cast<Point*>(it.current->object.payload))->y == 4, "Object has been incorrectly assigned");
-    lnext(&it);
-    QVERIFY2(it.current->object.type == INTEGER && *(static_cast<int*>(it.current->object.payload)) == 5, "Object has been incorrectly assigned");
-    lnext(&it);
-    QVERIFY2(it.current->object.type == DECIMAL && areDecimalNumbersEqual(*(static_cast<double*>(it.current->object.payload)), 1.25), "Object has been incorrectly assigned");
-
-    Object* removedObject = static_cast<Object*>(detachContentFromListElement(getListElementAtIndex(m_List1, 2)));
-    QVERIFY2(getListElementAtIndex(m_List1, 2)->object.type == -1 &&
-             getListElementAtIndex(m_List1, 2)->object.payload == nullptr &&
-             removedObject->type == INTEGER &&
-             (*(static_cast<int*>(removedObject->payload)) == 5), "Incorrect object removal from list element");
-
-    deleteObjectPayload(removedObject);
-    free(removedObject);
-    removedObject = nullptr;
-
-    QVERIFY(getListSize(m_List1) == 4);
 }
 
 void LinkedListTests::testIsElementContained()
