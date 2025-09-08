@@ -27,24 +27,17 @@ typedef struct
 
 typedef struct
 {
-    ListElementsSlice** slices;
-    ListElement** elementSlices;
+    ListElementsSlice** elementSlices;
     ListElement** elementRefs;
-    byte_t* availabilityFlags;
     size_t totalCount;
     size_t availableCount;
 } ListElementsPoolContent;
 
 // "private" (supporting) functions
-static bool newInitListElementsPool(ListElementsPool* elementsPool);
 static bool initListElementsPool(ListElementsPool* elementsPool);
-static void newClearListElementsPool(ListElementsPool* elementsPool);
 static void clearListElementsPool(ListElementsPool* elementsPool);
-static bool newAddSlice(ListElementsPool* elementsPool);
 static bool addSlice(ListElementsPool* elementsPool);
-static bool newIsValidListElementsPool(const ListElementsPool* elementsPool);
 static bool isValidListElementsPool(const ListElementsPool* elementsPool);
-static bool newRetrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
 static ListElementsSlice* createSlice(size_t elementsCount);
 static void deleteSlice(ListElementsSlice* slice);
@@ -147,9 +140,8 @@ ListElement* aquireElement(ListElementsPool* elementsPool)
 
     if (canElementBeAquired)
     {
-        ListElement** elementSlices = content->elementSlices;
+        ListElementsSlice** elementSlices = content->elementSlices;
         ListElement** elementRefs = content->elementRefs;
-        byte_t* availabilityFlags = content->availabilityFlags;
 
         const size_t lastAvailableElementRefIndex = content->availableCount - 1;
         ListElement* const elementToAquire = elementRefs[lastAvailableElementRefIndex];
@@ -165,12 +157,12 @@ ListElement* aquireElement(ListElementsPool* elementsPool)
             if (isElementAddressValid)
             {
                 aquiredElement = elementRefs[lastAvailableElementRefIndex];
-                const ListElement* firstElementInSlice = elementSlices[sliceIndex];
+                const ListElement* firstElementInSlice = elementSlices[sliceIndex]->elements;
                 const size_t elementIndex = sliceIndex * ELEMENTS_POOL_SLICE_SIZE + aquiredElement - firstElementInSlice;
                 const size_t byteIndex = elementIndex / BYTE_SIZE;
                 const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
                 const byte_t elementBitMask = LSB_MASK << bitIndex;
-                availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
+                elementSlices[sliceIndex]->availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
                 elementRefs[lastAvailableElementRefIndex] = NULL;
                 --content->availableCount;
             }
@@ -214,9 +206,8 @@ bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size
 
     if (canElementsBeAquired)
     {
-        ListElement** elementSlices = content->elementSlices;
+        ListElementsSlice** elementSlices = content->elementSlices;
         ListElement** elementRefs = content->elementRefs;
-        byte_t* availabilityFlags = content->availabilityFlags;
         size_t lastAvailableElementRefIndex = content->availableCount - 1;
         bool isElementAddressInvalid = false;
 
@@ -240,13 +231,13 @@ bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size
                 ListElement* aquiredElement = elementRefs[lastAvailableElementRefIndex];
                 size_t sliceIndex = 0;
                 (void)retrieveSliceIndex(aquiredElement, elementsPool, &sliceIndex); // return value already checked in previous loop
-                const ListElement* firstElementInSlice = elementSlices[sliceIndex];
+                const ListElement* firstElementInSlice = elementSlices[sliceIndex]->elements;
                 const size_t elementIndex = sliceIndex * ELEMENTS_POOL_SLICE_SIZE + aquiredElement - firstElementInSlice;
                 const size_t byteIndex = elementIndex / BYTE_SIZE;
                 const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
                 const byte_t elementBitMask = LSB_MASK << bitIndex;
 
-                availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
+                elementSlices[sliceIndex]->availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
                 elements[aquiredElementIndex] = aquiredElement;
                 elementRefs[lastAvailableElementRefIndex] = NULL;
                 --lastAvailableElementRefIndex;
@@ -283,12 +274,12 @@ bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
 
     if (isElementAddressValid)
     {
-        const ListElement* firstElementInSlice = content->elementSlices[sliceIndex];
+        const ListElement* firstElementInSlice = content->elementSlices[sliceIndex]->elements;
         const size_t elementIndex = sliceIndex * ELEMENTS_POOL_SLICE_SIZE + element - firstElementInSlice;
         const size_t byteIndex = elementIndex / BYTE_SIZE;
         const size_t bitIndex = BYTE_SIZE - 1 - elementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
         const byte_t elementBitMask = LSB_MASK << bitIndex;
-        const bool isElementAvailableInPool = content->availabilityFlags[byteIndex] & elementBitMask; // test element availability bit
+        const bool isElementAvailableInPool = content->elementSlices[sliceIndex]->availabilityFlags[byteIndex] & elementBitMask; // test element availability bit
 
         // only "unavailable" (aquired) elements can be released
         if (!isElementAvailableInPool)
@@ -300,7 +291,7 @@ bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
             element->object.payload = NULL;
             element->priority = 0;
             content->elementRefs[content->availableCount] = element;
-            content->availabilityFlags[byteIndex] |= elementBitMask; // set bit, element is available again for aquiring
+            content->elementSlices[sliceIndex]->availabilityFlags[byteIndex] |= elementBitMask; // set bit, element is available again for aquiring
             ++content->availableCount;
             success = true;
         }
@@ -442,86 +433,14 @@ bool customCopyObject(const ListElement* source, ListElement* destination)
     return success;
 }
 
-static bool newInitListElementsPool(ListElementsPool* elementsPool)
-{
-    bool success = false;
-
-    ListElementsPoolContent* content = NULL;
-    ListElementsSlice** slices = NULL;
-    ListElement** elementRefs = NULL;
-    const size_t totalCount = ELEMENTS_POOL_SLICE_SIZE;
-
-    if (elementsPool != NULL)
-    {
-        content = malloc(sizeof(ListElementsPoolContent));
-    }
-
-    if (content != NULL)
-    {
-        slices = (ListElementsSlice**)malloc(ELEMENTS_POOL_SLICES_COUNT);
-    }
-
-    if (slices != NULL)
-    {
-        slices[0] = createSlice(totalCount);
-
-        if (slices[0] != NULL)
-        {
-            for (size_t sliceIndex = 1; sliceIndex < ELEMENTS_POOL_SLICES_COUNT; ++sliceIndex)
-            {
-                slices[sliceIndex] = NULL;
-            }
-
-            elementRefs = (ListElement**)malloc(totalCount * sizeof(ListElement*));
-        }
-    }
-
-    if (elementRefs != NULL)
-    {
-        success = true;
-
-        for (size_t index = 0; index < totalCount; ++index)
-        {
-            ListElement* element = slices[0]->elements + index;
-            elementRefs[index] = element;
-        }
-
-        content->slices = slices;
-        content->elementRefs = elementRefs;
-        content->totalCount = totalCount;
-        ASSERT(content->totalCount > 0, "Total pooled elements count should not be 0!");
-        content->availableCount = content->totalCount;
-        elementsPool->content = content;
-    }
-
-    if (!success)
-    {
-        FREE(content);
-
-        if (slices != NULL)
-        {
-            deleteSlice(slices[0]);
-
-            free(slices);
-            slices = NULL;
-        }
-
-        FREE(elementRefs);
-    }
-
-    return success;
-}
-
 static bool initListElementsPool(ListElementsPool* elementsPool)
 {
     bool success = false;
 
     ListElementsPoolContent* content = NULL;
-    ListElement** elementSlices = NULL;
+    ListElementsSlice** elementSlices = NULL;
     ListElement** elementRefs = NULL;
-    byte_t* availabilityFlags = NULL;
     const size_t totalCount = ELEMENTS_POOL_SLICE_SIZE;
-    const size_t availabilityBytesCount = totalCount / BYTE_SIZE + (totalCount % BYTE_SIZE > 0 ? 1 : 0);
 
     if (elementsPool != NULL)
     {
@@ -530,12 +449,12 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
 
     if (content != NULL)
     {
-        elementSlices = (ListElement**)malloc(ELEMENTS_POOL_SLICES_COUNT * sizeof(ListElement*));
+        elementSlices = (ListElementsSlice**)malloc(ELEMENTS_POOL_SLICES_COUNT * sizeof(ListElementsSlice*));
     }
 
     if (elementSlices != NULL)
     {
-        elementSlices[0] = (ListElement*)malloc(totalCount * sizeof(ListElement));
+        elementSlices[0] = createSlice(totalCount);
 
         if (elementSlices[0] != NULL)
         {
@@ -550,28 +469,16 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
 
     if (elementRefs != NULL)
     {
-        availabilityFlags = (byte_t*)malloc(availabilityBytesCount);
-    }
-
-    if (availabilityFlags != NULL)
-    {
         success = true;
 
         for (size_t index = 0; index < totalCount; ++index)
         {
-            ListElement* element = elementSlices[0] + index;
-            initListElement(element);
+            ListElement* element = elementSlices[0]->elements + index;
             elementRefs[index] = element;
-        }
-
-        for (size_t index = 0; index < availabilityBytesCount; ++index)
-        {
-            availabilityFlags[index] = MAX_BYTE_VALUE;
         }
 
         content->elementSlices = elementSlices;
         content->elementRefs = elementRefs;
-        content->availabilityFlags = availabilityFlags;
         content->totalCount = totalCount;
         ASSERT(content->totalCount > 0, "Total pooled elements count should not be 0!");
         content->availableCount = content->totalCount;
@@ -584,47 +491,16 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
 
         if (elementSlices != NULL)
         {
-            FREE(elementSlices[0]);
+            deleteSlice(elementSlices[0]);
 
             free(elementSlices);
             elementSlices = NULL;
         }
 
         FREE(elementRefs);
-        FREE(availabilityFlags);
     }
 
     return success;
-}
-
-static void newClearListElementsPool(ListElementsPool* elementsPool)
-{
-    if (elementsPool != NULL)
-    {
-        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
-
-        if (content != NULL)
-        {
-            if (content->slices != NULL)
-            {
-                ListElementsSlice** elementSlices = content->slices;
-
-                for (size_t sliceIndex = 0; sliceIndex < ELEMENTS_POOL_SLICES_COUNT; ++sliceIndex)
-                {
-                    deleteSlice(elementSlices[sliceIndex]);
-                }
-
-                free(content->slices);
-                content->slices = NULL;
-            }
-
-            FREE(content->elementRefs);
-
-            free(elementsPool->content);
-            elementsPool->content = NULL;
-            content = NULL;
-        }
-    }
 }
 
 static void clearListElementsPool(ListElementsPool* elementsPool)
@@ -637,11 +513,11 @@ static void clearListElementsPool(ListElementsPool* elementsPool)
         {
             if (content->elementSlices != NULL)
             {
-                ListElement** elementSlices = content->elementSlices;
+                ListElementsSlice** elementSlices = content->elementSlices;
 
                 for (size_t sliceIndex = 0; sliceIndex < ELEMENTS_POOL_SLICES_COUNT; ++sliceIndex)
                 {
-                    FREE(elementSlices[sliceIndex]);
+                    deleteSlice(elementSlices[sliceIndex]);
                 }
 
                 free(content->elementSlices);
@@ -649,7 +525,6 @@ static void clearListElementsPool(ListElementsPool* elementsPool)
             }
 
             FREE(content->elementRefs);
-            FREE(content->availabilityFlags);
 
             free(elementsPool->content);
             elementsPool->content = NULL;
@@ -658,7 +533,7 @@ static void clearListElementsPool(ListElementsPool* elementsPool)
     }
 }
 
-static bool newAddSlice(ListElementsPool* elementsPool)
+static bool addSlice(ListElementsPool* elementsPool)
 {
     bool success = false;
     bool isValidPool = false;
@@ -709,7 +584,7 @@ static bool newAddSlice(ListElementsPool* elementsPool)
 
             free(content->elementRefs);
 
-            content->slices[slicesCount] = newSlice;
+            content->elementSlices[slicesCount] = newSlice;
             content->elementRefs = newElementRefs;
             content->totalCount = newTotalCount;
             content->availableCount += ELEMENTS_POOL_SLICE_SIZE;
@@ -726,140 +601,6 @@ static bool newAddSlice(ListElementsPool* elementsPool)
     return success;
 }
 
-static bool addSlice(ListElementsPool* elementsPool)
-{
-    bool success = false;
-    bool isValidPool = false;
-
-    if (elementsPool)
-    {
-        isValidPool = isValidListElementsPool(elementsPool);
-        ASSERT(isValidPool, "Invalid list elements pool detected!");
-    }
-
-    if (isValidPool)
-    {
-        ListElementsPoolContent* content = elementsPool->content;
-
-        const size_t totalCount = content->totalCount;
-        const size_t newTotalCount = totalCount + ELEMENTS_POOL_SLICE_SIZE;
-        const size_t availabilityBytesCount = totalCount / BYTE_SIZE + (totalCount % BYTE_SIZE > 0 ? 1 : 0);
-        const size_t newAvailabilityBytesCount = newTotalCount / BYTE_SIZE + (newTotalCount % BYTE_SIZE > 0 ? 1 : 0);
-        const size_t slicesCount = content->totalCount / ELEMENTS_POOL_SLICE_SIZE;
-        const size_t newSlicesCount = slicesCount + 1;
-
-        ListElement* newSlice = NULL;
-        ListElement** newElementRefs = NULL;
-        byte_t* newAvailabilityFlags = NULL;
-
-        if (slicesCount < ELEMENTS_POOL_SLICES_COUNT)
-        {
-            newSlice = (ListElement*)malloc(ELEMENTS_POOL_SLICE_SIZE * sizeof(ListElement));
-        }
-
-        if (newSlice != NULL)
-        {
-            newElementRefs = (ListElement**)malloc((newSlicesCount) * ELEMENTS_POOL_SLICE_SIZE * sizeof(ListElement*));
-        }
-
-        if (newElementRefs != NULL)
-        {
-            newAvailabilityFlags = (byte_t*)malloc(newAvailabilityBytesCount);
-        }
-
-        if (newAvailabilityFlags != NULL)
-        {
-            size_t elementRefIndex = 0;
-
-            for (; elementRefIndex < content->availableCount; ++elementRefIndex)
-            {
-                newElementRefs[elementRefIndex] = content->elementRefs[elementRefIndex];
-                content->elementRefs[elementRefIndex] = NULL;
-            }
-
-            for (size_t sliceElementIndex = 0; sliceElementIndex < ELEMENTS_POOL_SLICE_SIZE; ++sliceElementIndex)
-            {
-                newElementRefs[elementRefIndex] = newSlice + sliceElementIndex;
-                ++elementRefIndex;
-            }
-
-            size_t byteIndex = 0;
-
-            for (; byteIndex < availabilityBytesCount; ++byteIndex)
-            {
-                newAvailabilityFlags[byteIndex] = content->availabilityFlags[byteIndex];
-                content->availabilityFlags[byteIndex] = 0;
-            }
-
-            // there should be no bit misalignment issues (in case there are more bits than number of elements) - additional bits are initialized with 1 each time new elements are added
-            // however a good practice would be to have a number of elements that is multiple of the byte size
-            for (; byteIndex < newAvailabilityBytesCount; ++byteIndex)
-            {
-                newAvailabilityFlags[byteIndex] = MAX_BYTE_VALUE;
-            }
-
-            free(content->elementRefs);
-            free(content->availabilityFlags);
-
-            for (size_t index = 0; index < ELEMENTS_POOL_SLICE_SIZE; ++index)
-            {
-                ListElement* element = newSlice + index;
-                initListElement(element);
-            }
-
-            content->elementSlices[slicesCount] = newSlice;
-            content->elementRefs = newElementRefs;
-            content->availabilityFlags = newAvailabilityFlags;
-            content->totalCount = newTotalCount;
-            content->availableCount += ELEMENTS_POOL_SLICE_SIZE;
-
-            success = true;
-        }
-        else
-        {
-            FREE(newSlice);
-            FREE(newElementRefs);
-        }
-    }
-
-    return success;
-}
-
-static bool newIsValidListElementsPool(const ListElementsPool* elementsPool)
-{
-    static_assert(ELEMENTS_POOL_SLICE_SIZE > 0, "Invalid slice size!");
-
-    bool isValid = false;
-    ASSERT(elementsPool != NULL, "The list elements pool to be checked should NOT be NULL!");
-
-    if (elementsPool != NULL)
-    {
-        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
-
-        isValid = content != NULL &&
-                  content->slices != NULL &&
-                  content->elementRefs != NULL &&
-                  content->totalCount >= ELEMENTS_POOL_SLICE_SIZE &&
-                  content->totalCount >= content->availableCount;
-
-        if (isValid)
-        {
-            const size_t slicesCount = content->totalCount / ELEMENTS_POOL_SLICE_SIZE;
-
-            for (size_t sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex)
-            {
-                if (content->slices[sliceIndex] == NULL)
-                {
-                    isValid = false;
-                    break;
-                }
-            }
-        }
-    }
-
-    return isValid;
-}
-
 static bool isValidListElementsPool(const ListElementsPool* elementsPool)
 {
     static_assert(ELEMENTS_POOL_SLICE_SIZE > 0, "Invalid slice size!");
@@ -874,7 +615,6 @@ static bool isValidListElementsPool(const ListElementsPool* elementsPool)
         isValid = content != NULL &&
                   content->elementSlices != NULL &&
                   content->elementRefs != NULL &&
-                  content->availabilityFlags != NULL &&
                   content->totalCount >= ELEMENTS_POOL_SLICE_SIZE &&
                   content->totalCount >= content->availableCount;
 
@@ -896,35 +636,6 @@ static bool isValidListElementsPool(const ListElementsPool* elementsPool)
     return isValid;
 }
 
-static bool newRetrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex)
-{
-    bool isValid = false;
-
-    if (element != NULL && isValidListElementsPool(elementsPool))
-    {
-        const ListElementsPoolContent* const content = (ListElementsPoolContent*)elementsPool->content;
-        ListElementsSlice** const elementSlices = content->slices;
-        const size_t slicesCount = content->totalCount / ELEMENTS_POOL_SLICE_SIZE;
-
-        for (size_t index = 0; index < slicesCount; ++index)
-        {
-            isValid = element >= elementSlices[index]->elements && element < elementSlices[index]->elements + ELEMENTS_POOL_SLICE_SIZE;
-
-            if (isValid)
-            {
-                if (sliceIndex != NULL)
-                {
-                    *sliceIndex = index;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return isValid;
-}
-
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex)
 {
     bool isValid = false;
@@ -932,12 +643,12 @@ static bool retrieveSliceIndex(const ListElement* element, const ListElementsPoo
     if (element != NULL && isValidListElementsPool(elementsPool))
     {
         const ListElementsPoolContent* const content = (ListElementsPoolContent*)elementsPool->content;
-        ListElement** const elementSlices = content->elementSlices;
+        ListElementsSlice** const elementSlices = content->elementSlices;
         const size_t slicesCount = content->totalCount / ELEMENTS_POOL_SLICE_SIZE;
 
         for (size_t index = 0; index < slicesCount; ++index)
         {
-            isValid = element >= elementSlices[index] && element < elementSlices[index] + ELEMENTS_POOL_SLICE_SIZE;
+            isValid = element >= elementSlices[index]->elements && element < elementSlices[index]->elements + ELEMENTS_POOL_SLICE_SIZE;
 
             if (isValid)
             {
