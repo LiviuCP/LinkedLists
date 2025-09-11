@@ -547,12 +547,11 @@ static bool addSlice(ListElementsPool* elementsPool)
 
     if (isValidPool)
     {
-        ListElementsPoolContent* content = elementsPool->content;
+        ListElementsPoolContent* content = (ListElementsPoolContent*)elementsPool->content;
 
         const size_t totalCount = content->totalCount;
         const size_t newTotalCount = totalCount + ELEMENTS_POOL_SLICE_SIZE;
         const size_t slicesCount = content->totalCount / ELEMENTS_POOL_SLICE_SIZE;
-        const size_t newSlicesCount = slicesCount + 1;
 
         ListElementsSlice* newSlice = NULL;
         ListElement** newElementRefs = NULL;
@@ -564,18 +563,12 @@ static bool addSlice(ListElementsPool* elementsPool)
 
         if (newSlice != NULL)
         {
-            newElementRefs = (ListElement**)malloc((newSlicesCount) * ELEMENTS_POOL_SLICE_SIZE * sizeof(ListElement*));
+            newElementRefs = (ListElement**)realloc(content->elementRefs, newTotalCount * sizeof(ListElement*));
         }
 
         if (newElementRefs != NULL)
         {
-            size_t elementRefIndex = 0;
-
-            for (; elementRefIndex < content->availableCount; ++elementRefIndex)
-            {
-                newElementRefs[elementRefIndex] = content->elementRefs[elementRefIndex];
-                content->elementRefs[elementRefIndex] = NULL;
-            }
+            size_t elementRefIndex = content->availableCount;
 
             for (size_t sliceElementIndex = 0; sliceElementIndex < ELEMENTS_POOL_SLICE_SIZE; ++sliceElementIndex)
             {
@@ -583,7 +576,10 @@ static bool addSlice(ListElementsPool* elementsPool)
                 ++elementRefIndex;
             }
 
-            free(content->elementRefs);
+            for (; elementRefIndex < newTotalCount; ++elementRefIndex)
+            {
+                newElementRefs[elementRefIndex] = NULL;
+            }
 
             content->elementSlices[slicesCount] = newSlice;
             content->elementRefs = newElementRefs;
