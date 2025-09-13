@@ -599,6 +599,11 @@ static bool addSlice(ListElementsPool* elementsPool)
                 ++elementRefIndex;
             }
 
+            for (; elementRefIndex < newTotalCount; ++elementRefIndex)
+            {
+                newElementRefs[elementRefIndex] = NULL;
+            }
+
             size_t byteIndex = 0;
 
             for (; byteIndex < availabilityBytesCount; ++byteIndex)
