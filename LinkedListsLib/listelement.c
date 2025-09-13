@@ -19,7 +19,6 @@
 
 typedef struct
 {
-    void* data;
     ListElement* elements;
     byte_t* availabilityFlags;
     size_t totalElementsCount;
@@ -665,7 +664,9 @@ static bool retrieveSliceIndex(const ListElement* element, const ListElementsPoo
 static ListElementsSlice* createSlice(size_t elementsCount)
 {
     ListElementsSlice* slice = NULL;
-    void* sliceData = NULL;
+    ListElement* elements = NULL;
+    byte_t* availabilityFlags = NULL;
+
     const bool isValidElementsCount = elementsCount > 0 && elementsCount % BYTE_SIZE == 0;
     ASSERT(isValidElementsCount, "Invalid elements count for requested slice (should be > 0 and divisible with byte size)");
 
@@ -676,20 +677,24 @@ static ListElementsSlice* createSlice(size_t elementsCount)
 
     if (slice != NULL)
     {
-        slice->data = NULL;
         slice->elements = NULL;
         slice->availabilityFlags = NULL;
         slice->availableElementsCount = 0;
         slice->totalElementsCount = 0;
-
-        const size_t requiredSliceDataSize = elementsCount * sizeof(ListElement) + elementsCount / BYTE_SIZE;
-        sliceData = malloc(requiredSliceDataSize);
+        elements = malloc(elementsCount * sizeof(ListElement));
     }
 
-    if (sliceData != NULL)
+    if (elements != NULL)
     {
-        slice->elements = (ListElement*)(sliceData);
-        slice->availabilityFlags = (byte_t*)(sliceData + elementsCount * sizeof(ListElement));
+        availabilityFlags = malloc(elementsCount / BYTE_SIZE);
+    }
+
+    if (availabilityFlags != NULL)
+    {
+        slice->elements = elements;
+        slice->availabilityFlags = availabilityFlags;
+        slice->totalElementsCount = elementsCount;
+        slice->availableElementsCount = elementsCount;
 
         for (size_t index = 0; index < elementsCount; ++index)
         {
@@ -700,15 +705,11 @@ static ListElementsSlice* createSlice(size_t elementsCount)
         {
             *(slice->availabilityFlags + index) = MAX_BYTE_VALUE;
         }
-
-        slice->totalElementsCount = elementsCount;
-        slice->availableElementsCount = elementsCount;
-        slice->data = sliceData;
     }
     else
     {
-        free(slice);
-        slice = NULL;
+        FREE(slice);
+        FREE(elements);
     }
 
     return slice;
@@ -718,12 +719,8 @@ static void deleteSlice(ListElementsSlice* slice)
 {
     if (slice != NULL)
     {
-        void* sliceData = slice->data;
-
-        slice->elements = NULL;
-        slice->availabilityFlags = NULL;
+        FREE(slice->elements);
+        FREE(slice->availabilityFlags);
         free(slice);
-
-        FREE(sliceData);
     }
 }
