@@ -21,7 +21,7 @@ typedef struct ListElement ListElement;
 
 typedef struct
 {
-    void* content;
+    void* poolContent;
 }
 ListElementsPool;
 
