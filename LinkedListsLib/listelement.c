@@ -190,69 +190,87 @@ ListElement* aquireElement(ListElementsPool* elementsPool)
 bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size_t requiredElementsCount)
 {
     bool success = false;
-    bool isValidElementsPool = false;
     ListElementsPoolContent* poolContent = NULL;
+    ListElementsSlice** elementSlices = NULL;
+    SliceElementId* sliceElementIds = NULL;
     bool canElementsBeAquired = false;
 
     if (elementsPool != NULL && elements != NULL && requiredElementsCount > 0)
     {
-        isValidElementsPool = isValidListElementsPool(elementsPool);
-        ASSERT(isValidElementsPool, "Invalid list elements pool parameters!");
+        poolContent = (ListElementsPoolContent*)elementsPool->poolContent;
+        ASSERT(poolContent, "NULL pool content!");
     }
 
     // the maximum number of elements to be aquired cannot exceed 2 slices, i.e. maximum one slice can be created per aquiring operation provided the maximum slices count hasn't been reached
-    if (isValidElementsPool)
+    if (poolContent != NULL)
     {
-        poolContent = (ListElementsPoolContent*)elementsPool->poolContent;
         const size_t maxAllowedCountToBeAquired = ((poolContent->availableElementsCount < ELEMENTS_POOL_SLICE_SIZE ? poolContent->availableElementsCount : ELEMENTS_POOL_SLICE_SIZE) + ELEMENTS_POOL_SLICE_SIZE);
         canElementsBeAquired = requiredElementsCount <= maxAllowedCountToBeAquired;
 
         if (canElementsBeAquired && requiredElementsCount > poolContent->availableElementsCount)
         {
-            canElementsBeAquired = (poolContent->totalElementsCount < ELEMENTS_POOL_MAX_SLICES_COUNT * ELEMENTS_POOL_SLICE_SIZE) && addSliceToElementsPool(elementsPool);
+            canElementsBeAquired = (poolContent->slicesCount < poolContent->maximumSlicesCount) && addSliceToElementsPool(elementsPool);
         }
     }
 
     if (canElementsBeAquired)
     {
-        ListElementsSlice** elementSlices = poolContent->elementSlices;
-        SliceElementId* sliceElementIds = poolContent->sliceElementIds;
-        ASSERT(poolContent->availableElementsCount >= requiredElementsCount, "There should be enough elements available for aquiring!");
-        size_t lastAvailableSliceElementIdIndex = poolContent->availableElementsCount - 1;
-        bool invalidSliceElementIdDetected = false;
+        elementSlices = poolContent->elementSlices;
+        sliceElementIds = poolContent->sliceElementIds;
+        ASSERT(elementSlices != NULL, "NULL element slices!");
+        ASSERT(sliceElementIds != NULL, "NULL slice element ids!");
+    }
+
+    bool areEnoughAvailableElements = false;
+
+    if (elementSlices != NULL && sliceElementIds != NULL)
+    {
+        areEnoughAvailableElements = poolContent->availableElementsCount >= requiredElementsCount;
+        ASSERT(areEnoughAvailableElements, "There should be enough elements available for aquiring!");
+    }
+
+    if (areEnoughAvailableElements)
+    {
+        size_t aquiredElementsCount = 0;
 
         for (size_t aquiredElementIndex = 0; aquiredElementIndex < requiredElementsCount; ++aquiredElementIndex)
         {
-            if (!isValidSliceElementId(sliceElementIds[lastAvailableSliceElementIdIndex - aquiredElementIndex], elementsPool))
+            const size_t lastAvailableSliceElementIdIndex = poolContent->availableElementsCount - aquiredElementIndex - 1;
+            const SliceElementId lastAvailableSliceElementId = sliceElementIds[lastAvailableSliceElementIdIndex];
+
+            if (lastAvailableSliceElementId.sliceIndex >= poolContent->slicesCount)
             {
-                invalidSliceElementIdDetected = true;
+                ASSERT(false, "Invalid slice index");
                 break;
             }
-        }
 
-        ASSERT(!invalidSliceElementIdDetected, "Invalid slice element id!");
-
-        const bool invalidSliceDetected = !areAllSlicesValid(elementsPool);
-        ASSERT(!invalidSliceDetected, "Invalid slice!");
-
-        const size_t aquiredElementsCount = !invalidSliceElementIdDetected && !invalidSliceDetected ? requiredElementsCount : 0;
-
-        for (size_t aquiredElementIndex = 0; aquiredElementIndex < aquiredElementsCount; ++aquiredElementIndex)
-        {
-            const SliceElementId lastAvailableSliceElementId = sliceElementIds[lastAvailableSliceElementIdIndex];
             ListElementsSlice* slice = elementSlices[lastAvailableSliceElementId.sliceIndex];
+
+            if (slice == NULL || slice->elements == NULL || slice->availabilityFlags == NULL || lastAvailableSliceElementId.sliceElementIndex >= slice->totalElementsCount)
+            {
+                ASSERT(false, "");
+                break;
+            }
+
             ListElement* lastAvailableSliceElement = &slice->elements[lastAvailableSliceElementId.sliceElementIndex];
+
+            if (lastAvailableSliceElement == NULL)
+            {
+                ASSERT(false, "NULL slice element address!");
+                break;
+            }
+
             const size_t byteIndex = lastAvailableSliceElementId.sliceElementIndex / BYTE_SIZE;
             const size_t bitIndex = BYTE_SIZE - 1 - lastAvailableSliceElementId.sliceElementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
             const byte_t elementBitMask = LSB_MASK << bitIndex;
             slice->availabilityFlags[byteIndex] &= ~elementBitMask; // bit of the element set to 0, element is aquired (hence unavailable)
             elements[aquiredElementIndex] = lastAvailableSliceElement;
             --slice->availableElementsCount;
-            --lastAvailableSliceElementIdIndex;
+            ++aquiredElementsCount;
         }
 
         poolContent->availableElementsCount -= aquiredElementsCount;
-        success = aquiredElementsCount > 0;
+        success = aquiredElementsCount == requiredElementsCount;
     }
 
     return success;
