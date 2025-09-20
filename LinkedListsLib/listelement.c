@@ -53,8 +53,6 @@ static bool isValidListElementsPool(const ListElementsPool* elementsPool);
 static ListElementsSlice* createSlice(size_t elementsCount);
 static void deleteSlice(ListElementsSlice* slice);
 static bool isValidSlice(const ListElementsSlice* slice);
-static bool areAllSlicesValid(const ListElementsPool* elementsPool);
-static bool isValidSliceElementId(const SliceElementId sliceElementId, const ListElementsPool* elementsPool);
 
 ListElement* createListElement()
 {
@@ -782,53 +780,4 @@ static bool isValidSlice(const ListElementsSlice* slice)
            slice->totalElementsCount > 0 &&
            slice->totalElementsCount % BYTE_SIZE == 0 &&
            slice->availableElementsCount <= slice->totalElementsCount;
-}
-
-static bool areAllSlicesValid(const ListElementsPool* elementsPool)
-{
-    const ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
-    bool areValid = poolContent != NULL;
-
-    if (areValid)
-    {
-        for (size_t sliceIndex = 0; sliceIndex < poolContent->slicesCount; ++sliceIndex)
-        {
-            if (!isValidSlice(poolContent->elementSlices[sliceIndex]))
-            {
-                areValid = false;
-                break;
-            }
-        }
-    }
-
-    return areValid;
-}
-
-static bool isValidSliceElementId(const SliceElementId sliceElementId, const ListElementsPool* elementsPool)
-{
-    bool isValid = false;
-    const ListElementsPoolContent* poolContent = NULL;
-
-    if (elementsPool != NULL)
-    {
-        poolContent = (ListElementsPoolContent*)elementsPool->poolContent;
-        ASSERT(poolContent != NULL, "NULL list elements pool poolContent!");
-    }
-
-    if (poolContent != NULL)
-    {
-        const ListElementsSlice* slice = NULL;
-
-        ASSERT(poolContent->elementSlices != NULL, "NULL element slices!");
-
-        if (sliceElementId.sliceIndex < poolContent->slicesCount && poolContent->elementSlices != NULL)
-        {
-            slice = poolContent->elementSlices[sliceElementId.sliceIndex];
-            ASSERT(slice != NULL, "NULL list elements pool slice!");
-
-            isValid = slice != NULL && sliceElementId.sliceElementIndex < slice->totalElementsCount;
-        }
-    }
-
-    return isValid;
 }
