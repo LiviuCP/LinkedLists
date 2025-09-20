@@ -594,59 +594,62 @@ static void clearListElementsPool(ListElementsPool* elementsPool)
 static bool addSliceToElementsPool(ListElementsPool* elementsPool)
 {
     bool success = false;
-    bool isValidPool = false;
+    ListElementsPoolContent* poolContent = NULL;
+    ListElementsSlice** elementSlices = NULL;
+    SliceElementId* sliceElementIds = NULL;
+    ListElementsSlice* newSlice = NULL;
+    SliceElementId* newSliceElementIds = NULL;
+    size_t newTotalElementsCount = 0;
 
-    if (elementsPool)
+    if (elementsPool != NULL)
     {
-        isValidPool = isValidListElementsPool(elementsPool);
-        ASSERT(isValidPool, "Invalid list elements pool detected!");
+        poolContent = (ListElementsPoolContent*)elementsPool->poolContent;
+        ASSERT(poolContent != NULL, "NULL pool content!");
     }
 
-    if (isValidPool)
+    if (poolContent != NULL)
     {
-        ListElementsPoolContent* poolContent = (ListElementsPoolContent*)elementsPool->poolContent;
+        elementSlices = poolContent->elementSlices;
+        sliceElementIds = poolContent->sliceElementIds;
+        newTotalElementsCount = poolContent->totalElementsCount;
+        ASSERT(elementSlices != NULL, "NULL element slices!");
+        ASSERT(sliceElementIds != NULL, "NULL slice element IDs");
+    }
 
-        const size_t totalElementsCount = poolContent->totalElementsCount;
-        size_t newTotalElementsCount = totalElementsCount;
+    if (elementSlices != NULL && sliceElementIds != NULL && poolContent->slicesCount < poolContent->maximumSlicesCount)
+    {
+        newSlice = createSlice(ELEMENTS_POOL_SLICE_SIZE);
+    }
 
-        ListElementsSlice* newSlice = NULL;
-        SliceElementId* newSliceElementIds = NULL;
+    if (newSlice != NULL)
+    {
+        newTotalElementsCount += newSlice->totalElementsCount;
+        newSliceElementIds = (SliceElementId*)realloc(sliceElementIds, newTotalElementsCount * sizeof(SliceElementId));
+    }
 
-        if (poolContent->slicesCount < poolContent->maximumSlicesCount)
+    if (newSliceElementIds != NULL)
+    {
+        const size_t newSliceIndex = poolContent->slicesCount;
+        size_t sliceElementIdIndex = poolContent->availableElementsCount;
+
+        for (size_t sliceElementIndex = 0; sliceElementIndex < newSlice->totalElementsCount; ++sliceElementIndex)
         {
-            newSlice = createSlice(ELEMENTS_POOL_SLICE_SIZE);
+            newSliceElementIds[sliceElementIdIndex].sliceIndex = newSliceIndex;
+            newSliceElementIds[sliceElementIdIndex].sliceElementIndex = sliceElementIndex;
+            ++sliceElementIdIndex;
         }
 
-        if (newSlice != NULL)
-        {
-            newTotalElementsCount += newSlice->totalElementsCount;
-            newSliceElementIds = (SliceElementId*)realloc(poolContent->sliceElementIds, newTotalElementsCount * sizeof(SliceElementId));
-        }
-
-        if (newSliceElementIds != NULL)
-        {
-            const size_t newSliceIndex = poolContent->slicesCount;
-            size_t sliceElementIdIndex = poolContent->availableElementsCount;
-
-            for (size_t sliceElementIndex = 0; sliceElementIndex < newSlice->totalElementsCount; ++sliceElementIndex)
-            {
-                newSliceElementIds[sliceElementIdIndex].sliceIndex = newSliceIndex;
-                newSliceElementIds[sliceElementIdIndex].sliceElementIndex = sliceElementIndex;
-                ++sliceElementIdIndex;
-            }
-
-            poolContent->elementSlices[newSliceIndex] = newSlice;
-            poolContent->sliceElementIds = newSliceElementIds;
-            poolContent->totalElementsCount = newTotalElementsCount;
-            poolContent->availableElementsCount += ELEMENTS_POOL_SLICE_SIZE;
-            ++poolContent->slicesCount;
-            success = true;
-        }
-        else
-        {
-            deleteSlice(newSlice);
-            newSlice = NULL;
-        }
+        poolContent->elementSlices[newSliceIndex] = newSlice;
+        poolContent->sliceElementIds = newSliceElementIds;
+        poolContent->totalElementsCount = newTotalElementsCount;
+        poolContent->availableElementsCount += newSlice->totalElementsCount;
+        ++poolContent->slicesCount;
+        success = true;
+    }
+    else
+    {
+        deleteSlice(newSlice);
+        newSlice = NULL;
     }
 
     return success;
