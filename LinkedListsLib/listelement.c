@@ -51,7 +51,6 @@ static bool addSliceToElementsPool(ListElementsPool* elementsPool);
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
 static ListElementsSlice* createSlice(size_t elementsCount);
 static void deleteSlice(ListElementsSlice* slice);
-static bool isValidSlice(const ListElementsSlice* slice);
 
 ListElement* createListElement()
 {
@@ -751,15 +750,4 @@ static void deleteSlice(ListElementsSlice* slice)
     }
 
     FREE(data);
-}
-
-static bool isValidSlice(const ListElementsSlice* slice)
-{
-    return slice != NULL &&
-           slice->data != NULL &&
-           slice->elements != NULL &&
-           slice->availabilityFlags != NULL &&
-           slice->totalElementsCount > 0 &&
-           slice->totalElementsCount % BYTE_SIZE == 0 &&
-           slice->availableElementsCount <= slice->totalElementsCount;
 }
