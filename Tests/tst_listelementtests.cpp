@@ -71,6 +71,8 @@ private:
     ListElementsPool* m_TempPool2;
 
     List* m_List1;
+    List* m_List2;
+    List* m_List3;
 
     // lists that are not test class members marked for deletion (deleted when running cleanup()) - do not add members (e.g. m_pList1) here
     std::vector<List*> m_ListsMarkedForDeletion;
@@ -88,6 +90,8 @@ ListElementTests::ListElementTests()
     , m_TempPool1{nullptr}
     , m_TempPool2{nullptr}
     , m_List1{nullptr}
+    , m_List2{nullptr}
+    , m_List3{nullptr}
 {
 }
 
@@ -419,13 +423,13 @@ void ListElementTests::testOptimizingPoolCapacity()
 
     QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == 0);
 
-    List* list1 = createEmptyList(m_TempPool2);
-    QVERIFY(list1);
+    m_List1 = createEmptyList(m_TempPool2);
+    QVERIFY(m_List1);
 
-    (void)createAndAppendToList(list1, 5);
-    (void)createAndPrependToList(list1, 4);
-    (void)createAndAppendToList(list1, 2);
-    (void)createAndAppendToList(list1, 9);
+    (void)createAndAppendToList(m_List1, 5);
+    (void)createAndPrependToList(m_List1, 4);
+    (void)createAndAppendToList(m_List1, 2);
+    (void)createAndAppendToList(m_List1, 9);
 
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 4);
 
@@ -437,8 +441,8 @@ void ListElementTests::testOptimizingPoolCapacity()
     QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 1);
 
     const size_t prioritiesArray1[8] = {2, 4, 5, 8, 7, 0, 2, 3};
-    List* list2 = createListFromPrioritiesArray(prioritiesArray1, 8, m_TempPool2);
-    QVERIFY(list2);
+    m_List2 = createListFromPrioritiesArray(prioritiesArray1, 8, m_TempPool2);
+    QVERIFY(m_List2);
 
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 9);
 
@@ -457,14 +461,13 @@ void ListElementTests::testOptimizingPoolCapacity()
     shrinkPoolCapacity(m_TempPool2);
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 8);
 
-    sortDescendingByPriority(list2);
+    sortDescendingByPriority(m_List2);
 
-    QVERIFY(getListSize(list2) == 8);
-    QVERIFY(list2->first && list2->first->priority == 8);
-    QVERIFY(list2->last && list2->last->priority == 0);
+    QVERIFY(getListSize(m_List2) == 8);
+    QVERIFY(m_List2->first && m_List2->first->priority == 8);
+    QVERIFY(m_List2->last && m_List2->last->priority == 0);
 
-    deleteList(list2, deleteObjectPayload);
-    list2 = nullptr;
+    clearList(m_List2, deleteObjectPayload);
 
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
@@ -488,8 +491,8 @@ void ListElementTests::testOptimizingPoolCapacity()
     shrinkPoolCapacity(m_TempPool2);
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
 
-    QVERIFY(list1->first && list1->first->priority == 4);
-    QVERIFY(list1->last && list1->last->priority == 9);
+    QVERIFY(m_List1->first && m_List1->first->priority == 4);
+    QVERIFY(m_List1->last && m_List1->last->priority == 9);
 
     RELEASE_ELEMENTS(listElementRefs5, batchSize5, m_TempPool2);
     RELEASE_ELEMENTS(listElementRefs7, batchSize7, m_TempPool2);
@@ -499,35 +502,32 @@ void ListElementTests::testOptimizingPoolCapacity()
     shrinkPoolCapacity(m_TempPool2);
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 4);
 
-    QVERIFY(getListSize(list1) == 4);
-    ListIterator it = lbegin(list1);
+    QVERIFY(getListSize(m_List1) == 4);
+    ListIterator it = lbegin(m_List1);
     lnext(&it);
 
     QVERIFY(it.current && it.current->priority == 5);
 
     (void)createAndInsertBefore(it, 20);
 
-    QVERIFY(getListSize(list1) == 5);
+    QVERIFY(getListSize(m_List1) == 5);
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
-    QVERIFY(list1->first && list1->first->next && list1->first->next->priority == 20);
+    QVERIFY(m_List1->first && m_List1->first->next && m_List1->first->next->priority == 20);
 
     const size_t prioritiesArray2[4] = {9, 5, 12, 7};
-    List* list3 = createListFromPrioritiesArray(prioritiesArray2, 4, m_TempPool2);
-    QVERIFY(list3);
+    m_List3 = createListFromPrioritiesArray(prioritiesArray2, 4, m_TempPool2);
+    QVERIFY(m_List3);
 
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 9);
 
-    sortAscendingByPriority(list3);
+    sortAscendingByPriority(m_List3);
 
-    QVERIFY(getListSize(list3) == 4);
-    QVERIFY(list3->first && list3->first->priority == 5);
-    QVERIFY(list3->last && list3->last->priority == 12);
+    QVERIFY(getListSize(m_List3) == 4);
+    QVERIFY(m_List3->first && m_List3->first->priority == 5);
+    QVERIFY(m_List3->last && m_List3->last->priority == 12);
 
-    deleteList(list1, deleteObjectPayload);
-    list1 = nullptr;
-
-    deleteList(list3, deleteObjectPayload);
-    list3 = nullptr;
+    clearList(m_List1, deleteObjectPayload);
+    clearList(m_List3, deleteObjectPayload);
 
     QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
@@ -661,6 +661,8 @@ void ListElementTests::cleanupTestCase()
     QVERIFY(!m_TempPool1);
     QVERIFY(!m_TempPool2);
     QVERIFY(!m_List1);
+    QVERIFY(!m_List2);
+    QVERIFY(!m_List3);
 
     QVERIFY(m_ListElementsMarkedForDeletion.empty());
     QVERIFY(m_ListElementRefsMarkedForDeletion.empty());
@@ -674,6 +676,8 @@ void ListElementTests::init()
     QVERIFY(!m_TempPool1);
     QVERIFY(!m_TempPool2);
     QVERIFY(!m_List1);
+    QVERIFY(!m_List2);
+    QVERIFY(!m_List3);
 
     QVERIFY(m_ListElementsMarkedForDeletion.empty());
     QVERIFY(m_ListElementRefsMarkedForDeletion.empty());
@@ -682,6 +686,8 @@ void ListElementTests::init()
 void ListElementTests::cleanup()
 {
     DELETE_LIST(m_List1, deleteObjectPayload);
+    DELETE_LIST(m_List2, deleteObjectPayload);
+    DELETE_LIST(m_List3, deleteObjectPayload);
 
     DELETE_LIST_ELEMENTS_POOL(m_TempPool1);
     DELETE_LIST_ELEMENTS_POOL(m_TempPool2);
