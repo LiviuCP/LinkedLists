@@ -47,6 +47,7 @@ typedef struct
 // "private" (supporting) functions
 static bool initListElementsPool(ListElementsPool* elementsPool);
 static void addSliceToElementsPool(ListElementsPool* elementsPool);
+static void deleteUnusedSlices(ListElementsPool* elementsPool);
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
 static ListElementsSlice* createSlice(size_t elementsCount);
 static void deleteSlice(ListElementsSlice* slice);
@@ -101,13 +102,8 @@ void deleteListElementsPool(ListElementsPool* elementsPool)
     SliceElementId* sliceElementIds = poolContent != NULL ? poolContent->sliceElementIds : NULL;
     const size_t slicesCount = poolContent != NULL ? poolContent->slicesCount : 0;
 
-    if (elementsPool != NULL)
-    {
-        ASSERT(elementSlices != NULL && sliceElementIds != NULL && slicesCount > 0, "Invalid pool content!");
-        free(elementsPool);
-        elementsPool = NULL;
-    }
-
+    ASSERT(elementsPool == NULL || (elementSlices != NULL && sliceElementIds != NULL && slicesCount > 0), "Invalid pool content!");
+    FREE(elementsPool);
     FREE(poolContent);
 
     if (elementSlices != NULL)
@@ -129,11 +125,7 @@ void deleteListElementsPool(ListElementsPool* elementsPool)
 size_t getAvailableElementsCount(ListElementsPool* elementsPool)
 {
     const ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
-
-    if (elementsPool != NULL)
-    {
-        ASSERT(poolContent != NULL, "Invalid list elements pool content!");
-    }
+    ASSERT(elementsPool == NULL || poolContent != NULL, "Invalid list elements pool content!");
 
     return poolContent != NULL ? poolContent->availableElementsCount : 0;
 }
@@ -151,10 +143,7 @@ ListElement* aquireElement(ListElementsPool* elementsPool)
     ListElementsSlice** elementSlices = poolContent != NULL ? poolContent->elementSlices : NULL;
     SliceElementId* sliceElementIds = poolContent != NULL ? poolContent->sliceElementIds : NULL;
 
-    if (elementsPool != NULL)
-    {
-        ASSERT(elementSlices != NULL && sliceElementIds != NULL, "Invalid list elements pool content!");
-    }
+    ASSERT(elementsPool == NULL || (elementSlices != NULL && sliceElementIds != NULL), "Invalid list elements pool content!");
 
     if (elementSlices != NULL && sliceElementIds != NULL && poolContent->availableElementsCount > 0)
     {
@@ -213,10 +202,7 @@ bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size
     ListElementsSlice** elementSlices = poolContent != NULL ? poolContent->elementSlices : NULL;
     SliceElementId* sliceElementIds = poolContent != NULL ? poolContent->sliceElementIds : NULL;
 
-    if (elementsPool != NULL)
-    {
-        ASSERT(elementSlices != NULL && sliceElementIds != NULL, "Invalid list elements pool content!");
-    }
+    ASSERT(elementsPool == NULL || (elementSlices != NULL && sliceElementIds != NULL), "Invalid list elements pool content!");
 
     if (canRequiredElementsCountBeAquired && elementSlices != NULL && sliceElementIds != NULL)
     {
@@ -272,10 +258,7 @@ bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
     ListElementsSlice** elementSlices = poolContent != NULL ? poolContent->elementSlices : NULL;
     SliceElementId* sliceElementIds = poolContent != NULL ? poolContent->sliceElementIds : NULL;
 
-    if (elementsPool != NULL)
-    {
-        ASSERT(elementSlices != NULL && sliceElementIds != NULL, "Invalid list elements pool content!");
-    }
+    ASSERT(elementsPool == NULL || (elementSlices != NULL && sliceElementIds != NULL), "Invalid list elements pool content!");
 
     size_t sliceIndex = 0;
     const bool isElementAddressValid = element != NULL && elementSlices != NULL && sliceElementIds != NULL ? retrieveSliceIndex(element, elementsPool, &sliceIndex) : false;
@@ -284,10 +267,7 @@ bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
     ListElement* sliceElements = slice != NULL ? slice->elements : NULL;
     byte_t* availabilityFlags = slice != NULL ? slice->availabilityFlags : NULL;
 
-    if (slice != NULL)
-    {
-        ASSERT(sliceElements != NULL && availabilityFlags != NULL, "Invalid slice content!");
-    }
+    ASSERT(slice == NULL || (sliceElements != NULL && availabilityFlags != NULL), "Invalid slice content!");
 
     if (sliceElements != NULL && availabilityFlags != NULL)
     {
@@ -320,6 +300,18 @@ bool releaseElement(ListElement* element, ListElementsPool* elementsPool)
     }
 
     return success;
+}
+
+void shrinkPoolCapacity(ListElementsPool* elementsPool)
+{
+    ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
+    ASSERT(elementsPool == NULL || poolContent != NULL, "Invalid list elements pool content!");
+
+    // some available elements should remain after deleting unused slices
+    if (poolContent != NULL && poolContent->availableElementsCount > ELEMENTS_POOL_SLICE_SIZE)
+    {
+        deleteUnusedSlices(elementsPool);
+    }
 }
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload)
@@ -464,7 +456,6 @@ static bool initListElementsPool(ListElementsPool* elementsPool)
 
     SliceElementId* sliceElementIds = NULL;
     const size_t totalElementsCount = ELEMENTS_POOL_SLICE_SIZE;
-    const size_t slicesCount = 1;
     const size_t maximumSlicesCount = ELEMENTS_POOL_MAX_SLICES_COUNT;
 
     ListElementsPoolContent* poolContent = elementsPool != NULL ? malloc(sizeof(ListElementsPoolContent)) : NULL;
@@ -530,10 +521,8 @@ static void addSliceToElementsPool(ListElementsPool* elementsPool)
     SliceElementId* sliceElementIds = poolContent != NULL ? poolContent->sliceElementIds : NULL;
     const size_t totalElementsCount = poolContent != NULL ? poolContent->totalElementsCount : 0;
 
-    if (elementsPool != NULL)
-    {
-        ASSERT(poolContent != NULL && elementSlices != NULL && sliceElementIds != NULL && poolContent->availableElementsCount <= totalElementsCount, "Invalid elements pool content!");
-    }
+    ASSERT(elementsPool == NULL || (poolContent != NULL && elementSlices != NULL && sliceElementIds != NULL && poolContent->availableElementsCount <= totalElementsCount),
+           "Invalid elements pool content!");
 
     const bool canCreateNewSlice = elementSlices != NULL && sliceElementIds != NULL && poolContent->slicesCount < poolContent->maximumSlicesCount;
     ListElementsSlice* newSlice = canCreateNewSlice ? createSlice(ELEMENTS_POOL_SLICE_SIZE) : NULL;
@@ -565,6 +554,103 @@ static void addSliceToElementsPool(ListElementsPool* elementsPool)
     }
 }
 
+static void deleteUnusedSlices(ListElementsPool* elementsPool)
+{
+    ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
+    ListElementsSlice** elementSlices = poolContent != NULL ? poolContent->elementSlices : NULL;
+    SliceElementId* sliceElementIds = poolContent != NULL ? poolContent->sliceElementIds : NULL;
+    const size_t slicesCount = poolContent != NULL ? poolContent->slicesCount : 0;
+    size_t nrOfSlicesLeftAfterRemoval = slicesCount;
+    size_t nrOfElementsLeftAfterRemoval = poolContent ? poolContent->totalElementsCount : 0;
+
+    ASSERT(elementsPool == NULL || (poolContent != NULL && elementSlices != NULL && sliceElementIds != NULL && poolContent->slicesCount > 0), "Invalid elements pool content!");
+
+    // at least one slice should remain after cleanup
+    size_t currentSliceIndex = poolContent != NULL && poolContent->availableElementsCount == poolContent->totalElementsCount ? 1 : 0;
+
+    while (currentSliceIndex < nrOfSlicesLeftAfterRemoval)
+    {
+        ListElementsSlice* currentSlice = elementSlices[currentSliceIndex];
+
+        if (currentSlice == NULL || currentSlice->availabilityFlags == NULL)
+        {
+            ASSERT(false, "Invalid slice!");
+            break;
+        }
+
+        if (currentSlice->availableElementsCount == currentSlice->totalElementsCount)
+        {
+            if (nrOfElementsLeftAfterRemoval < currentSlice->totalElementsCount)
+            {
+                ASSERT(false, "");
+                break;
+            }
+
+            nrOfElementsLeftAfterRemoval -= currentSlice->totalElementsCount;
+            deleteSlice(currentSlice);
+            const size_t lastSliceIndex = nrOfSlicesLeftAfterRemoval - 1;
+            --nrOfSlicesLeftAfterRemoval;
+
+            if (lastSliceIndex > currentSliceIndex)
+            {
+                elementSlices[currentSliceIndex] = elementSlices[lastSliceIndex];
+                elementSlices[lastSliceIndex] = NULL;
+                continue;
+            }
+
+            break;
+        }
+
+        ASSERT(currentSlice->availableElementsCount < currentSlice->totalElementsCount, "Available slice elements count should not exceed the total slice elements count!");
+        ++currentSliceIndex;
+    }
+
+    SliceElementId* newSliceElementIds = nrOfSlicesLeftAfterRemoval < slicesCount ? realloc(sliceElementIds, nrOfElementsLeftAfterRemoval * sizeof(SliceElementId)) : NULL;
+
+    // if slice element IDs cannot be resized the old slice element IDs remain (still valid)
+    if (newSliceElementIds != NULL)
+    {
+        size_t sliceElementIdIndex = 0;
+
+        for (size_t sliceIndex = 0; sliceIndex < nrOfSlicesLeftAfterRemoval; ++sliceIndex)
+        {
+            ListElementsSlice* slice = elementSlices[sliceIndex];
+
+            if (slice == NULL || slice->availabilityFlags == NULL)
+            {
+                ASSERT(false, "Invalid slice!");
+                break;
+            }
+
+            for (size_t sliceElementIndex = 0; sliceElementIndex < slice->totalElementsCount; ++sliceElementIndex)
+            {
+                const size_t byteIndex = sliceElementIndex / BYTE_SIZE;
+                const size_t bitIndex = BYTE_SIZE - 1 - sliceElementIndex % BYTE_SIZE; // bits are numbered from byte end (least significant: 0) to beginning (most significant: 7)
+                const byte_t elementBitMask = LSB_MASK << bitIndex;
+                const bool canElementBeAquired = slice->availabilityFlags[byteIndex] & elementBitMask; // test element availability bit
+
+                if (canElementBeAquired)
+                {
+                    newSliceElementIds[sliceElementIdIndex].sliceIndex = sliceIndex;
+                    newSliceElementIds[sliceElementIdIndex].sliceElementIndex = sliceElementIndex;
+                    ++sliceElementIdIndex;
+                }
+            }
+        }
+
+        poolContent->sliceElementIds = newSliceElementIds;
+    }
+
+    if (nrOfSlicesLeftAfterRemoval < slicesCount)
+    {
+        poolContent->slicesCount = nrOfSlicesLeftAfterRemoval;
+        const size_t elementsCountDelta = poolContent->totalElementsCount - nrOfElementsLeftAfterRemoval;
+        poolContent->totalElementsCount = nrOfElementsLeftAfterRemoval;
+        ASSERT(poolContent->availableElementsCount >= elementsCountDelta, "Invalid available elements count!");
+        poolContent->availableElementsCount = poolContent->availableElementsCount >= elementsCountDelta ? poolContent->availableElementsCount - elementsCountDelta : 0;
+    }
+}
+
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex)
 {
     bool isValid = false;
@@ -572,10 +658,7 @@ static bool retrieveSliceIndex(const ListElement* element, const ListElementsPoo
     const ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
     ListElementsSlice** elementSlices = poolContent != NULL ? poolContent->elementSlices : NULL;
 
-    if (elementsPool != NULL)
-    {
-        ASSERT(elementSlices != NULL, "Invalid list elements pool content!");
-    }
+    ASSERT(elementsPool == NULL || elementSlices != NULL, "Invalid list elements pool content!");
 
     const size_t nrOfSlicesToCheck = elementSlices != NULL && element != NULL ? poolContent->slicesCount : 0;
 

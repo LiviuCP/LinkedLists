@@ -35,6 +35,7 @@ size_t getAvailableElementsCount(ListElementsPool* elementsPool);
 ListElement* aquireElement(ListElementsPool* elementsPool);
 bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size_t requiredElementsCount);
 bool releaseElement(ListElement* element, ListElementsPool* elementsPool);
+void shrinkPoolCapacity(ListElementsPool* elementsPool);
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload);
 Object* detachContentFromListElement(ListElement* element);

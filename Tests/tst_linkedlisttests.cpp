@@ -104,7 +104,7 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
     }
 
     {
-        List list{nullptr, nullptr};
+        List list{nullptr, nullptr, nullptr}; // no elements pool used for the list containing elements stored on stack
 
         ListElement first{Object{-1, nullptr}, 6, nullptr};
         ListElement second{Object{-1, nullptr}, 2, nullptr};
