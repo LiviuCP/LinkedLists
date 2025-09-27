@@ -29,13 +29,14 @@ ListElementsPool;
 ListElement* createListElement();
 void initListElement(ListElement* element);
 
+// don't use for stack created lists (heap-only)
 ListElementsPool* createListElementsPool();
 void deleteListElementsPool(ListElementsPool* elementsPool);
-size_t getAvailableElementsCount(ListElementsPool* elementsPool);
 ListElement* aquireElement(ListElementsPool* elementsPool);
 bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size_t requiredElementsCount);
 bool releaseElement(ListElement* element, ListElementsPool* elementsPool);
 void shrinkPoolCapacity(ListElementsPool* elementsPool);
+size_t getAvailableElementsCount(ListElementsPool* elementsPool);
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload);
 Object* detachContentFromListElement(ListElement* element);

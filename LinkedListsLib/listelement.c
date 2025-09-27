@@ -122,14 +122,6 @@ void deleteListElementsPool(ListElementsPool* elementsPool)
     FREE(sliceElementIds);
 }
 
-size_t getAvailableElementsCount(ListElementsPool* elementsPool)
-{
-    const ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
-    ASSERT(elementsPool == NULL || poolContent != NULL, "Invalid list elements pool content!");
-
-    return poolContent != NULL ? poolContent->availableElementsCount : 0;
-}
-
 ListElement* aquireElement(ListElementsPool* elementsPool)
 {
     ListElement* aquiredElement = NULL;
@@ -312,6 +304,14 @@ void shrinkPoolCapacity(ListElementsPool* elementsPool)
     {
         deleteUnusedSlices(elementsPool);
     }
+}
+
+size_t getAvailableElementsCount(ListElementsPool* elementsPool)
+{
+    const ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
+    ASSERT(elementsPool == NULL || poolContent != NULL, "Invalid list elements pool content!");
+
+    return poolContent != NULL ? poolContent->availableElementsCount : 0;
 }
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload)
