@@ -27,7 +27,6 @@ extern "C"{
 /* These functions should only be used for heap-based lists/elements */
 
 List* createEmptyList(ListElementsPool* elementsPool);
-List* createEmptyLists(size_t count, ListElementsPool* elementsPool);
 
 List* createListFromPrioritiesArray(const size_t* prioritiesArray,
                                     const size_t arraySize,

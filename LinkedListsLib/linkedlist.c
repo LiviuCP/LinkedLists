@@ -23,29 +23,6 @@ List* createEmptyList(ListElementsPool* elementsPool)
     return list;
 }
 
-List* createEmptyLists(size_t count, ListElementsPool* elementsPool)
-{
-    List* first = NULL;
-
-    if (count > 0)
-    {
-        first = (List*)calloc(count, sizeof(List));
-    }
-
-    if (first)
-    {
-        for (size_t index = 0; index < count; ++index)
-        {
-            List* current = &first[index];
-            current->first = NULL;
-            current->last = NULL;
-            current->elementsPool = elementsPool;
-        }
-    }
-
-    return first;
-}
-
 List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize, ListElementsPool* elementsPool)
 {
     List* list = NULL;
