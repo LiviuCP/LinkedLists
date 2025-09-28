@@ -6,6 +6,8 @@
 #include "../LinkedListsLib/linkedlist.h"
 #include "../Utils/error.h"
 
+#define HASH_OFFSET 4
+
 static const int hashEntryType = 'h' + 'a' + 's' + 'h' + 'E' + 'n' + 't' + 'r' + 'y';
 
 // "private" (supporting) functions
@@ -19,56 +21,51 @@ static List* _getCurrentBucket(const char* key, HashTable* hashTable);
 
 HashTable* createHashTable(const size_t hashSize, ListElementsPool* elementsPool)
 {
-    HashTable* result = NULL;
+    HashTable* hashTable = NULL;
 
-    if (hashSize > 0)
+    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category (hash table object)
+    void* data = hashSize > 0 ? malloc(HASH_OFFSET + sizeof(HashTable) + hashSize * sizeof(List)) : NULL;
+
+    if (data != NULL)
     {
-        List* hashBuckets = createEmptyLists(hashSize, elementsPool);
+        hashTable = (HashTable*)(data + HASH_OFFSET);
+        List* hashBuckets = (List*)(hashTable + 1);
 
-        if (hashBuckets != NULL)
+        for (size_t index = 0; index < hashSize; ++index)
         {
-            HashTable* hashTable = (HashTable*)malloc(sizeof(HashTable));
+            List* hashBucket = hashBuckets + index;
 
-            if (hashTable != NULL)
-            {
-                hashTable->hashBuckets = hashBuckets;
-                hashTable->hashSize = hashSize;
-                result = hashTable;
-            }
+            hashBucket->first = NULL;
+            hashBucket->last = NULL;
+            hashBucket->elementsPool = elementsPool;
         }
 
-        if (result == NULL)
-        {
-            FREE(hashBuckets);
-        }
+        hashTable->hashBuckets = hashBuckets;
+        hashTable->hashSize = hashSize;
+        hashTable->data = data;
     }
 
-    return result;
+    return hashTable;
 }
 
 void deleteHashTable(HashTable* hashTable)
 {
-    ASSERT(hashTable != NULL, "Attempt to delete NULL hash table");
+    void* data = hashTable != NULL ? hashTable->data : NULL;
+    List* hashBuckets = hashTable != NULL ? (List*)hashTable->hashBuckets : NULL;
 
-    if (hashTable != NULL)
+    ASSERT(hashTable == NULL || data != NULL && hashBuckets != NULL, "Invalid hash table!");
+
+    if (hashBuckets != NULL)
     {
-        List* hashBuckets = (List*)hashTable->hashBuckets;
-        ASSERT(hashBuckets != NULL, "Invalid hash buckets detected!");
-
-        if (hashBuckets != NULL)
+        for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
         {
-            for (size_t hashIndex = 0; hashIndex < hashTable->hashSize; ++hashIndex)
-            {
-                clearList(&hashBuckets[hashIndex], _deleteHashEntry);
-            }
-
-            free(hashTable->hashBuckets);
-            hashTable->hashBuckets = NULL;
+            clearList(hashBuckets + hashIndex, _deleteHashEntry);
         }
 
-        free(hashTable);
-        hashTable = NULL;
+        hashBuckets = NULL;
     }
+
+    FREE(data);
 }
 
 bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)

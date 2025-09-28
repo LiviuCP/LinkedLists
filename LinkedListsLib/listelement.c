@@ -7,7 +7,7 @@
 #include "error.h"
 
 #define ELEMENTS_POOL_MAX_SLICES_COUNT 8
-#define SLICE_OFFSET 1
+#define SLICE_OFFSET 4
 
 /* The list elements pool consists of a fixed number of slices, each slice having a fixed number of elements that can be aquired for usage
    - when the pool gets created only the first slice is available

@@ -16,6 +16,7 @@ typedef struct
 {
     void* hashBuckets;
     size_t hashSize;
+    void* data; // to be used for HashTable deletion only
 } HashTable;
 
 #ifdef __cplusplus
