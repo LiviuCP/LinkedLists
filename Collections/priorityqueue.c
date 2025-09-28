@@ -6,39 +6,45 @@
 #include "../LinkedListsLib/linkedlist.h"
 #include "../Utils/error.h"
 
+#define QUEUE_OFFSET 4
+
 PriorityQueue* createPriorityQueue(ListElementsPool* elementsPool)
 {
-    PriorityQueue* result = NULL;
-    PriorityQueue* queue = (PriorityQueue*)malloc(sizeof(PriorityQueue));
+    PriorityQueue* queue = NULL;
 
-    if (queue != NULL)
+    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category (queue object)
+    void* data = malloc(QUEUE_OFFSET + sizeof(PriorityQueue) + sizeof(List));
+
+    if (data)
     {
-        List* queueContainer = createEmptyList(elementsPool);
+        queue = (PriorityQueue*)(data + QUEUE_OFFSET);
 
-        if (queueContainer != NULL)
-        {
-            queue->container = queueContainer;
-            result = queue;
-        }
-        else
-        {
-            free(queue);
-            queue = NULL;
-        }
+        List* queueContainer = (List*)(queue + 1);
+        queueContainer->first = NULL;
+        queueContainer->last = NULL;
+        queueContainer->elementsPool = elementsPool;
+
+        queue->container = queueContainer;
+        queue->data = data;
     }
 
-    return result;
+    return queue;
 }
 
 void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object))
 {
-    if (queue != NULL)
+    void* data = queue != NULL ? queue->data : NULL;
+    List* queueContainer = queue != NULL ? (List*)queue->container : NULL;
+
+    ASSERT(queue == NULL || data != NULL && queueContainer != NULL, "Invalid priority queue!");
+
+    if (queueContainer != NULL)
     {
-        deleteList((List*)queue->container, deallocObject);
-        queue->container = NULL;
-        free(queue);
-        queue = NULL;
+        clearList(queueContainer, deallocObject);
+        queueContainer = NULL;
     }
+
+    FREE(data);
 }
 
 bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload)
