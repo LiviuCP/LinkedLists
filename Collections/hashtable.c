@@ -34,10 +34,7 @@ HashTable* createHashTable(const size_t hashSize, ListElementsPool* elementsPool
         for (size_t index = 0; index < hashSize; ++index)
         {
             List* hashBucket = hashBuckets + index;
-
-            hashBucket->first = NULL;
-            hashBucket->last = NULL;
-            hashBucket->elementsPool = elementsPool;
+            initEmptyList(hashBucket, elementsPool);
         }
 
         hashTable->hashBuckets = hashBuckets;

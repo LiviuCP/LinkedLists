@@ -33,6 +33,8 @@ List* createListFromPrioritiesArray(const size_t* prioritiesArray,
                                     const size_t arraySize,
                                     ListElementsPool* elementsPool);
 
+void initEmptyList(List* list, ListElementsPool* elementsPool);
+
 void deleteList(List* list, void (*deallocObject)(Object* object));
 void clearList(List* list, void (*deallocObject)(Object* object));
 

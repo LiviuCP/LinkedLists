@@ -17,9 +17,7 @@ List* createEmptyList(ListElementsPool* elementsPool)
 
     if (list != NULL)
     {
-        list->first = NULL;
-        list->last = NULL;
-        list->elementsPool = elementsPool;
+        initEmptyList(list, elementsPool);
     }
 
     return list;
@@ -111,6 +109,16 @@ List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t 
     }
 
     return list;
+}
+
+void initEmptyList(List* list, ListElementsPool* elementsPool)
+{
+    if (list != NULL)
+    {
+        list->first = NULL;
+        list->last = NULL;
+        list->elementsPool = elementsPool;
+    }
 }
 
 // user is responsible for de-allocating the Object of each element prior to erasing the list

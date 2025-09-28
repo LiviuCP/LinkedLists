@@ -19,10 +19,8 @@ Stack* createStack(ListElementsPool* elementsPool)
         stack = (Stack*)(data + STACK_OFFSET);
 
         List* stackContainer = (List*)(stack + 1);
-        stackContainer->first = NULL;
-        stackContainer->last = NULL;
-        stackContainer->elementsPool = elementsPool;
 
+        initEmptyList(stackContainer, elementsPool);
         stack->container = stackContainer;
         stack->data = data;
     }

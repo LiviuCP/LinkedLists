@@ -20,10 +20,8 @@ PriorityQueue* createPriorityQueue(ListElementsPool* elementsPool)
         queue = (PriorityQueue*)(data + QUEUE_OFFSET);
 
         List* queueContainer = (List*)(queue + 1);
-        queueContainer->first = NULL;
-        queueContainer->last = NULL;
-        queueContainer->elementsPool = elementsPool;
 
+        initEmptyList(queueContainer, elementsPool);
         queue->container = queueContainer;
         queue->data = data;
     }
