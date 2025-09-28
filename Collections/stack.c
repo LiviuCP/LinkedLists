@@ -5,41 +5,45 @@
 
 #include <stdio.h>
 
+#define STACK_OFFSET 4
+
 Stack* createStack(ListElementsPool* elementsPool)
 {
-    Stack* result = NULL;
-    Stack* stack = (Stack*)malloc(sizeof(Stack));
+    Stack* stack = NULL;
 
-    if (stack != NULL)
+    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category (stack object)
+    void* data = malloc(STACK_OFFSET + sizeof(Stack) + sizeof(List));
+
+    if (data)
     {
-        List* stackContainer = createEmptyList(elementsPool);
+        stack = (Stack*)(data + STACK_OFFSET);
 
-        if (stackContainer != NULL)
-        {
-            stack->container = (void*)stackContainer;
-            result = stack;
-        }
-        else
-        {
-            free(stack);
-            stack = NULL;
-        }
+        List* stackContainer = (List*)(stack + 1);
+        stackContainer->first = NULL;
+        stackContainer->last = NULL;
+        stackContainer->elementsPool = elementsPool;
+
+        stack->container = stackContainer;
+        stack->data = data;
     }
 
-    return result;
+    return stack;
 }
 
 void deleteStack(Stack* stack, void (*deallocObject)(Object* object))
 {
-    if (stack != NULL)
-    {
-        ASSERT(stack->container != NULL, "NULL stack container detected!");
+    void* data = stack != NULL ? stack->data : NULL;
+    List* stackContainer = stack != NULL ? (List*)stack->container : NULL;
 
-        deleteList((List*)stack->container, deallocObject);
-        stack->container = NULL;
-        free(stack);
-        stack = NULL;
+    ASSERT(stack == NULL || data != NULL && stackContainer != NULL, "Invalid stack!");
+
+    if (stackContainer != NULL)
+    {
+        clearList(stackContainer, deallocObject);
+        stackContainer = NULL;
     }
+
+    FREE(data);
 }
 
 bool pushToStack(Stack* stack, const int objectType, void* const objectPayload)

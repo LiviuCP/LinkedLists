@@ -6,6 +6,7 @@
 typedef struct
 {
     void* container;
+    void* data; // to be used for Stack object deletion only
 } Stack;
 
 #ifdef __cplusplus
