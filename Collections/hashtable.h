@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../LinkedListsLib/listelement.h"
-
 typedef struct
 {
     char* key;
@@ -23,7 +21,7 @@ typedef struct
 extern "C" {
 #endif
 
-HashTable* createHashTable(const size_t hashSize, ListElementsPool* elementsPool);
+HashTable* createHashTable(const size_t hashSize, void* elementsPool);
 void deleteHashTable(HashTable* hashTable);
 bool insertHashEntry(const char* key, const char* value, HashTable* hashTable);
 void eraseHashEntry(const char* key, HashTable* hashTable);

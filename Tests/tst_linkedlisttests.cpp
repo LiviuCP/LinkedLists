@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "linkedlist.h"
+#include "listelementspool.h"
 #include "codeutils.h"
 #include "testobjects.h"
 

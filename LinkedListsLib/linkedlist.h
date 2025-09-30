@@ -3,13 +3,13 @@
 
 #include <stdlib.h>
 
-#include "listelement.h"
+#include "listelementspoolproxy.h"
 
 typedef struct
 {
     ListElement* first;
     ListElement* last; // required for constant time element appending
-    ListElementsPool* elementsPool;
+    ListElementsPoolProxy elementsPoolProxy;
 }
 List;
 
@@ -26,13 +26,13 @@ extern "C"{
 
 /* These functions should only be used for heap-based lists/elements */
 
-List* createEmptyList(ListElementsPool* elementsPool);
+List* createEmptyList(void* elementsPool);
 
 List* createListFromPrioritiesArray(const size_t* prioritiesArray,
                                     const size_t arraySize,
-                                    ListElementsPool* elementsPool);
+                                    void* elementsPool);
 
-void initEmptyList(List* list, ListElementsPool* elementsPool);
+void initEmptyList(List* list, void* elementsPool);
 
 void deleteList(List* list, void (*deallocObject)(Object* object));
 void clearList(List* list, void (*deallocObject)(Object* object));

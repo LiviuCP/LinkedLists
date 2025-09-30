@@ -2,13 +2,12 @@
 #include <string.h>
 
 #include "priorityqueue.h"
-
-#include "../LinkedListsLib/linkedlist.h"
-#include "../Utils/error.h"
+#include "linkedlist.h"
+#include "error.h"
 
 #define QUEUE_OFFSET 4
 
-PriorityQueue* createPriorityQueue(ListElementsPool* elementsPool)
+PriorityQueue* createPriorityQueue(void* elementsPool)
 {
     PriorityQueue* queue = NULL;
 
@@ -60,7 +59,7 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const 
 
         if (queueContainer != NULL)
         {
-            newElement = queueContainer->elementsPool != NULL ? aquireElement(queueContainer->elementsPool) : createListElement();
+            newElement = queueContainer->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&queueContainer->elementsPoolProxy) : createListElement();
         }
 
         if (newElement != NULL)
@@ -144,9 +143,9 @@ Object* removeFromPriorityQueue(PriorityQueue* queue)
                 removedElement->object.type = -1;
                 removedElement->object.payload = NULL;
 
-                if (queueContainer->elementsPool != NULL)
+                if (queueContainer->elementsPoolProxy.elementsPool != NULL)
                 {
-                    releaseElement(removedElement, queueContainer->elementsPool);
+                    releaseListElement(removedElement, &queueContainer->elementsPoolProxy);
                 }
                 else
                 {

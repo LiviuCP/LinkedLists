@@ -11,7 +11,7 @@
 */
 static void clearListWithoutObjectsDeallocation(List* list);
 
-List* createEmptyList(ListElementsPool* elementsPool)
+List* createEmptyList(void* elementsPool)
 {
     List* list = (List*)malloc(sizeof(List));
 
@@ -23,7 +23,7 @@ List* createEmptyList(ListElementsPool* elementsPool)
     return list;
 }
 
-List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize, ListElementsPool* elementsPool)
+List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize, void* elementsPool)
 {
     List* list = NULL;
 
@@ -42,7 +42,7 @@ List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t 
 
             if (elementsToAquire != NULL)
             {
-                success = aquireElements(elementsPool, elementsToAquire, arraySize);
+                success = aquireListElements(&list->elementsPoolProxy, elementsToAquire, arraySize);
                 const size_t elementsCountToAppend = success ? arraySize : 0;
 
                 for (size_t index = 0; index < elementsCountToAppend; ++index)
@@ -88,13 +88,13 @@ List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t 
     return list;
 }
 
-void initEmptyList(List* list, ListElementsPool* elementsPool)
+void initEmptyList(List* list, void* elementsPool)
 {
     if (list != NULL)
     {
         list->first = NULL;
         list->last = NULL;
-        list->elementsPool = elementsPool;
+        list->elementsPoolProxy.elementsPool = elementsPool;
     }
 }
 
@@ -106,7 +106,6 @@ void deleteList(List* list, void (*deallocObject)(Object* object))
         if (list->first != NULL)
         {
             clearList(list, deallocObject);
-            list->elementsPool = NULL; // elementsPool is not owned by list, hence removing any reference to it is sufficient
         }
 
         free(list);
@@ -122,14 +121,14 @@ void clearList(List* list, void (*deallocObject)(Object* object))
         list->first = NULL;
         list->last = NULL;
 
-        if (list->elementsPool != NULL)
+        if (list->elementsPoolProxy.elementsPool != NULL)
         {
             while (currentElement != NULL)
             {
                 deallocObject(&currentElement->object);
                 ListElement* elementToDelete = currentElement;
                 currentElement = currentElement->next;
-                const bool released = releaseElement(elementToDelete, list->elementsPool);
+                const bool released = releaseListElement(elementToDelete, &list->elementsPoolProxy);
                 ASSERT(released, "Element not contained in elementsPool!");
                 elementToDelete = NULL;
             }
@@ -154,7 +153,7 @@ ListElement* createAndPrependToList(List* list, size_t priority)
 
     if (list != NULL)
     {
-        element = list->elementsPool != NULL ? aquireElement(list->elementsPool) : (ListElement*)malloc(sizeof(ListElement));
+        element = list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&list->elementsPoolProxy) : (ListElement*)malloc(sizeof(ListElement));
 
         if (element != NULL)
         {
@@ -178,7 +177,7 @@ ListElement* createAndAppendToList(List* list, size_t priority)
 
     if (list != NULL)
     {
-        element = list->elementsPool != NULL ? aquireElement(list->elementsPool) : (ListElement*)malloc(sizeof(ListElement));
+        element = list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&list->elementsPoolProxy) : (ListElement*)malloc(sizeof(ListElement));
 
         if (element != NULL)
         {
@@ -203,7 +202,7 @@ ListElement* createAndInsertBefore(ListIterator it, size_t priority)
 
     if (it.list != NULL)
     {
-        ListElement* const previousElement = it.list->elementsPool != NULL ? aquireElement(it.list->elementsPool) : createListElement();
+        ListElement* const previousElement = it.list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&it.list->elementsPoolProxy) : createListElement();
 
         if (previousElement != NULL)
         {
@@ -223,7 +222,7 @@ ListElement* createAndInsertAfter(ListIterator it, size_t priority)
 
     if (it.list != NULL)
     {
-        ListElement* const nextElement = it.list->elementsPool != NULL ? aquireElement(it.list->elementsPool) : createListElement();
+        ListElement* const nextElement = it.list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&it.list->elementsPoolProxy) : createListElement();
 
         if (nextElement != NULL)
         {
@@ -245,7 +244,7 @@ void moveContentToList(List* source, List* destination)
         if (destination->last != NULL)
         {
             ASSERT(destination->first != NULL, "Null pointer detected for first destination list element");
-            List* temp = createEmptyList(destination->elementsPool);
+            List* temp = createEmptyList(destination->elementsPoolProxy.elementsPool);
             bool unsuccessfulElementAllocationOccurred = false;
 
             if (temp != NULL)
@@ -284,7 +283,7 @@ void moveContentToList(List* source, List* destination)
         else
         {
             destination->first = source->first;
-            destination->elementsPool = source->elementsPool;
+            destination->elementsPoolProxy.elementsPool = source->elementsPoolProxy.elementsPool;
             destination->last = source->last;
             source->first = NULL;
             source->last = NULL;
@@ -305,7 +304,7 @@ ListElement* copyContentToList(const List* source, List* destination, bool (*cop
     {
         ASSERT(source->last != NULL, "Null pointer detected for last source list element");
 
-        List* temp = createEmptyList(destination->elementsPool);
+        List* temp = createEmptyList(destination->elementsPoolProxy.elementsPool);
 
         if (temp != NULL)
         {
@@ -1117,9 +1116,9 @@ static void clearListWithoutObjectsDeallocation(List* list)
             currentElementToDelete = currentElementToDelete->next;
             elementToDelete->next = NULL;
 
-            if (list->elementsPool != NULL)
+            if (list->elementsPoolProxy.elementsPool != NULL)
             {
-                releaseElement(elementToDelete, list->elementsPool);
+                releaseListElement(elementToDelete, &list->elementsPoolProxy);
             }
             else
             {

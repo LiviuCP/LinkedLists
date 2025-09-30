@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "hashtable.h"
+#include "listelementspool.h"
 
 #define DELETE_HASHTABLE(hashTable) \
     if (hashTable) \

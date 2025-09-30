@@ -3,12 +3,6 @@
 
 #include "codeutils.h"
 
-#define ELEMENTS_POOL_SLICE_SIZE 128
-
-#ifdef __cplusplus
-extern "C"{
-#endif
-
 struct ListElement
 {
     Object object;
@@ -19,24 +13,13 @@ struct ListElement
 
 typedef struct ListElement ListElement;
 
-typedef struct
-{
-    void* poolContent;
-}
-ListElementsPool;
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 // don't use for stack created lists (heap-only)
 ListElement* createListElement();
 void initListElement(ListElement* element);
-
-// don't use for stack created lists (heap-only)
-ListElementsPool* createListElementsPool();
-void deleteListElementsPool(ListElementsPool* elementsPool);
-ListElement* aquireElement(ListElementsPool* elementsPool);
-bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size_t requiredElementsCount);
-bool releaseElement(ListElement* element, ListElementsPool* elementsPool);
-void shrinkPoolCapacity(ListElementsPool* elementsPool);
-size_t getAvailableElementsCount(ListElementsPool* elementsPool);
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload);
 Object* detachContentFromListElement(ListElement* element);

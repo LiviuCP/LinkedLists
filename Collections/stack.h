@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include "../LinkedListsLib/listelement.h"
+#include "codeutils.h"
 
 typedef struct
 {
@@ -13,7 +13,7 @@ typedef struct
 extern "C"{
 #endif
 
-Stack* createStack(ListElementsPool* elementsPool);
+Stack* createStack(void* elementsPool);
 void deleteStack(Stack* stack, void (*deallocObject)(Object* object));
 
 bool pushToStack(Stack* stack, const int objectType, void* const objectPayload);

@@ -2,9 +2,8 @@
 #include <string.h>
 
 #include "hashtable.h"
-
-#include "../LinkedListsLib/linkedlist.h"
-#include "../Utils/error.h"
+#include "linkedlist.h"
+#include "error.h"
 
 #define HASH_OFFSET 4
 
@@ -19,7 +18,7 @@ static void _deleteHashEntry(Object* object); // custom deleter for hash table
 static ListElement* _removeElementFromBucket(const char* key, List* bucket);
 static List* _getCurrentBucket(const char* key, HashTable* hashTable);
 
-HashTable* createHashTable(const size_t hashSize, ListElementsPool* elementsPool)
+HashTable* createHashTable(const size_t hashSize, void* elementsPool)
 {
     HashTable* hashTable = NULL;
 
@@ -129,9 +128,9 @@ void eraseHashEntry(const char* key, HashTable* hashTable)
     {
         _deleteHashEntry(&(removedElement->object));
 
-        if (currentBucket->elementsPool != NULL)
+        if (currentBucket->elementsPoolProxy.elementsPool != NULL)
         {
-            releaseElement(removedElement, currentBucket->elementsPool);
+            releaseListElement(removedElement, &currentBucket->elementsPoolProxy);
         }
         else
         {

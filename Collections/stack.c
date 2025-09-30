@@ -1,13 +1,12 @@
 #include "stack.h"
-
-#include "../LinkedListsLib/linkedlist.h"
-#include "../Utils/error.h"
+#include "linkedlist.h"
+#include "error.h"
 
 #include <stdio.h>
 
 #define STACK_OFFSET 4
 
-Stack* createStack(ListElementsPool* elementsPool)
+Stack* createStack(void* elementsPool)
 {
     Stack* stack = NULL;
 
@@ -102,9 +101,9 @@ Object* popFromStack(Stack* stack)
                 *newObject = topStackElement->object;
                 result = newObject;
 
-                if (stackContainer->elementsPool != NULL)
+                if (stackContainer->elementsPoolProxy.elementsPool != NULL)
                 {
-                    releaseElement(topStackElement, stackContainer->elementsPool);
+                    releaseListElement(topStackElement, &stackContainer->elementsPoolProxy);
                 }
                 else
                 {

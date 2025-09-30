@@ -1,6 +1,7 @@
 #include <QTest>
 
 #include "stack.h"
+#include "listelementspool.h"
 #include "codeutils.h"
 #include "testobjects.h"
 

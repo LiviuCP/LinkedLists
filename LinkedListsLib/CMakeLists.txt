@@ -12,6 +12,8 @@ add_library(${PROJECT_NAME} ${LIB_TYPE}
     linkedlistslib.cpp
     linkedlist.c
     listelement.c
+    listelementspool.c
+    listelementspoolproxy.c
     sort.c
     listprintutils.c
 )

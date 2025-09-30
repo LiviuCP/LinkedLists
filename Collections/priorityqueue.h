@@ -1,7 +1,7 @@
 #ifndef PRIORITYQUEUE_H
 #define PRIORITYQUEUE_H
 
-#include "../LinkedListsLib/listelement.h"
+#include "codeutils.h"
 
 typedef struct
 {
@@ -19,7 +19,7 @@ typedef struct
 extern "C"{
 #endif
 
-PriorityQueue* createPriorityQueue(ListElementsPool* elementsPool);
+PriorityQueue* createPriorityQueue(void* elementsPool);
 void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
 
 bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload);
