@@ -19,12 +19,18 @@ private slots:
     void testIsSortedAscendingByPriority();
     void testIsSortedDescendingByPriority();
 
+    void testMoveListToArray();
+    void testMoveArrayToList();
+
     void initTestCase_data();
     void cleanupTestCase();
     void init();
     void cleanup();
 
 private:
+    void _markListElementForCleanup(ListElement* element, bool shouldRelease);
+    void _clearListElementsMarkedForCleanup();
+
     size_t _getSumOfPriorities(List* list);
 
     ListElementsPool* m_Pool;
@@ -37,6 +43,13 @@ private:
     List* m_List5;
     List* m_List6;
     List* m_List7;
+
+    // used for storing multiple element addreses, to be cleaned up after each test run (elements to be cleaned up separately)
+    ListElement** m_ListElementRefs;
+
+    // elements collected from test cases that need to be discarded (released to pool or freed)
+    std::vector<ListElement*> m_ListElementsMarkedForRelease;
+    std::vector<ListElement*> m_ListElementsMarkedForDeletion;
 };
 
 ListSortingTests::ListSortingTests()
@@ -49,6 +62,7 @@ ListSortingTests::ListSortingTests()
     , m_List5{nullptr}
     , m_List6{nullptr}
     , m_List7{nullptr}
+    , m_ListElementRefs{nullptr}
 {
 }
 
@@ -449,6 +463,89 @@ void ListSortingTests::testIsSortedDescendingByPriority()
     }
 }
 
+void ListSortingTests::testMoveListToArray()
+{
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
+    const size_t prioritiesArray[4]{6, 2, 5, 9};
+
+    m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
+
+    QVERIFY(getListSize(m_List1) == 4);
+
+    size_t arraySize;
+    ListElement** array = moveListToArray(m_List1, &arraySize);
+
+    QVERIFY2(isEmptyList(m_List1) &&
+             arraySize == 4 &&
+             array[0]->next == nullptr && array[0]->priority == 6 &&
+             array[1]->next == nullptr && array[1]->priority == 2 &&
+             array[2]->next == nullptr && array[2]->priority == 5 &&
+             array[3]->next == nullptr && array[3]->priority == 9 ,  "The list content has been incorrectly moved to array");
+
+    for (size_t index = 0; index < arraySize; ++index)
+    {
+        _markListElementForCleanup(array[index], pool != nullptr);
+    }
+
+    free(array);
+    array = nullptr;
+}
+
+void ListSortingTests::testMoveArrayToList()
+{
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Pool);
+
+    m_List1 = createEmptyList(pool);
+    m_ListElementRefs = static_cast<ListElement**>(calloc(4, sizeof(ListElement*)));
+
+    m_ListElementRefs[0] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[0], pool != nullptr);
+
+    QVERIFY(m_ListElementRefs[0]);
+
+    m_ListElementRefs[1] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[1], pool != nullptr);
+
+    QVERIFY(m_ListElementRefs[1]);
+
+    m_ListElementRefs[2] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[2], pool != nullptr);
+
+    QVERIFY(m_ListElementRefs[2]);
+
+    m_ListElementRefs[3] = pool ? aquireElement(pool) : createListElement();
+    _markListElementForCleanup(m_ListElementRefs[3], pool != nullptr);
+
+    QVERIFY(m_ListElementRefs[3]);
+
+    m_ListElementRefs[0]->priority = 6;
+    m_ListElementRefs[1]->priority = 2;
+    m_ListElementRefs[2]->priority = 5;
+    m_ListElementRefs[3]->priority = 9;
+
+    QVERIFY(isEmptyList(m_List1));
+
+    // previous cleanup markings were performed to prevent memory leaks; upon reaching this point the elements should be unmarked as the they would get transferred to the list (no longer "free")
+    _clearListElementsMarkedForCleanup();
+
+    moveArrayToList(m_ListElementRefs, 4, m_List1);
+
+    QVERIFY2(m_ListElementRefs[0] == nullptr &&
+             m_ListElementRefs[1] == nullptr &&
+             m_ListElementRefs[2] == nullptr &&
+             m_ListElementRefs[3] == nullptr &&
+             getListSize(m_List1) == 4 &&
+             getListElementAtIndex(m_List1, 0)->priority == 6 &&
+             getListElementAtIndex(m_List1, 1)->priority == 2 &&
+             getListElementAtIndex(m_List1, 2)->priority == 5 &&
+             getListElementAtIndex(m_List1, 3)->priority == 9, "The array content has been incorrectly moved to list");
+    QVERIFY2(getFirstListElement(m_List1)->priority == 6 && getLastListElement(m_List1)->priority == 9, "First and last element of the list are not correctly referenced");
+    QVERIFY(getListElementAtIndex(m_List1, 1)->object.type == -1 && getListElementAtIndex(m_List1, 1)->object.payload == nullptr);
+}
+
 void ListSortingTests::initTestCase_data()
 {
     m_Pool = createListElementsPool();
@@ -479,6 +576,10 @@ void ListSortingTests::cleanupTestCase()
     QVERIFY(!m_List5);
     QVERIFY(!m_List6);
     QVERIFY(!m_List7);
+
+    QVERIFY(!m_ListElementRefs);
+    QVERIFY(m_ListElementsMarkedForRelease.empty());
+    QVERIFY(m_ListElementsMarkedForDeletion.empty());
 }
 
 void ListSortingTests::init()
@@ -493,6 +594,10 @@ void ListSortingTests::init()
     QVERIFY(!m_List5);
     QVERIFY(!m_List6);
     QVERIFY(!m_List7);
+
+    QVERIFY(!m_ListElementRefs);
+    QVERIFY(m_ListElementsMarkedForRelease.empty());
+    QVERIFY(m_ListElementsMarkedForDeletion.empty());
 }
 
 void ListSortingTests::cleanup()
@@ -505,7 +610,42 @@ void ListSortingTests::cleanup()
     DELETE_LIST(m_List6, deleteObjectPayload);
     DELETE_LIST(m_List7, deleteObjectPayload);
 
+    for (auto& element : m_ListElementsMarkedForRelease)
+    {
+        if (element)
+        {
+            releaseElement(element, m_Pool);
+            element = nullptr;
+        }
+    }
+
+    for (auto& element : m_ListElementsMarkedForDeletion)
+    {
+        FREE(element);
+    }
+
+    m_ListElementsMarkedForRelease.clear();
+    m_ListElementsMarkedForDeletion.clear();
+
+    // it is assumed that the actual elements have been previously cleaned up (deleted or released) during test run
+    FREE(m_ListElementRefs);
+
     QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+}
+
+void ListSortingTests::_markListElementForCleanup(ListElement* element, bool shouldRelease)
+{
+    if (element)
+    {
+        auto& freeElementsCollector = shouldRelease ? m_ListElementsMarkedForRelease : m_ListElementsMarkedForDeletion;
+        freeElementsCollector.push_back(element);
+    }
+}
+
+void ListSortingTests::_clearListElementsMarkedForCleanup()
+{
+    m_ListElementsMarkedForRelease.clear();
+    m_ListElementsMarkedForDeletion.clear();
 }
 
 size_t ListSortingTests::_getSumOfPriorities(List *list)

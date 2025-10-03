@@ -658,7 +658,7 @@ ListElement* removeNextListElement(ListIterator it)
 
         if (result == it.list->last)
         {
-            it.list->last = it.current->next;
+            it.list->last = it.current;
         }
     }
 
