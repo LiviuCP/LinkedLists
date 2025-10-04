@@ -25,9 +25,9 @@ include_directories(
 add_executable(BitOperationsTests tst_bitoperationstests.cpp)
 add_executable(CodeUtilsTests tst_codeutilstests.cpp)
 add_executable(HashTableTests tst_hashtabletests.cpp)
-add_executable(LinkedListTests tst_linkedlisttests.cpp)
-add_executable(ListElementTests tst_listelementtests.cpp)
-add_executable(ListSortingTests tst_listsortingtests.cpp)
+add_executable(LinkedListTests tst_linkedlisttests.cpp listtestfixture.cpp)
+add_executable(ListElementTests tst_listelementtests.cpp listtestfixture.cpp)
+add_executable(ListSortingTests tst_listsortingtests.cpp listtestfixture.cpp)
 add_executable(PriorityQueueTests tst_priorityqueuetests.cpp)
 add_executable(StackTests tst_stacktests.cpp)
 

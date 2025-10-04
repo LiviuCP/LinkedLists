@@ -279,6 +279,19 @@ size_t getAvailableElementsCount(ListElementsPool* elementsPool)
     return poolContent != NULL ? poolContent->availableElementsCount : 0;
 }
 
+size_t getAquiredElementsCount(ListElementsPool* elementsPool)
+{
+    const ListElementsPoolContent* poolContent = elementsPool != NULL ? (ListElementsPoolContent*)elementsPool->poolContent : NULL;
+    const size_t availableElementsCount = poolContent != NULL ? poolContent->availableElementsCount : 0;
+    const size_t totalElementsCount = poolContent != NULL ? poolContent->totalElementsCount : 0;
+
+    ASSERT(elementsPool == NULL || poolContent != NULL && totalElementsCount >= availableElementsCount, "Invalid list elements pool content!");
+
+    const size_t aquiredElementsCount = totalElementsCount >= availableElementsCount ? totalElementsCount - availableElementsCount : 0;
+
+    return aquiredElementsCount;
+}
+
 static bool initListElementsPool(ListElementsPool* elementsPool)
 {
     static_assert(ELEMENTS_POOL_SLICE_SIZE > 0 && ELEMENTS_POOL_SLICE_SIZE % BYTE_SIZE == 0, "Invalid slice size!");

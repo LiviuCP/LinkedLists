@@ -1,13 +1,14 @@
 #include <QTest>
 
+#include "listtestfixture.h"
 #include "linkedlist.h"
 #include "listelementspool.h"
 #include "codeutils.h"
 #include "testobjects.h"
 
-#define ALLOC_LIST_ELEMENT_REFS(listElementRefs, count) \
+#define ALLOC_LIST_ELEMENT_REFS(listElementRefs, count, fixture) \
     listElementRefs = (ListElement**)malloc(count * sizeof(ListElement*)); \
-    _markListElementRefsForDeletion(listElementRefs); \
+    fixture.markListElementRefsForDeletion(listElementRefs); \
 \
     QVERIFY(listElementRefs); \
 \
@@ -15,13 +16,6 @@
     { \
         listElementRefs[index] = nullptr; \
     } \
-
-#define DELETE_LIST_ELEMENTS_POOL(elementsPool) \
-    if (elementsPool) \
-    { \
-        deleteListElementsPool(elementsPool); \
-        elementsPool = nullptr; \
-    }
 
 #define CHECK_AQUIRED_ELEMENTS(listElementRefs, count) \
     QVERIFY((listElementRefs)); \
@@ -46,9 +40,6 @@ class ListElementTests : public QObject
 {
     Q_OBJECT
 
-public:
-    explicit ListElementTests();
-
 private slots:
     void testAquiringSinglePoolElement();
     void testAquiringMultiplePoolElements();
@@ -61,559 +52,527 @@ private slots:
     void cleanup();
 
 private:
-    void _markListElementForDeletion(ListElement* element);
-    void _markListElementRefsForDeletion(ListElement** elementRefs);
-
-    ListElementsPool* m_Pool;
-    size_t m_TotalAvailablePoolElementsCount;
-
-    // temporary pools, to be cleaned up (if necessary) after each test run
-    ListElementsPool* m_TempPool1;
-    ListElementsPool* m_TempPool2;
-
-    List* m_List1;
-    List* m_List2;
-    List* m_List3;
-
-    // lists that are not test class members marked for deletion (deleted when running cleanup()) - do not add members (e.g. m_pList1) here
-    std::vector<List*> m_ListsMarkedForDeletion;
-
-    // elements collected from test cases that need to be freed
-    std::vector<ListElement*> m_ListElementsMarkedForDeletion;
-
-    // arrays of element refs collected from test cases that need to be freed
-    std::vector<ListElement**> m_ListElementRefsMarkedForDeletion;
+    ListTestFixture m_Fixture;
 };
-
-ListElementTests::ListElementTests()
-    : m_Pool{nullptr}
-    , m_TotalAvailablePoolElementsCount{0}
-    , m_TempPool1{nullptr}
-    , m_TempPool2{nullptr}
-    , m_List1{nullptr}
-    , m_List2{nullptr}
-    , m_List3{nullptr}
-{
-}
 
 void ListElementTests::testAquiringSinglePoolElement()
 {
-    m_TempPool1 = createListElementsPool();
-    QVERIFY(m_TempPool1);
+    m_Fixture.m_TempPool1 = createListElementsPool();
+    QVERIFY(m_Fixture.m_TempPool1);
 
-    // in this case the temp pool is assigned to m_List1 only to prevent elements deletion from list (in case of test fail); the aquiring/releasing of elements occurs externally
-    m_List1 = createEmptyList(m_TempPool1);
-    QVERIFY(m_List1);
+    // in this case the temp pool is assigned to m_Fixture.m_List1 only to prevent elements deletion from list (in case of test fail); the aquiring/releasing of elements occurs externally
+    m_Fixture.m_List1 = createEmptyList(m_Fixture.m_TempPool1);
+    QVERIFY(m_Fixture.m_List1);
 
-    const size_t initialPooledElementsCount = getAvailableElementsCount(m_TempPool1);
+    const size_t initialPooledElementsCount = getAvailableElementsCount(m_Fixture.m_TempPool1);
 
     QVERIFY(initialPooledElementsCount == ELEMENTS_POOL_SLICE_SIZE);
     QVERIFY(initialPooledElementsCount >= 8); // safety net to prevent overflows, see below
 
-    ListElement* element = aquireElement(m_TempPool1);
+    ListElement* element = aquireElement(m_Fixture.m_TempPool1);
 
     CHECK_AQUIRED_ELEMENTS(&element, 1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == initialPooledElementsCount - 1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == initialPooledElementsCount - 1);
 
-    prependToList(m_List1, element);
+    prependToList(m_Fixture.m_List1, element);
 
-    element = aquireElement(m_TempPool1);
+    element = aquireElement(m_Fixture.m_TempPool1);
 
     CHECK_AQUIRED_ELEMENTS(&element, 1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == initialPooledElementsCount - 2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == initialPooledElementsCount - 2);
 
-    appendToList(m_List1, element);
+    appendToList(m_Fixture.m_List1, element);
 
-    QVERIFY(getListSize(m_List1) == 2);
+    QVERIFY(getListSize(m_Fixture.m_List1) == 2);
 
     for (size_t index = 0; index < initialPooledElementsCount - 3; ++index)
     {
-        element = aquireElement(m_TempPool1);
+        element = aquireElement(m_Fixture.m_TempPool1);
         QVERIFY(element);
 
         if (index % 2)
         {
-            prependToList(m_List1, element);
+            prependToList(m_Fixture.m_List1, element);
         }
         else
         {
-            appendToList(m_List1, element);
+            appendToList(m_Fixture.m_List1, element);
         }
     }
 
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 1);
-    QVERIFY(getListSize(m_List1) == initialPooledElementsCount - 1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 1);
+    QVERIFY(getListSize(m_Fixture.m_List1) == initialPooledElementsCount - 1);
 
-    element = aquireElement(m_TempPool1);
+    element = aquireElement(m_Fixture.m_TempPool1);
 
     CHECK_AQUIRED_ELEMENTS(&element, 1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 0);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 0);
 
-    appendToList(m_List1, element);
-    QVERIFY(getListSize(m_List1) == initialPooledElementsCount);
+    appendToList(m_Fixture.m_List1, element);
+    QVERIFY(getListSize(m_Fixture.m_List1) == initialPooledElementsCount);
 
-    element = aquireElement(m_TempPool1);
+    element = aquireElement(m_Fixture.m_TempPool1);
 
     QVERIFY(element);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
 
     bool released = false;
 
-    released = releaseElement(element, m_TempPool1);
-    QVERIFY(released && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE);
+    released = releaseElement(element, m_Fixture.m_TempPool1);
+    QVERIFY(released && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE);
 
-    element = removeLastListElement(m_List1);
+    element = removeLastListElement(m_Fixture.m_List1);
     QVERIFY(element);
 
-    released = releaseElement(element, m_TempPool1);
-    QVERIFY(released && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 1);
+    released = releaseElement(element, m_Fixture.m_TempPool1);
+    QVERIFY(released && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 1);
 
-    element = removeFirstListElement(m_List1);
+    element = removeFirstListElement(m_Fixture.m_List1);
     QVERIFY(element);
 
-    released = releaseElement(element, m_TempPool1);
-    QVERIFY(released && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 2);
+    released = releaseElement(element, m_Fixture.m_TempPool1);
+    QVERIFY(released && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 2);
 
     // releasing an element twice is not allowed
-    released = releaseElement(element, m_TempPool1);
+    released = releaseElement(element, m_Fixture.m_TempPool1);
     QVERIFY(!released);
 
     ListElement* newElement = createListElement();
-    _markListElementForDeletion(newElement);
+    m_Fixture.markListElementForCleanup(newElement, false);
 
     // releasing an element that doesn't belong to pool is not allowed
-    released = releaseElement(newElement, m_TempPool1);
-    QVERIFY(!released && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 2);
+    released = releaseElement(newElement, m_Fixture.m_TempPool1);
+    QVERIFY(!released && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 2);
 
-    element = aquireElement(m_TempPool1);
+    element = aquireElement(m_Fixture.m_TempPool1);
 
     CHECK_AQUIRED_ELEMENTS(&element, 1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 1);
 
-    released = releaseElement(element, m_TempPool1);
-    QVERIFY(released && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 2);
+    released = releaseElement(element, m_Fixture.m_TempPool1);
+    QVERIFY(released && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE + 2);
 
-    const size_t listElementsCount = getListSize(m_List1);
+    const size_t listElementsCount = getListSize(m_Fixture.m_List1);
     QVERIFY(listElementsCount == initialPooledElementsCount - 2);
 
     for (size_t index = 0; index < listElementsCount; ++index)
     {
-        element = index % 2 == 0 ? removeLastListElement(m_List1) : removeFirstListElement(m_List1);
+        element = index % 2 == 0 ? removeLastListElement(m_Fixture.m_List1) : removeFirstListElement(m_Fixture.m_List1);
         QVERIFY(element);
-        released = releaseElement(element, m_TempPool1);
+        released = releaseElement(element, m_Fixture.m_TempPool1);
         QVERIFY(released);
         element = nullptr;
     }
 
     const size_t finalPooledElementsCount = initialPooledElementsCount + ELEMENTS_POOL_SLICE_SIZE;
 
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == finalPooledElementsCount);
-    QVERIFY(isEmptyList(m_List1));
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == finalPooledElementsCount);
+    QVERIFY(isEmptyList(m_Fixture.m_List1));
 
-    released = releaseElement(nullptr, m_TempPool1);
-    QVERIFY(!released && getAvailableElementsCount(m_TempPool1) == finalPooledElementsCount);
+    released = releaseElement(nullptr, m_Fixture.m_TempPool1);
+    QVERIFY(!released && getAvailableElementsCount(m_Fixture.m_TempPool1) == finalPooledElementsCount);
 }
 
 void ListElementTests::testAquiringMultiplePoolElements()
 {
-    m_TempPool1 = createListElementsPool();
-    QVERIFY(m_TempPool1);
+    m_Fixture.m_TempPool1 = createListElementsPool();
+    QVERIFY(m_Fixture.m_TempPool1);
 
     // batch 1
     const size_t batchSize1 = 3;
     ListElement** listElementRefs1 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs1, batchSize1);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs1, batchSize1, m_Fixture);
 
-    bool multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs1, batchSize1);
+    bool multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs1, batchSize1);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 3);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 3);
     CHECK_AQUIRED_ELEMENTS(listElementRefs1, batchSize1);
 
     // batch 2
     const size_t batchSize2 = ELEMENTS_POOL_SLICE_SIZE - 2;
     ListElement** listElementRefs2 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs2, batchSize2);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs2, batchSize2, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs2, batchSize2);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs2, batchSize2);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
     CHECK_AQUIRED_ELEMENTS(listElementRefs2, batchSize2);
 
-    RELEASE_ELEMENTS(listElementRefs2, batchSize2, m_TempPool1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE - 3);
+    RELEASE_ELEMENTS(listElementRefs2, batchSize2, m_Fixture.m_TempPool1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE - 3);
 
-    RELEASE_ELEMENTS(listElementRefs1, batchSize1, m_TempPool1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE);
+    RELEASE_ELEMENTS(listElementRefs1, batchSize1, m_Fixture.m_TempPool1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE);
 
     // batch 3
     const size_t batchSize3 = 2 * ELEMENTS_POOL_SLICE_SIZE;
     ListElement** listElementRefs3 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs3, batchSize3);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs3, batchSize3, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs3, batchSize3);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs3, batchSize3);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == 0);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == 0);
     CHECK_AQUIRED_ELEMENTS(listElementRefs3, batchSize3);
 
-    RELEASE_ELEMENTS(listElementRefs3, batchSize3, m_TempPool1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE);
+    RELEASE_ELEMENTS(listElementRefs3, batchSize3, m_Fixture.m_TempPool1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE);
 
     // batch 4
     const size_t batchSize4 = 1;
     ListElement** listElementRefs4 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs4, batchSize4);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs4, batchSize4, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs4, batchSize4);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs4, batchSize4);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE - 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE - 1);
     CHECK_AQUIRED_ELEMENTS(listElementRefs4, batchSize4);
 
     // batch 5
     size_t batchSize5 = 2 * ELEMENTS_POOL_SLICE_SIZE + 1;
     ListElement** listElementRefs5 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs5, batchSize5);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs5, batchSize5, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs5, batchSize5);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs5, batchSize5);
     QVERIFY(!multipleElementsAquired);
 
     --batchSize5;
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs5, batchSize5);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs5, batchSize5);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
     CHECK_AQUIRED_ELEMENTS(listElementRefs5, batchSize5);
 
-    RELEASE_ELEMENTS(listElementRefs4, batchSize4, m_TempPool1);
-    RELEASE_ELEMENTS(listElementRefs5, batchSize5, m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs4, batchSize4, m_Fixture.m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs5, batchSize5, m_Fixture.m_TempPool1);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 3 * ELEMENTS_POOL_SLICE_SIZE);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 3 * ELEMENTS_POOL_SLICE_SIZE);
 
     // batch 6
     const size_t batchSize6 = ELEMENTS_POOL_SLICE_SIZE + ELEMENTS_POOL_SLICE_SIZE / 2;
     ListElement** listElementRefs6 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs6, batchSize6);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs6, batchSize6, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs6, batchSize6);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs6, batchSize6);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == batchSize6);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == batchSize6);
     CHECK_AQUIRED_ELEMENTS(listElementRefs6, batchSize6);
 
     // batch 7
     const size_t batchSize7 = ELEMENTS_POOL_SLICE_SIZE;
     ListElement** listElementRefs7 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs7, batchSize7);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs7, batchSize7, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs7, batchSize7);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs7, batchSize7);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE / 2);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE / 2);
     CHECK_AQUIRED_ELEMENTS(listElementRefs7, batchSize7);
 
     // batch 8
     size_t batchSize8 = ELEMENTS_POOL_SLICE_SIZE + ELEMENTS_POOL_SLICE_SIZE / 2 + 1;
     ListElement** listElementRefs8 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs8, batchSize8);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs8, batchSize8, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs8, batchSize8);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs8, batchSize8);
 
     QVERIFY(!multipleElementsAquired);
 
     --batchSize8;
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs8, batchSize8);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs8, batchSize8);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == 0);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == 0);
     CHECK_AQUIRED_ELEMENTS(listElementRefs8, batchSize8);
 
     // batch 9
     const size_t batchSize9 = 5;
     ListElement** listElementRefs9 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs9, batchSize9);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs9, batchSize9, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs9, batchSize9);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs9, batchSize9);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 5);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 5);
     CHECK_AQUIRED_ELEMENTS(listElementRefs9, batchSize9);
 
-    RELEASE_ELEMENTS(listElementRefs6, batchSize6, m_TempPool1);
-    RELEASE_ELEMENTS(listElementRefs7, batchSize7, m_TempPool1);
-    RELEASE_ELEMENTS(listElementRefs8, batchSize8, m_TempPool1);
-    RELEASE_ELEMENTS(listElementRefs9, batchSize9, m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs6, batchSize6, m_Fixture.m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs7, batchSize7, m_Fixture.m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs8, batchSize8, m_Fixture.m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs9, batchSize9, m_Fixture.m_TempPool1);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 5 * ELEMENTS_POOL_SLICE_SIZE);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 5 * ELEMENTS_POOL_SLICE_SIZE);
 
     // combined test: aquire single element and aquire multiple elements
-    m_TempPool2 = createListElementsPool();
-    QVERIFY(m_TempPool2);
+    m_Fixture.m_TempPool2 = createListElementsPool();
+    QVERIFY(m_Fixture.m_TempPool2);
 
-    ListElement* element = aquireElement(m_TempPool2);
+    ListElement* element = aquireElement(m_Fixture.m_TempPool2);
     QVERIFY(element);
     CHECK_AQUIRED_ELEMENTS(&element, 1);
 
     const size_t batchSize10 = ELEMENTS_POOL_SLICE_SIZE - 1;
     ListElement** listElementRefs10 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs10, batchSize10);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs10, batchSize10, m_Fixture);
 
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs10, batchSize10);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs10, batchSize10);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == 0);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == 0);
     CHECK_AQUIRED_ELEMENTS(listElementRefs10, batchSize10);
 
-    RELEASE_ELEMENTS(listElementRefs10, batchSize10, m_TempPool2);
-    RELEASE_ELEMENTS(&element, 1, m_TempPool2);
+    RELEASE_ELEMENTS(listElementRefs10, batchSize10, m_Fixture.m_TempPool2);
+    RELEASE_ELEMENTS(&element, 1, m_Fixture.m_TempPool2);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
     // additional corner cases
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs10, 0);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs10, 0);
     QVERIFY(!multipleElementsAquired);
 
     multipleElementsAquired = aquireElements(nullptr, listElementRefs10, 1);
     QVERIFY(!multipleElementsAquired);
 
-    multipleElementsAquired = aquireElements(m_TempPool2, nullptr, 1);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, nullptr, 1);
     QVERIFY(!multipleElementsAquired);
 }
 
 void ListElementTests::testOptimizingPoolCapacity()
 {
     // first pool: simple test for optimizing capacity
-    m_TempPool1 = createListElementsPool();
-    QVERIFY(m_TempPool1);
+    m_Fixture.m_TempPool1 = createListElementsPool();
+    QVERIFY(m_Fixture.m_TempPool1);
 
     const size_t batchSize1 = ELEMENTS_POOL_SLICE_SIZE + 1;
     ListElement** listElementRefs1 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs1, batchSize1);
-    bool multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs1, batchSize1);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs1, batchSize1, m_Fixture);
+    bool multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs1, batchSize1);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 1);
 
     const size_t batchSize2 = 5;
     ListElement** listElementRefs2 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs2, batchSize2);
-    multipleElementsAquired = aquireElements(m_TempPool1, listElementRefs2, batchSize2);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs2, batchSize2, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs2, batchSize2);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 6);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 6);
 
-    RELEASE_ELEMENTS(listElementRefs1, batchSize1, m_TempPool1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE - 5);
+    RELEASE_ELEMENTS(listElementRefs1, batchSize1, m_Fixture.m_TempPool1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == 2 * ELEMENTS_POOL_SLICE_SIZE - 5);
 
-    shrinkPoolCapacity(m_TempPool1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 5);
+    shrinkPoolCapacity(m_Fixture.m_TempPool1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE - 5);
 
-    RELEASE_ELEMENTS(listElementRefs2, batchSize2, m_TempPool1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE);
+    RELEASE_ELEMENTS(listElementRefs2, batchSize2, m_Fixture.m_TempPool1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE);
 
-    shrinkPoolCapacity(m_TempPool1);
-    QVERIFY(getAvailableElementsCount(m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE);
+    shrinkPoolCapacity(m_Fixture.m_TempPool1);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool1) == ELEMENTS_POOL_SLICE_SIZE);
 
     // second pool: test that the integrity of the aquired elements is preserved when optimization is performed
-    m_TempPool2 = createListElementsPool();
-    QVERIFY(m_TempPool2);
+    m_Fixture.m_TempPool2 = createListElementsPool();
+    QVERIFY(m_Fixture.m_TempPool2);
 
     const size_t batchSize3 = ELEMENTS_POOL_SLICE_SIZE - 1;
     ListElement** listElementRefs3 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs3, batchSize3);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs3, batchSize3);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs3, batchSize3, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs3, batchSize3);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == 1);
 
     const size_t batchSize4 = ELEMENTS_POOL_SLICE_SIZE + 1;
     ListElement** listElementRefs4 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs4, batchSize4);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs4, batchSize4);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs4, batchSize4, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs4, batchSize4);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == 0);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == 0);
 
-    m_List1 = createEmptyList(m_TempPool2);
-    QVERIFY(m_List1);
+    m_Fixture.m_List1 = createEmptyList(m_Fixture.m_TempPool2);
+    QVERIFY(m_Fixture.m_List1);
 
-    (void)createAndAppendToList(m_List1, 5);
-    (void)createAndPrependToList(m_List1, 4);
-    (void)createAndAppendToList(m_List1, 2);
-    (void)createAndAppendToList(m_List1, 9);
+    (void)createAndAppendToList(m_Fixture.m_List1, 5);
+    (void)createAndPrependToList(m_Fixture.m_List1, 4);
+    (void)createAndAppendToList(m_Fixture.m_List1, 2);
+    (void)createAndAppendToList(m_Fixture.m_List1, 9);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 4);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 4);
 
     const size_t batchSize5 = ELEMENTS_POOL_SLICE_SIZE - 3;
     ListElement** listElementRefs5 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs5, batchSize5);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs5, batchSize5);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs5, batchSize5, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs5, batchSize5);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 1);
 
     const size_t prioritiesArray1[8] = {2, 4, 5, 8, 7, 0, 2, 3};
-    m_List2 = createListFromPrioritiesArray(prioritiesArray1, 8, m_TempPool2);
-    QVERIFY(m_List2);
+    m_Fixture.m_List2 = createListFromPrioritiesArray(prioritiesArray1, 8, m_Fixture.m_TempPool2);
+    QVERIFY(m_Fixture.m_List2);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 9);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 9);
 
     const size_t batchSize6 = ELEMENTS_POOL_SLICE_SIZE - 4;
     ListElement** listElementRefs6 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs6, batchSize6);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs6, batchSize6);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs6, batchSize6, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs6, batchSize6);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
 
-    RELEASE_ELEMENTS(listElementRefs4, batchSize4, m_TempPool2);
-    RELEASE_ELEMENTS(listElementRefs6, batchSize6, m_TempPool2);
+    RELEASE_ELEMENTS(listElementRefs4, batchSize4, m_Fixture.m_TempPool2);
+    RELEASE_ELEMENTS(listElementRefs6, batchSize6, m_Fixture.m_TempPool2);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 3 * ELEMENTS_POOL_SLICE_SIZE - 8);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 3 * ELEMENTS_POOL_SLICE_SIZE - 8);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 8);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 8);
 
-    sortDescendingByPriority(m_List2);
+    sortDescendingByPriority(m_Fixture.m_List2);
 
-    QVERIFY(getListSize(m_List2) == 8);
-    QVERIFY(m_List2->first && m_List2->first->priority == 8);
-    QVERIFY(m_List2->last && m_List2->last->priority == 0);
+    QVERIFY(getListSize(m_Fixture.m_List2) == 8);
+    QVERIFY(m_Fixture.m_List2->first && m_Fixture.m_List2->first->priority == 8);
+    QVERIFY(m_Fixture.m_List2->last && m_Fixture.m_List2->last->priority == 0);
 
-    clearList(m_List2, deleteObjectPayload);
+    clearList(m_Fixture.m_List2, deleteObjectPayload);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
-    RELEASE_ELEMENTS(listElementRefs3, batchSize3, m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE - 1);
+    RELEASE_ELEMENTS(listElementRefs3, batchSize3, m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE - 1);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 1);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 1);
 
     const size_t batchSize7 = ELEMENTS_POOL_SLICE_SIZE + 4;
     ListElement** listElementRefs7 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs7, batchSize7);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs7, batchSize7);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs7, batchSize7, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs7, batchSize7);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
     CHECK_AQUIRED_ELEMENTS(listElementRefs7, batchSize7);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
 
-    QVERIFY(m_List1->first && m_List1->first->priority == 4);
-    QVERIFY(m_List1->last && m_List1->last->priority == 9);
+    QVERIFY(m_Fixture.m_List1->first && m_Fixture.m_List1->first->priority == 4);
+    QVERIFY(m_Fixture.m_List1->last && m_Fixture.m_List1->last->priority == 9);
 
-    RELEASE_ELEMENTS(listElementRefs5, batchSize5, m_TempPool2);
-    RELEASE_ELEMENTS(listElementRefs7, batchSize7, m_TempPool2);
+    RELEASE_ELEMENTS(listElementRefs5, batchSize5, m_Fixture.m_TempPool2);
+    RELEASE_ELEMENTS(listElementRefs7, batchSize7, m_Fixture.m_TempPool2);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 3 * ELEMENTS_POOL_SLICE_SIZE - 4);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 3 * ELEMENTS_POOL_SLICE_SIZE - 4);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 4);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 4);
 
-    QVERIFY(getListSize(m_List1) == 4);
-    ListIterator it = lbegin(m_List1);
+    QVERIFY(getListSize(m_Fixture.m_List1) == 4);
+    ListIterator it = lbegin(m_Fixture.m_List1);
     lnext(&it);
 
     QVERIFY(it.current && it.current->priority == 5);
 
     (void)createAndInsertBefore(it, 20);
 
-    QVERIFY(getListSize(m_List1) == 5);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
-    QVERIFY(m_List1->first && m_List1->first->next && m_List1->first->next->priority == 20);
+    QVERIFY(getListSize(m_Fixture.m_List1) == 5);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 5);
+    QVERIFY(m_Fixture.m_List1->first && m_Fixture.m_List1->first->next && m_Fixture.m_List1->first->next->priority == 20);
 
     const size_t prioritiesArray2[4] = {9, 5, 12, 7};
-    m_List3 = createListFromPrioritiesArray(prioritiesArray2, 4, m_TempPool2);
-    QVERIFY(m_List3);
+    m_Fixture.m_List3 = createListFromPrioritiesArray(prioritiesArray2, 4, m_Fixture.m_TempPool2);
+    QVERIFY(m_Fixture.m_List3);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 9);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 9);
 
-    sortAscendingByPriority(m_List3);
+    sortAscendingByPriority(m_Fixture.m_List3);
 
-    QVERIFY(getListSize(m_List3) == 4);
-    QVERIFY(m_List3->first && m_List3->first->priority == 5);
-    QVERIFY(m_List3->last && m_List3->last->priority == 12);
+    QVERIFY(getListSize(m_Fixture.m_List3) == 4);
+    QVERIFY(m_Fixture.m_List3->first && m_Fixture.m_List3->first->priority == 5);
+    QVERIFY(m_Fixture.m_List3->last && m_Fixture.m_List3->last->priority == 12);
 
-    clearList(m_List1, deleteObjectPayload);
-    clearList(m_List3, deleteObjectPayload);
+    clearList(m_Fixture.m_List1, deleteObjectPayload);
+    clearList(m_Fixture.m_List3, deleteObjectPayload);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
     const size_t batchSize8 = ELEMENTS_POOL_SLICE_SIZE + 1;
     ListElement** listElementRefs8 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs8, batchSize8);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs8, batchSize8);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs8, batchSize8, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs8, batchSize8);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE - 1);
     CHECK_AQUIRED_ELEMENTS(listElementRefs8, batchSize8);
 
-    RELEASE_ELEMENTS(listElementRefs8, batchSize8, m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE);
+    RELEASE_ELEMENTS(listElementRefs8, batchSize8, m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE);
 
     const size_t batchSize9 = ELEMENTS_POOL_SLICE_SIZE;
     ListElement** listElementRefs9 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs9, batchSize9);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs9, batchSize9);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs9, batchSize9, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs9, batchSize9);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 
-    RELEASE_ELEMENTS(listElementRefs9, batchSize9, m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE);
+    RELEASE_ELEMENTS(listElementRefs9, batchSize9, m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE);
 
     const size_t batchSize10 = ELEMENTS_POOL_SLICE_SIZE - 1;
     ListElement** listElementRefs10 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs10, batchSize10);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs10, batchSize10);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs10, batchSize10, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs10, batchSize10);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE + 1);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE + 1);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 1);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 1);
 
     const size_t batchSize11 = ELEMENTS_POOL_SLICE_SIZE + 1;
     ListElement** listElementRefs11 = nullptr;
-    ALLOC_LIST_ELEMENT_REFS(listElementRefs11, batchSize11);
-    multipleElementsAquired = aquireElements(m_TempPool2, listElementRefs11, batchSize11);
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs11, batchSize11, m_Fixture);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, listElementRefs11, batchSize11);
 
-    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_TempPool2) == 0);
+    QVERIFY(multipleElementsAquired && getAvailableElementsCount(m_Fixture.m_TempPool2) == 0);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 0);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 0);
 
-    RELEASE_ELEMENTS(listElementRefs10, batchSize10, m_TempPool2);
-    RELEASE_ELEMENTS(listElementRefs11, batchSize11, m_TempPool2);
+    RELEASE_ELEMENTS(listElementRefs10, batchSize10, m_Fixture.m_TempPool2);
+    RELEASE_ELEMENTS(listElementRefs11, batchSize11, m_Fixture.m_TempPool2);
 
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == 2 * ELEMENTS_POOL_SLICE_SIZE);
 
-    shrinkPoolCapacity(m_TempPool2);
-    QVERIFY(getAvailableElementsCount(m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
+    shrinkPoolCapacity(m_Fixture.m_TempPool2);
+    QVERIFY(getAvailableElementsCount(m_Fixture.m_TempPool2) == ELEMENTS_POOL_SLICE_SIZE);
 }
 
 void ListElementTests::testAssignRemoveObject()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    m_List1 = createEmptyList(pool);
+    m_Fixture.m_List1 = createEmptyList(pool);
 
     // Point
     Point* point = static_cast<Point*>(malloc(sizeof(Point)));
     point->x = 3;
     point->y = 4;
-    assignObjectContentToListElement(createAndAppendToList(m_List1, 2), POINT, static_cast<void*>(point));
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 2), POINT, static_cast<void*>(point));
     point = nullptr;
     // int
     int* distance = static_cast<int*>(malloc(sizeof(int)));
     *distance = 5;
-    assignObjectContentToListElement(createAndAppendToList(m_List1, 3), INTEGER, static_cast<void*>(distance));
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 3), INTEGER, static_cast<void*>(distance));
     distance = nullptr;
     // float
     double* angle = static_cast<double*>(malloc(sizeof(double)));
     *angle = 1.25;
-    assignObjectContentToListElement(createAndAppendToList(m_List1, 1), DECIMAL, static_cast<void*>(angle));
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 1), DECIMAL, static_cast<void*>(angle));
     angle = nullptr;
     // no object
-    Q_UNUSED(createAndPrependToList(m_List1, 10));
+    Q_UNUSED(createAndPrependToList(m_Fixture.m_List1, 10));
 
-    QVERIFY(getListSize(m_List1) == 4);
+    QVERIFY(getListSize(m_Fixture.m_List1) == 4);
 
-    ListIterator it = lbegin(m_List1);
+    ListIterator it = lbegin(m_Fixture.m_List1);
     QVERIFY2(it.current->object.type == -1 && it.current->object.payload == nullptr, "Default object is incorrect (should be empty)");
     lnext(&it);
     QVERIFY2(it.current->object.type == POINT && (static_cast<Point*>(it.current->object.payload))->x == 3
@@ -623,9 +582,9 @@ void ListElementTests::testAssignRemoveObject()
     lnext(&it);
     QVERIFY2(it.current->object.type == DECIMAL && areDecimalNumbersEqual(*(static_cast<double*>(it.current->object.payload)), 1.25), "Object has been incorrectly assigned");
 
-    Object* removedObject = static_cast<Object*>(detachContentFromListElement(getListElementAtIndex(m_List1, 2)));
-    QVERIFY2(getListElementAtIndex(m_List1, 2)->object.type == -1 &&
-             getListElementAtIndex(m_List1, 2)->object.payload == nullptr &&
+    Object* removedObject = static_cast<Object*>(detachContentFromListElement(getListElementAtIndex(m_Fixture.m_List1, 2)));
+    QVERIFY2(getListElementAtIndex(m_Fixture.m_List1, 2)->object.type == -1 &&
+             getListElementAtIndex(m_Fixture.m_List1, 2)->object.payload == nullptr &&
              removedObject->type == INTEGER &&
              (*(static_cast<int*>(removedObject->payload)) == 5), "Incorrect object removal from list element");
 
@@ -633,95 +592,37 @@ void ListElementTests::testAssignRemoveObject()
     free(removedObject);
     removedObject = nullptr;
 
-    QVERIFY(getListSize(m_List1) == 4);
+    QVERIFY(getListSize(m_Fixture.m_List1) == 4);
 }
 
 void ListElementTests::initTestCase_data()
 {
-    m_Pool = createListElementsPool();
-    QVERIFY(m_Pool);
-
-    m_TotalAvailablePoolElementsCount = getAvailableElementsCount(m_Pool);
+    m_Fixture.init();
+    QVERIFY(m_Fixture.hasInitialState());
 
     ListElementsPool* p_NullPool{nullptr};
 
     QTest::addColumn<ListElementsPool*>("pool");
 
-    QTest::newRow("allocation from pool") << m_Pool;
+    QTest::newRow("allocation from pool") << m_Fixture.m_Pool;
     QTest::newRow("no pool allocation") << p_NullPool;
 }
 
 void ListElementTests::cleanupTestCase()
 {
-    QVERIFY(m_Pool);
-
-    deleteListElementsPool(m_Pool);
-    m_Pool = nullptr;
-    m_TotalAvailablePoolElementsCount = 0;
-
-    QVERIFY(!m_TempPool1);
-    QVERIFY(!m_TempPool2);
-    QVERIFY(!m_List1);
-    QVERIFY(!m_List2);
-    QVERIFY(!m_List3);
-
-    QVERIFY(m_ListElementsMarkedForDeletion.empty());
-    QVERIFY(m_ListElementRefsMarkedForDeletion.empty());
+    QVERIFY(m_Fixture.hasInitialState());
+    m_Fixture.destroy();
 }
 
 void ListElementTests::init()
 {
-    QVERIFY(m_Pool);
-    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
-
-    QVERIFY(!m_TempPool1);
-    QVERIFY(!m_TempPool2);
-    QVERIFY(!m_List1);
-    QVERIFY(!m_List2);
-    QVERIFY(!m_List3);
-
-    QVERIFY(m_ListElementsMarkedForDeletion.empty());
-    QVERIFY(m_ListElementRefsMarkedForDeletion.empty());
+    QVERIFY(m_Fixture.hasInitialState());
 }
 
 void ListElementTests::cleanup()
 {
-    DELETE_LIST(m_List1, deleteObjectPayload);
-    DELETE_LIST(m_List2, deleteObjectPayload);
-    DELETE_LIST(m_List3, deleteObjectPayload);
-
-    DELETE_LIST_ELEMENTS_POOL(m_TempPool1);
-    DELETE_LIST_ELEMENTS_POOL(m_TempPool2);
-
-    for (auto& element : m_ListElementsMarkedForDeletion)
-    {
-        FREE(element);
-    }
-
-    m_ListElementsMarkedForDeletion.clear();
-
-    for (auto& elementRefs : m_ListElementRefsMarkedForDeletion)
-    {
-        FREE(elementRefs);
-    }
-
-    m_ListElementRefsMarkedForDeletion.clear();
-}
-
-void ListElementTests::_markListElementForDeletion(ListElement* element)
-{
-    if (element)
-    {
-        m_ListElementsMarkedForDeletion.push_back(element);
-    }
-}
-
-void ListElementTests::_markListElementRefsForDeletion(ListElement** elementRefs)
-{
-    if (elementRefs)
-    {
-        m_ListElementRefsMarkedForDeletion.push_back(elementRefs);
-    }
+    m_Fixture.resetToInitialState();
+    QVERIFY(m_Fixture.hasInitialState());
 }
 
 QTEST_APPLESS_MAIN(ListElementTests)

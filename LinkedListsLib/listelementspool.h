@@ -34,6 +34,7 @@ bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size
 bool releaseElement(ListElement* element, ListElementsPool* elementsPool);
 void shrinkPoolCapacity(ListElementsPool* elementsPool);
 size_t getAvailableElementsCount(ListElementsPool* elementsPool);
+size_t getAquiredElementsCount(ListElementsPool* elementsPool);
 
 #ifdef __cplusplus
 }
