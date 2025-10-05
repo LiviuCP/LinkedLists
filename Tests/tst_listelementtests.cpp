@@ -1,8 +1,6 @@
 #include <QTest>
 
 #include "listtestfixture.h"
-#include "linkedlist.h"
-#include "listelementspool.h"
 #include "codeutils.h"
 #include "testobjects.h"
 
@@ -598,7 +596,6 @@ void ListElementTests::testAssignRemoveObject()
 void ListElementTests::initTestCase_data()
 {
     m_Fixture.init();
-    QVERIFY(m_Fixture.hasInitialState());
 
     ListElementsPool* p_NullPool{nullptr};
 
@@ -622,7 +619,6 @@ void ListElementTests::init()
 void ListElementTests::cleanup()
 {
     m_Fixture.resetToInitialState();
-    QVERIFY(m_Fixture.hasInitialState());
 }
 
 QTEST_APPLESS_MAIN(ListElementTests)

@@ -1,7 +1,7 @@
 #include <QTest>
 
+#include "listtestfixture.h"
 #include "priorityqueue.h"
-#include "listelementspool.h"
 #include "testobjects.h"
 
 #define DELETE_PRIORITY_QUEUE(queue, deleter) \
@@ -30,17 +30,13 @@ private slots:
     void cleanup();
 
 private:
-    ListElementsPool* m_Pool;
-    size_t m_TotalAvailablePoolElementsCount;
-
+    ListTestFixture m_Fixture;
     PriorityQueue* m_Queue1;
     PriorityQueue* m_Queue2;
 };
 
 PriorityQueueTests::PriorityQueueTests()
-    : m_Pool{nullptr}
-    , m_TotalAvailablePoolElementsCount{0}
-    , m_Queue1{nullptr}
+    : m_Queue1{nullptr}
     , m_Queue2{nullptr}
 {
 }
@@ -48,7 +44,7 @@ PriorityQueueTests::PriorityQueueTests()
 void PriorityQueueTests::testElementsInsertionDeletion()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     m_Queue1 = createPriorityQueue(pool);
 
@@ -119,7 +115,7 @@ void PriorityQueueTests::testElementsInsertionDeletion()
 void PriorityQueueTests::testClearPriorityQueue()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     m_Queue1 = createPriorityQueue(pool);
 
@@ -138,7 +134,7 @@ void PriorityQueueTests::testClearPriorityQueue()
 void PriorityQueueTests::testIterators()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     {
         m_Queue1 = createPriorityQueue(pool);
@@ -219,7 +215,7 @@ void PriorityQueueTests::testIterators()
 void PriorityQueueTests::testModifyObject()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     m_Queue1 = createPriorityQueue(pool);
 
@@ -263,33 +259,25 @@ void PriorityQueueTests::testModifyObject()
 
 void PriorityQueueTests::initTestCase_data()
 {
-    m_Pool = createListElementsPool();
-    QVERIFY(m_Pool);
-
-    m_TotalAvailablePoolElementsCount = getAvailableElementsCount(m_Pool);
+    m_Fixture.init();
 
     ListElementsPool* p_NullPool{nullptr};
 
     QTest::addColumn<ListElementsPool*>("pool");
 
-    QTest::newRow("allocation from pool") << m_Pool;
+    QTest::newRow("allocation from pool") << m_Fixture.m_Pool;
     QTest::newRow("no pool allocation") << p_NullPool;
 }
 
 void PriorityQueueTests::cleanupTestCase()
 {
-    QVERIFY(m_Pool);
-
-    deleteListElementsPool(m_Pool);
-    m_Pool = nullptr;
-    m_TotalAvailablePoolElementsCount = 0;
+    QVERIFY(m_Fixture.hasInitialState());
+    m_Fixture.destroy();
 }
 
 void PriorityQueueTests::init()
 {
-    QVERIFY(m_Pool);
-    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
-
+    QVERIFY(m_Fixture.hasInitialState());
     QVERIFY(!m_Queue1);
     QVERIFY(!m_Queue2);
 }
@@ -299,7 +287,7 @@ void PriorityQueueTests::cleanup()
     DELETE_PRIORITY_QUEUE(m_Queue1, emptyTestObject);
     DELETE_PRIORITY_QUEUE(m_Queue2, emptyTestObject);
 
-    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+    m_Fixture.resetToInitialState();
 }
 
 QTEST_APPLESS_MAIN(PriorityQueueTests)

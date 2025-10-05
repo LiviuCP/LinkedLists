@@ -1,8 +1,6 @@
 #include <QTest>
 
 #include "listtestfixture.h"
-#include "linkedlist.h"
-#include "listelementspool.h"
 #include "sort.h"
 
 class ListSortingTests : public QObject
@@ -514,7 +512,6 @@ void ListSortingTests::testMoveArrayToList()
 void ListSortingTests::initTestCase_data()
 {
     m_Fixture.init();
-    QVERIFY(m_Fixture.hasInitialState());
 
     ListElementsPool* p_NullPool{nullptr};
 
@@ -538,7 +535,6 @@ void ListSortingTests::init()
 void ListSortingTests::cleanup()
 {
     m_Fixture.resetToInitialState();
-    QVERIFY(m_Fixture.hasInitialState());
 }
 
 size_t ListSortingTests::_getSumOfPriorities(List *list)

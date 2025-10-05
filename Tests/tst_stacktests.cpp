@@ -1,7 +1,7 @@
 #include <QTest>
 
+#include "listtestfixture.h"
 #include "stack.h"
-#include "listelementspool.h"
 #include "codeutils.h"
 #include "testobjects.h"
 
@@ -29,23 +29,19 @@ private slots:
     void cleanup();
 
 private:
-    ListElementsPool* m_Pool;
-    size_t m_TotalAvailablePoolElementsCount;
-
+    ListTestFixture m_Fixture;
     Stack* m_Stack1;
 };
 
 StackTests::StackTests()
-    : m_Pool{nullptr}
-    , m_TotalAvailablePoolElementsCount{0}
-    , m_Stack1{nullptr}
+    : m_Stack1{nullptr}
 {
 }
 
 void StackTests::testElementsAreCorrectlyPushedAndPopped()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     // first push
     m_Stack1 = createStack(pool);
@@ -88,7 +84,7 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
 void StackTests::testClearStack()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     m_Stack1 = createStack(pool);
 
@@ -106,41 +102,32 @@ void StackTests::testClearStack()
 
 void StackTests::initTestCase_data()
 {
-    m_Pool = createListElementsPool();
-    QVERIFY(m_Pool);
-
-    m_TotalAvailablePoolElementsCount = getAvailableElementsCount(m_Pool);
+    m_Fixture.init();
 
     ListElementsPool* p_NullPool{nullptr};
 
     QTest::addColumn<ListElementsPool*>("pool");
 
-    QTest::newRow("allocation from pool") << m_Pool;
+    QTest::newRow("allocation from pool") << m_Fixture.m_Pool;
     QTest::newRow("no pool allocation") << p_NullPool;
 }
 
 void StackTests::cleanupTestCase()
 {
-    QVERIFY(m_Pool);
-
-    deleteListElementsPool(m_Pool);
-    m_Pool = nullptr;
-    m_TotalAvailablePoolElementsCount = 0;
+    QVERIFY(m_Fixture.hasInitialState());
+    m_Fixture.destroy();
 }
 
 void StackTests::init()
 {
-    QVERIFY(m_Pool);
-    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
-
+    QVERIFY(m_Fixture.hasInitialState());
     QVERIFY(!m_Stack1);
 }
 
 void StackTests::cleanup()
 {
     DELETE_STACK(m_Stack1, emptyTestObject);
-
-    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+    m_Fixture.resetToInitialState();
 }
 
 QTEST_APPLESS_MAIN(StackTests)

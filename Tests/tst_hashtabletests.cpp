@@ -2,8 +2,8 @@
 
 #include <cstring>
 
+#include "listtestfixture.h"
 #include "hashtable.h"
-#include "listelementspool.h"
 
 #define DELETE_HASHTABLE(hashTable) \
     if (hashTable) \
@@ -32,17 +32,13 @@ private slots:
     void cleanup();
 
 private:
-    ListElementsPool* m_Pool;
-    size_t m_TotalAvailablePoolElementsCount;
-
+    ListTestFixture m_Fixture;
     HashTable* m_HashTable1;
     HashTable* m_HashTable2;
 };
 
 HashTableTests::HashTableTests()
-    : m_Pool{nullptr}
-    , m_TotalAvailablePoolElementsCount{0}
-    , m_HashTable1{nullptr}
+    : m_HashTable1{nullptr}
     , m_HashTable2{nullptr}
 {
 }
@@ -50,7 +46,7 @@ HashTableTests::HashTableTests()
 void HashTableTests::testHashTableIsCorrectlyCreated()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     m_HashTable1 = createHashTable(5, pool);
     QVERIFY2(getHashTableEntriesCount(m_HashTable1) == 0 && getHashIndexesCount(m_HashTable1) == 5, "The hash table has not been correctly created");
@@ -101,7 +97,7 @@ void HashTableTests::testHashIndexesAreCorrectlyRetrieved()
 void HashTableTests::testEntryIsCorrectlyInserted()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     m_HashTable1 = createHashTable(7, pool);
 
@@ -123,7 +119,7 @@ void HashTableTests::testEntryIsCorrectlyInserted()
 void HashTableTests::testEntryIsCorrectlyErased()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     {
         m_HashTable1 = createHashTable(5, pool);
@@ -157,7 +153,7 @@ void HashTableTests::testEntryIsCorrectlyErased()
 void HashTableTests::testEntryValueIsCorrectlyUpdated()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     m_HashTable1 = createHashTable(7, pool);
 
@@ -173,34 +169,25 @@ void HashTableTests::testEntryValueIsCorrectlyUpdated()
 
 void HashTableTests::initTestCase_data()
 {
-    m_Pool = createListElementsPool();
-    QVERIFY(m_Pool);
-
-    m_TotalAvailablePoolElementsCount = getAvailableElementsCount(m_Pool);
+    m_Fixture.init();
 
     ListElementsPool* p_NullPool{nullptr};
 
     QTest::addColumn<ListElementsPool*>("pool");
 
-    QTest::newRow("allocation from pool") << m_Pool;
+    QTest::newRow("allocation from pool") << m_Fixture.m_Pool;
     QTest::newRow("no pool allocation") << p_NullPool;
-
 }
 
 void HashTableTests::cleanupTestCase()
 {
-    QVERIFY(m_Pool);
-
-    deleteListElementsPool(m_Pool);
-    m_Pool = nullptr;
-    m_TotalAvailablePoolElementsCount = 0;
+    QVERIFY(m_Fixture.hasInitialState());
+    m_Fixture.destroy();
 }
 
 void HashTableTests::init()
 {
-    QVERIFY(m_Pool);
-    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
-
+    QVERIFY(m_Fixture.hasInitialState());
     QVERIFY(!m_HashTable1);
     QVERIFY(!m_HashTable2);
 }
@@ -210,7 +197,7 @@ void HashTableTests::cleanup()
     DELETE_HASHTABLE(m_HashTable1);
     DELETE_HASHTABLE(m_HashTable2);
 
-    QVERIFY(getAvailableElementsCount(m_Pool) == m_TotalAvailablePoolElementsCount);
+    m_Fixture.resetToInitialState();
 }
 
 QTEST_APPLESS_MAIN(HashTableTests)
