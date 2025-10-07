@@ -811,7 +811,7 @@ void sortDescendingByPriority(List* list)
     BUBBLE_SORT(DESCENDING , priority)
 }
 
-bool sortByRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
+bool sortByPriorityUsingRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
 {
     bool result = false;
 

@@ -1,22 +1,46 @@
 #include <QTest>
+#include <set>
 
 #include "listtestfixture.h"
 #include "sort.h"
+
+enum class SortingStatus
+{
+    SORTED,
+    UNSORTED
+};
+
+enum class SortingOrder
+{
+    ASCENDING,
+    DESCENDING
+};
+
+enum class SortingAlgorithm
+{
+    INSERTION,
+    HEAP,
+    MERGE,
+    QUICK,
+    ENHANCED_MERGE,
+    ENHANCED_QUICK,
+    QUICK_MERGE
+};
 
 class ListSortingTests : public QObject
 {
     Q_OBJECT
 
 private slots:
-    void testSortAscendingByPriority();
-    void testSortDescendingByPriority();
-    void testSortAscendingByPriorityUsingRandomAccess();
-    void testSortDescendingByPriorityUsingRandomAccess();
-    void testIsSortedAscendingByPriority();
-    void testIsSortedDescendingByPriority();
-
+    void testSortByPriorityNoRandomAccess();
+    void testSortByPriorityUsingRandomAccess();
+    void testIsSortedByPriority();
     void testMoveListToArray();
     void testMoveArrayToList();
+
+    void testSortByPriorityNoRandomAccess_data();
+    void testSortByPriorityUsingRandomAccess_data();
+    void testIsSortedByPriority_data();
 
     void initTestCase_data();
     void cleanupTestCase();
@@ -24,406 +48,125 @@ private slots:
     void cleanup();
 
 private:
-    size_t _getSumOfPriorities(List* list);
-
     ListTestFixture m_Fixture;
 };
 
-void ListSortingTests::testSortAscendingByPriority()
+void ListSortingTests::testSortByPriorityNoRandomAccess()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
+    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(SortingOrder, sortingOrder);
+    QFETCH(std::vector<size_t>, expectedPriorities);
+
+    const size_t prioritiesCount = priorities.size();
+    QVERIFY(prioritiesCount == expectedPriorities.size());
+
+    List* list = prioritiesCount > 0 ? createListFromPrioritiesArray(priorities.data(), prioritiesCount, pool) : createEmptyList(pool);
+    QVERIFY(list);
+
+    m_Fixture.markListForDeletion(list);
+
+    QVERIFY(getListSize(list) == prioritiesCount);
+
+    if (sortingOrder == SortingOrder::ASCENDING)
     {
-        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item first
-
-        sortAscendingByPriority(m_Fixture.m_List1);
-
-        QVERIFY(getListSize(m_Fixture.m_List1) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List1, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List1) == 19 && isSortedAscendingByPriority(m_Fixture.m_List1), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List1)->priority == 1 && getLastListElement(m_Fixture.m_List1)->priority == 6, "First and last element of the list are not correctly referenced");
+        sortAscendingByPriority(list);
+    }
+    else
+    {
+        sortDescendingByPriority(list);
     }
 
+    for (size_t index = 0; index < prioritiesCount; ++index)
     {
-        const size_t prioritiesArray[6]{3, 2, 1, 5, 2, 6};
-        m_Fixture.m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item last
-
-        sortAscendingByPriority(m_Fixture.m_List2);
-
-        QVERIFY(getListSize(m_Fixture.m_List2) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List2, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List2) == 19 && isSortedAscendingByPriority(m_Fixture.m_List2), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List2)->priority == 1 && getLastListElement(m_Fixture.m_List2)->priority == 6, "First and last element of the list are not correctly referenced");
+        QVERIFY(getListElementAtIndex(list, index)->priority == expectedPriorities[index]);
     }
 
+    if (prioritiesCount > 0)
     {
-        const size_t prioritiesArray[6]{1, 6, 2, 5, 3, 2};
-        m_Fixture.m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item first
-
-        sortAscendingByPriority(m_Fixture.m_List3);
-
-        QVERIFY(getListSize(m_Fixture.m_List3) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List3, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List3) == 19 && isSortedAscendingByPriority(m_Fixture.m_List3), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List3)->priority == 1 && getLastListElement(m_Fixture.m_List3)->priority == 6, "First and last element of the list are not correctly referenced");
+        QVERIFY(getFirstListElement(list)->priority == expectedPriorities[0] && getLastListElement(list)->priority == expectedPriorities[prioritiesCount - 1]);
     }
 
-    {
-        const size_t prioritiesArray[6]{2, 3, 5, 2, 6, 1};
-        m_Fixture.m_List4 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item last
-
-        sortAscendingByPriority(m_Fixture.m_List4);
-
-        QVERIFY(getListSize(m_Fixture.m_List4) == 6);
-        QVERIFY2(getFirstListElement(m_Fixture.m_List4)->priority == 1 && getLastListElement(m_Fixture.m_List4)->priority == 6, "First and last element of the list are not correctly referenced");
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List4, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List4) == 19 && isSortedAscendingByPriority(m_Fixture.m_List4), "The list hasn't been correctly sorted");
-    }
-
-    {
-        const size_t prioritiesArray[6]{2, 3, 1, 2, 6, 5};
-        m_Fixture.m_List5 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // random
-
-        sortAscendingByPriority(m_Fixture.m_List5);
-
-        QVERIFY(getListSize(m_Fixture.m_List5) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List5, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List5) == 19 && isSortedAscendingByPriority(m_Fixture.m_List5), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List5)->priority == 1 && getLastListElement(m_Fixture.m_List5)->priority == 6, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        const size_t prioritiesArray[2]{6, 5};
-        m_Fixture.m_List6 = createListFromPrioritiesArray(prioritiesArray, 2, pool);
-        sortAscendingByPriority(m_Fixture.m_List6);
-
-        QVERIFY(getListSize(m_Fixture.m_List6) == 2);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List6, 0)->priority == 5 && getListElementAtIndex(m_Fixture.m_List6, 1)->priority == 6, "The list hasn't been correctly sorted ");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List6)->priority == 5 && getLastListElement(m_Fixture.m_List6)->priority == 6, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        m_Fixture.m_List7 = createEmptyList(pool);
-        createAndAppendToList(m_Fixture.m_List7, 1);
-
-        sortAscendingByPriority(m_Fixture.m_List7);
-
-        QVERIFY(getListSize(m_Fixture.m_List7) == 1);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List7, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List7)->priority == 1 && getLastListElement(m_Fixture.m_List7)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
+    QVERIFY(sortingOrder == SortingOrder::ASCENDING ? isSortedAscendingByPriority(list) : isSortedDescendingByPriority(list));
 }
 
-void ListSortingTests::testSortDescendingByPriority()
+void ListSortingTests::testSortByPriorityUsingRandomAccess()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    {
-        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item first
-        sortDescendingByPriority(m_Fixture.m_List1);
+    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(SortingAlgorithm, algorithm);
+    QFETCH(SortingOrder, sortingOrder);
+    QFETCH(std::vector<size_t>, expectedPriorities);
 
-        QVERIFY(getListSize(m_Fixture.m_List1) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List1, 0)->priority == 6 && _getSumOfPriorities(m_Fixture.m_List1) == 19 && isSortedDescendingByPriority(m_Fixture.m_List1), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List1)->priority == 6 && getLastListElement(m_Fixture.m_List1)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        const size_t prioritiesArray[6]{3, 2, 1, 5, 2, 6};
-        m_Fixture.m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // highest prio item last
-        sortDescendingByPriority(m_Fixture.m_List2);
-
-        QVERIFY(getListSize(m_Fixture.m_List2) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List2, 0)->priority == 6 && _getSumOfPriorities(m_Fixture.m_List2) == 19 && isSortedDescendingByPriority(m_Fixture.m_List2), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List2)->priority == 6 && getLastListElement(m_Fixture.m_List2)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        const size_t prioritiesArray[6]{1, 6, 2, 5, 3, 2};
-        m_Fixture.m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item first
-        sortDescendingByPriority(m_Fixture.m_List3);
-
-        QVERIFY(getListSize(m_Fixture.m_List3) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List3, 0)->priority == 6 && _getSumOfPriorities(m_Fixture.m_List3) == 19 && isSortedDescendingByPriority(m_Fixture.m_List3), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List3)->priority == 6 && getLastListElement(m_Fixture.m_List3)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        const size_t prioritiesArray[6]{2, 3, 5, 2, 6, 1};
-        m_Fixture.m_List4 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // lowest prio item last
-        sortDescendingByPriority(m_Fixture.m_List4);
-
-        QVERIFY(getListSize(m_Fixture.m_List4) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List4, 0)->priority == 6 && _getSumOfPriorities(m_Fixture.m_List4) == 19 && isSortedDescendingByPriority(m_Fixture.m_List4), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List4)->priority == 6 && getLastListElement(m_Fixture.m_List4)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        const size_t prioritiesArray[6]{2, 3, 1, 2, 6, 5};
-        m_Fixture.m_List5 = createListFromPrioritiesArray(prioritiesArray, 6, pool); // random
-        sortDescendingByPriority(m_Fixture.m_List5);
-
-        QVERIFY(getListSize(m_Fixture.m_List5) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List5, 0)->priority == 6 && _getSumOfPriorities(m_Fixture.m_List5) == 19 && isSortedDescendingByPriority(m_Fixture.m_List5), "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List5)->priority == 6 && getLastListElement(m_Fixture.m_List5)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        const size_t prioritiesArray[2]{5, 6};
-        m_Fixture.m_List6 = createListFromPrioritiesArray(prioritiesArray, 2, pool);
-        sortDescendingByPriority(m_Fixture.m_List6);
-
-        QVERIFY(getListSize(m_Fixture.m_List6) == 2);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List6, 0)->priority == 6 && getListElementAtIndex(m_Fixture.m_List6, 1)->priority == 5, "The list hasn't been correctly sorted ");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List6)->priority == 6 && getLastListElement(m_Fixture.m_List6)->priority == 5, "First and last element of the list are not correctly referenced");
-    }
-
-    {
-        m_Fixture.m_List7 = createEmptyList(pool);
-        createAndAppendToList(m_Fixture.m_List7, 1);
-
-        sortDescendingByPriority(m_Fixture.m_List7);
-
-        QVERIFY(getListSize(m_Fixture.m_List7) == 1);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List7, 0)->priority == 1, "The list hasn't been correctly sorted (ascending) by priority");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List7)->priority == 1 && getLastListElement(m_Fixture.m_List7)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-}
-
-void ListSortingTests::testSortAscendingByPriorityUsingRandomAccess()
-{
-    QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Fixture.m_Pool);
-
-    const size_t firstPrioritiesArray[6]{2, 3, 5, 2, 6, 1};
-    const size_t secondPrioritiesArray[8]{2, 3, 5, 2, 6, 1, 8, 7};
-    const size_t thirdPrioritiesArray[12]{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6};
-
-    // insertion sort
-    {
-        m_Fixture.m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
-        sortByRandomAccess(m_Fixture.m_List1, insertionSortAscendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List1) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List1, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List1) == 19 && isSortedAscendingByPriority(m_Fixture.m_List1),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List1)->priority == 1 && getLastListElement(m_Fixture.m_List1)->priority == 6, "First and last element of the list are not correctly referenced");
-    }
-
-    // heap sort
-    {
-        m_Fixture.m_List2 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
-        sortByRandomAccess(m_Fixture.m_List2, heapSortAscendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List2) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List2, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List2) == 19 && isSortedAscendingByPriority(m_Fixture.m_List2),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List2)->priority == 1 && getLastListElement(m_Fixture.m_List2)->priority == 6, "First and last element of the list are not correctly referenced");
-    }
-
-    // merge sort
-    {
-        m_Fixture.m_List3 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
-        sortByRandomAccess(m_Fixture.m_List3, mergeSortAscendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List3) == 8);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List3, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List3) == 34 && isSortedAscendingByPriority(m_Fixture.m_List3),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List3)->priority == 1 && getLastListElement(m_Fixture.m_List3)->priority == 8, "First and last element of the list are not correctly referenced");
-    }
-
-    // quick sort
-    {
-        m_Fixture.m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
-        sortByRandomAccess(m_Fixture.m_List4, quickSortAscendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List4) == 8);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List4, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List4) == 34 && isSortedAscendingByPriority(m_Fixture.m_List4),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List4)->priority == 1 && getLastListElement(m_Fixture.m_List4)->priority == 8, "First and last element of the list are not correctly referenced");
-    }
-
+    const std::set<SortingAlgorithm> singleThreadedSortingAlgorithms{SortingAlgorithm::INSERTION, SortingAlgorithm::HEAP, SortingAlgorithm::MERGE, SortingAlgorithm::QUICK};
 #ifdef UNIX_OS
-    // enhanced merge sort
-    {
-        m_Fixture.m_List5 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
-        sortByRandomAccess(m_Fixture.m_List5, enhancedMergeSortAscendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List5) == 12);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List5, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List5) == 58 && isSortedAscendingByPriority(m_Fixture.m_List5),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List5)->priority == 1 && getLastListElement(m_Fixture.m_List5)->priority == 9, "First and last element of the list are not correctly referenced");
-    }
-
-    // quick merge sort
-    {
-        m_Fixture.m_List6 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
-        sortByRandomAccess(m_Fixture.m_List6, quickMergeSortAscendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List6) == 12);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List6, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List6) == 58 && isSortedAscendingByPriority(m_Fixture.m_List6),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List6)->priority == 1 && getLastListElement(m_Fixture.m_List6)->priority == 9, "First and last element of the list are not correctly referenced");
-    }
-
-    // enhanced quick sort
-    {
-        m_Fixture.m_List7 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
-        sortByRandomAccess(m_Fixture.m_List7, enhancedQuickSortAscendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List7) == 12);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List7, 0)->priority == 1 && _getSumOfPriorities(m_Fixture.m_List7) == 58 && isSortedAscendingByPriority(m_Fixture.m_List7),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List7)->priority == 1 && getLastListElement(m_Fixture.m_List7)->priority == 9, "First and last element of the list are not correctly referenced");
-    }
+    const std::set<SortingAlgorithm> multiThreadedSortingAlgorithms{SortingAlgorithm::ENHANCED_MERGE, SortingAlgorithm::ENHANCED_QUICK, SortingAlgorithm::QUICK_MERGE};
+    QVERIFY(singleThreadedSortingAlgorithms.contains(algorithm) || multiThreadedSortingAlgorithms.contains(algorithm));
+#else
+    QVERIFY(singleThreadedSortingAlgorithms.contains(algorithm));
 #endif
+
+    const size_t prioritiesCount = priorities.size();
+    QVERIFY(prioritiesCount == expectedPriorities.size());
+
+    List* list = prioritiesCount > 0 ? createListFromPrioritiesArray(priorities.data(), prioritiesCount, pool) : createEmptyList(pool);
+    QVERIFY(list);
+
+    m_Fixture.markListForDeletion(list);
+
+    QVERIFY(getListSize(list) == prioritiesCount);
+
+    const auto ascendingSortingFunction = algorithm == SortingAlgorithm::INSERTION ? insertionSortAscendingByPriority
+                                                                                   : algorithm == SortingAlgorithm::HEAP ? heapSortAscendingByPriority
+                                                                                   : algorithm == SortingAlgorithm::MERGE ? mergeSortAscendingByPriority
+                                                                                   : algorithm == SortingAlgorithm::QUICK ? quickSortAscendingByPriority
+                                                                                   : algorithm == SortingAlgorithm::ENHANCED_MERGE ? enhancedMergeSortAscendingByPriority
+                                                                                   : algorithm == SortingAlgorithm::ENHANCED_QUICK ? enhancedQuickSortAscendingByPriority
+                                                                                                                                   : quickMergeSortAscendingByPriority;
+    const auto descendingSortingFunction = algorithm == SortingAlgorithm::INSERTION ? insertionSortDescendingByPriority
+                                                                                    : algorithm == SortingAlgorithm::HEAP ? heapSortDescendingByPriority
+                                                                                    : algorithm == SortingAlgorithm::MERGE ? mergeSortDescendingByPriority
+                                                                                    : algorithm == SortingAlgorithm::QUICK ? quickSortDescendingByPriority
+                                                                                    : algorithm == SortingAlgorithm::ENHANCED_MERGE ? enhancedMergeSortDescendingByPriority
+                                                                                    : algorithm == SortingAlgorithm::ENHANCED_QUICK ? enhancedQuickSortDescendingByPriority
+                                                                                                                                    : quickMergeSortDescendingByPriority;
+
+    sortByPriorityUsingRandomAccess(list, sortingOrder == SortingOrder::ASCENDING ? ascendingSortingFunction : descendingSortingFunction);
+
+    for (size_t index = 0; index < prioritiesCount; ++index)
+    {
+        QVERIFY(getListElementAtIndex(list, index)->priority == expectedPriorities[index]);
+    }
+
+    if (prioritiesCount > 0)
+    {
+        QVERIFY(getFirstListElement(list)->priority == expectedPriorities[0] && getLastListElement(list)->priority == expectedPriorities[prioritiesCount - 1]);
+    }
+
+    QVERIFY(sortingOrder == SortingOrder::ASCENDING ? isSortedAscendingByPriority(list) : isSortedDescendingByPriority(list));
 }
 
-void ListSortingTests::testSortDescendingByPriorityUsingRandomAccess()
+void ListSortingTests::testIsSortedByPriority()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    const size_t firstPrioritiesArray[6]{2, 3, 5, 2, 6, 1};
-    const size_t secondPrioritiesArray[8]{2, 3, 5, 2, 6, 1, 8, 7};
-    const size_t thirdPrioritiesArray[12]{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6};
+    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(SortingOrder, sortingOrderToCheck);
+    QFETCH(SortingStatus, expectedSortingStatus);
 
-    // insertion sort
-    {
-        m_Fixture.m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
-        sortByRandomAccess(m_Fixture.m_List1, insertionSortDescendingByPriority);
+    const size_t prioritiesCount = priorities.size();
+    List* list = prioritiesCount > 0 ? createListFromPrioritiesArray(priorities.data(), prioritiesCount, pool) : createEmptyList(pool);
 
-        QVERIFY(getListSize(m_Fixture.m_List1) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List1, 0)->priority == 6 && _getSumOfPriorities(m_Fixture.m_List1) == 19 && isSortedDescendingByPriority(m_Fixture.m_List1),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List1)->priority == 6 && getLastListElement(m_Fixture.m_List1)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
+    m_Fixture.markListForDeletion(list);
+    const bool shouldBeSorted = expectedSortingStatus == SortingStatus::SORTED;
 
-    // heap sort
-    {
-        m_Fixture.m_List2 = createListFromPrioritiesArray(firstPrioritiesArray, 6, pool);
-        sortByRandomAccess(m_Fixture.m_List2, insertionSortDescendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List2) == 6);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List2, 0)->priority == 6 && _getSumOfPriorities(m_Fixture.m_List2) == 19 && isSortedDescendingByPriority(m_Fixture.m_List2),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List2)->priority == 6 && getLastListElement(m_Fixture.m_List2)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    // merge sort
-    {
-        m_Fixture.m_List3 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
-        sortByRandomAccess(m_Fixture.m_List3, insertionSortDescendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List3) == 8);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List3, 0)->priority == 8 && _getSumOfPriorities(m_Fixture.m_List3) == 34 && isSortedDescendingByPriority(m_Fixture.m_List3),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List3)->priority == 8 && getLastListElement(m_Fixture.m_List3)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    // quick sort
-    {
-        m_Fixture.m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 8, pool);
-        sortByRandomAccess(m_Fixture.m_List4, insertionSortDescendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List4) == 8);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List4, 0)->priority == 8 && _getSumOfPriorities(m_Fixture.m_List4) == 34 && isSortedDescendingByPriority(m_Fixture.m_List4),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List4)->priority == 8 && getLastListElement(m_Fixture.m_List4)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-#ifdef UNIX_OS
-    // enhanced merge sort
-    {
-        m_Fixture.m_List5 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
-        sortByRandomAccess(m_Fixture.m_List5, enhancedMergeSortDescendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List5) == 12);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List5, 0)->priority == 9 && _getSumOfPriorities(m_Fixture.m_List5) == 58 && isSortedDescendingByPriority(m_Fixture.m_List5),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List5)->priority == 9 && getLastListElement(m_Fixture.m_List5)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    // quick merge sort
-    {
-        m_Fixture.m_List6 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
-        sortByRandomAccess(m_Fixture.m_List6, quickMergeSortDescendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List6) == 12);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List6, 0)->priority == 9 && _getSumOfPriorities(m_Fixture.m_List6) == 58 && isSortedDescendingByPriority(m_Fixture.m_List6),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List6)->priority == 9 && getLastListElement(m_Fixture.m_List6)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-
-    // enhanced quick sort
-    {
-        m_Fixture.m_List7 = createListFromPrioritiesArray(thirdPrioritiesArray, 12, pool);
-        sortByRandomAccess(m_Fixture.m_List7, enhancedQuickSortDescendingByPriority);
-
-        QVERIFY(getListSize(m_Fixture.m_List7) == 12);
-        QVERIFY2(getListElementAtIndex(m_Fixture.m_List7, 0)->priority == 9 && _getSumOfPriorities(m_Fixture.m_List7) == 58 && isSortedDescendingByPriority(m_Fixture.m_List7),
-                 "The list hasn't been correctly sorted");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List7)->priority == 9 && getLastListElement(m_Fixture.m_List7)->priority == 1, "First and last element of the list are not correctly referenced");
-    }
-#endif
-}
-
-void ListSortingTests::testIsSortedAscendingByPriority()
-{
-    QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Fixture.m_Pool);
-
-    {
-        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
-
-        QVERIFY(getListSize(m_Fixture.m_List1) == 6);
-        QVERIFY2(!isSortedAscendingByPriority(m_Fixture.m_List1), "The list is incorrectly marked as sorted ascending by priority");
-    }
-
-    {
-        const size_t prioritiesArray[6]{1, 2, 2, 3, 5, 6};
-        m_Fixture.m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
-
-        QVERIFY(getListSize(m_Fixture.m_List2) == 6);
-        QVERIFY2(isSortedAscendingByPriority(m_Fixture.m_List2), "The list is incorrectly marked as sorted ascending by priority");
-    }
-
-    {
-        const size_t prioritiesArray[6]{5, 5, 5, 5, 5, 5};
-        m_Fixture.m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
-
-        QVERIFY(getListSize(m_Fixture.m_List3) == 6);
-        QVERIFY2(isSortedAscendingByPriority(m_Fixture.m_List3), "The list is incorrectly marked as sorted ascending by priority");
-    }
-}
-
-void ListSortingTests::testIsSortedDescendingByPriority()
-{
-    QFETCH_GLOBAL(ListElementsPool*, pool);
-    QVERIFY(!pool || pool == m_Fixture.m_Pool);
-
-    {
-        const size_t prioritiesArray[6]{6, 2, 5, 1, 2, 3};
-        m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
-
-        QVERIFY(getListSize(m_Fixture.m_List1) == 6);
-        QVERIFY2(!isSortedDescendingByPriority(m_Fixture.m_List1), "The list is incorrectly marked as sorted descending by priority");
-    }
-
-    {
-        const size_t prioritiesArray[6]{6, 5, 4, 2, 2, 1};
-        m_Fixture.m_List2 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
-
-        QVERIFY(getListSize(m_Fixture.m_List2) == 6);
-        QVERIFY2(isSortedDescendingByPriority(m_Fixture.m_List2), "The list is incorrectly marked as sorted descending by priority");
-    }
-
-    {
-        const size_t prioritiesArray[6]{5, 5, 5, 5, 5, 5};
-        m_Fixture.m_List3 = createListFromPrioritiesArray(prioritiesArray, 6, pool);
-
-        QVERIFY(getListSize(m_Fixture.m_List3) == 6);
-        QVERIFY2(isSortedDescendingByPriority(m_Fixture.m_List3), "The list is incorrectly marked as sorted descending by priority");
-    }
+    QVERIFY(sortingOrderToCheck == SortingOrder::ASCENDING ? isSortedAscendingByPriority(list) == shouldBeSorted
+                                                           : isSortedDescendingByPriority(list) == shouldBeSorted);
 }
 
 void ListSortingTests::testMoveListToArray()
@@ -509,6 +252,191 @@ void ListSortingTests::testMoveArrayToList()
     QVERIFY(getListElementAtIndex(m_Fixture.m_List1, 1)->object.type == -1 && getListElementAtIndex(m_Fixture.m_List1, 1)->object.payload == nullptr);
 }
 
+void ListSortingTests::testSortByPriorityNoRandomAccess_data()
+{
+    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<SortingOrder>("sortingOrder");
+    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+
+    QTest::newRow("Sort ascending: 1") << std::vector<size_t>{6, 2, 5, 1, 2, 3} << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 5, 6};
+    QTest::newRow("Sort ascending: 2") << std::vector<size_t>{3, 2, 1, 5, 2, 6} << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 5, 6};
+    QTest::newRow("Sort ascending: 3") << std::vector<size_t>{1, 6, 2, 5, 3, 2} << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 5, 6};
+    QTest::newRow("Sort ascending: 4") << std::vector<size_t>{2, 3, 5, 2, 6, 1} << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 5, 6};
+    QTest::newRow("Sort ascending: 5") << std::vector<size_t>{2, 3, 1, 2, 6, 5} << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 5, 6};
+    QTest::newRow("Sort ascending: 6") << std::vector<size_t>{1, 2, 2, 3, 5, 6} << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 5, 6};
+    QTest::newRow("Sort ascending: 7") << std::vector<size_t>{6, 5, 3, 2, 2, 1} << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 5, 6};
+    QTest::newRow("Sort ascending: 8") << std::vector<size_t>{5, 6} << SortingOrder::ASCENDING << std::vector<size_t>{5, 6};
+    QTest::newRow("Sort ascending: 9") << std::vector<size_t>{6, 5} << SortingOrder::ASCENDING << std::vector<size_t>{5, 6};
+    QTest::newRow("Sort ascending: 10") << std::vector<size_t>{1} << SortingOrder::ASCENDING << std::vector<size_t>{1};
+    QTest::newRow("Sort ascending: 11") << std::vector<size_t>{} << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending: 1") << std::vector<size_t>{6, 2, 5, 1, 2, 3} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5, 3, 2, 2, 1};
+    QTest::newRow("Sort descending: 2") << std::vector<size_t>{3, 2, 1, 5, 2, 6} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5, 3, 2, 2, 1};
+    QTest::newRow("Sort descending: 3") << std::vector<size_t>{1, 6, 2, 5, 3, 2} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5, 3, 2, 2, 1};
+    QTest::newRow("Sort descending: 4") << std::vector<size_t>{2, 3, 5, 2, 6, 1} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5, 3, 2, 2, 1};
+    QTest::newRow("Sort descending: 5") << std::vector<size_t>{2, 3, 1, 2, 6, 5} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5, 3, 2, 2, 1};
+    QTest::newRow("Sort descending: 6") << std::vector<size_t>{1, 2, 2, 3, 5, 6} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5, 3, 2, 2, 1};
+    QTest::newRow("Sort descending: 7") << std::vector<size_t>{6, 5, 3, 2, 2, 1} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5, 3, 2, 2, 1};
+    QTest::newRow("Sort descending: 8") << std::vector<size_t>{5, 6} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5};
+    QTest::newRow("Sort descending: 9") << std::vector<size_t>{6, 5} << SortingOrder::DESCENDING << std::vector<size_t>{6, 5};
+    QTest::newRow("Sort descending: 10") << std::vector<size_t>{1} << SortingOrder::DESCENDING << std::vector<size_t>{1};
+    QTest::newRow("Sort descending: 11") << std::vector<size_t>{} << SortingOrder::DESCENDING << std::vector<size_t>{};
+    }
+
+void ListSortingTests::testSortByPriorityUsingRandomAccess_data()
+{
+    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<SortingAlgorithm>("algorithm");
+    QTest::addColumn<SortingOrder>("sortingOrder");
+    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+
+    QTest::newRow("Sort ascending - insertion: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - insertion: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - insertion: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - insertion: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort ascending - insertion: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - insertion: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - insertion: 7") << std::vector<size_t>{4} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort ascending - insertion: 8") << std::vector<size_t>{} << SortingAlgorithm::INSERTION << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort ascending - heap: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - heap: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - heap: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - heap: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort ascending - heap: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - heap: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - heap: 7") << std::vector<size_t>{4} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort ascending - heap: 8") << std::vector<size_t>{} << SortingAlgorithm::HEAP << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort ascending - merge: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - merge: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - merge: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - merge: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort ascending - merge: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - merge: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - merge: 7") << std::vector<size_t>{4} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort ascending - merge: 8") << std::vector<size_t>{} << SortingAlgorithm::MERGE << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort ascending - quick: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - quick: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - quick: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - quick: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort ascending - quick: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - quick: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - quick: 7") << std::vector<size_t>{4} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort ascending - quick: 8") << std::vector<size_t>{} << SortingAlgorithm::QUICK << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending - insertion: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - insertion: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - insertion: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - insertion: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort descending - insertion: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - insertion: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - insertion: 7") << std::vector<size_t>{4} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort descending - insertion: 8") << std::vector<size_t>{} << SortingAlgorithm::INSERTION << SortingOrder::DESCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending - heap: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - heap: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - heap: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - heap: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort descending - heap: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - heap: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - heap: 7") << std::vector<size_t>{4} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort descending - heap: 8") << std::vector<size_t>{} << SortingAlgorithm::HEAP << SortingOrder::DESCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending - merge: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - merge: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - merge: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - merge: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort descending - merge: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - merge: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - merge: 7") << std::vector<size_t>{4} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort descending - merge: 8") << std::vector<size_t>{} << SortingAlgorithm::MERGE << SortingOrder::DESCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending - quick: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - quick: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - quick: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - quick: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort descending - quick: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - quick: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - quick: 7") << std::vector<size_t>{4} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort descending - quick: 8") << std::vector<size_t>{} << SortingAlgorithm::QUICK << SortingOrder::DESCENDING << std::vector<size_t>{};
+#ifdef UNIX_OS
+    QTest::newRow("Sort ascending - enhanced merge: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - enhanced merge: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - enhanced merge: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - enhanced merge: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort ascending - enhanced merge: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - enhanced merge: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - enhanced merge: 7") << std::vector<size_t>{4} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort ascending - enhanced merge: 8") << std::vector<size_t>{} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort ascending - enhanced quick: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - enhanced quick: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - enhanced quick: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - enhanced quick: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort ascending - enhanced quick: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - enhanced quick: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - enhanced quick: 7") << std::vector<size_t>{4} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort ascending - enhanced quick: 8") << std::vector<size_t>{} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort ascending - quick-merge: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - quick-merge: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - quick-merge: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9};
+    QTest::newRow("Sort ascending - quick-merge: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort ascending - quick-merge: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - quick-merge: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{3, 5};
+    QTest::newRow("Sort ascending - quick-merge: 7") << std::vector<size_t>{4} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort ascending - quick-merge: 8") << std::vector<size_t>{} << SortingAlgorithm::QUICK_MERGE << SortingOrder::ASCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending - enhanced merge: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - enhanced merge: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - enhanced merge: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - enhanced merge: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort descending - enhanced merge: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - enhanced merge: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - enhanced merge: 7") << std::vector<size_t>{4} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort descending - enhanced merge: 8") << std::vector<size_t>{} << SortingAlgorithm::ENHANCED_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending - enhanced quick: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - enhanced quick: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - enhanced quick: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - enhanced quick: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort descending - enhanced quick: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - enhanced quick: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - enhanced quick: 7") << std::vector<size_t>{4} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort descending - enhanced quick: 8") << std::vector<size_t>{} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{};
+    QTest::newRow("Sort descending - quick-merge: 1") << std::vector<size_t>{2, 3, 5, 2, 9, 6, 1, 8, 7, 5, 4, 6} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - quick-merge: 2") << std::vector<size_t>{1, 2, 2, 3, 4, 5, 5, 6, 6, 7, 8, 9} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - quick-merge: 3") << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{9, 8, 7, 6, 6, 5, 5, 4, 3, 2, 2, 1};
+    QTest::newRow("Sort descending - quick-merge: 4") << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{8, 8, 8, 8, 8, 8, 8, 8};
+    QTest::newRow("Sort descending - quick-merge: 5") << std::vector<size_t>{5, 3} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - quick-merge: 6") << std::vector<size_t>{3, 5} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{5, 3};
+    QTest::newRow("Sort descending - quick-merge: 7") << std::vector<size_t>{4} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{4};
+    QTest::newRow("Sort descending - quick-merge: 8") << std::vector<size_t>{} << SortingAlgorithm::QUICK_MERGE << SortingOrder::DESCENDING << std::vector<size_t>{};
+
+    // additional enhanced quick sorting tests
+    QTest::newRow("Sort ascending - enhanced quick: 9") << std::vector<size_t>{2, 5, 4, 2, 9} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{2, 2, 4, 5, 9};
+    QTest::newRow("Sort ascending - enhanced quick: 10") << std::vector<size_t>{3, 9, 5, 7, 3, 6} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{3, 3, 5, 6, 7, 9};
+    QTest::newRow("Sort ascending - enhanced quick: 11") << std::vector<size_t>{4, 10, 7, 5, 9, 5, 5} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::ASCENDING << std::vector<size_t>{4, 5, 5, 5, 7, 9, 10};
+    QTest::newRow("Sort descending - enhanced quick: 9") << std::vector<size_t>{2, 5, 4, 2, 9} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 5, 4, 2, 2};
+    QTest::newRow("Sort descending - enhanced quick: 10") << std::vector<size_t>{3, 9, 5, 7, 3, 6} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{9, 7, 6, 5, 3, 3};
+    QTest::newRow("Sort descending - enhanced quick: 11") << std::vector<size_t>{4, 10, 7, 5, 9, 5, 5} << SortingAlgorithm::ENHANCED_QUICK << SortingOrder::DESCENDING << std::vector<size_t>{10, 9, 7, 5, 5, 5, 4};
+#endif
+}
+
+void ListSortingTests::testIsSortedByPriority_data()
+{
+    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<SortingOrder>("sortingOrderToCheck");
+    QTest::addColumn<SortingStatus>("expectedSortingStatus");
+
+    QTest::newRow("Check ascending sorting: 1") << std::vector<size_t>{6, 2, 5, 1, 2, 3} << SortingOrder::ASCENDING << SortingStatus::UNSORTED;
+    QTest::newRow("Check ascending sorting: 2") << std::vector<size_t>{1, 2, 2, 3, 5, 6} << SortingOrder::ASCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check ascending sorting: 3") << std::vector<size_t>{6, 5, 4, 2, 2, 1} << SortingOrder::ASCENDING << SortingStatus::UNSORTED;
+    QTest::newRow("Check ascending sorting: 4") << std::vector<size_t>{5, 5, 5, 5, 5, 5} << SortingOrder::ASCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check ascending sorting: 5") << std::vector<size_t>{3, 5} << SortingOrder::ASCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check ascending sorting: 6") << std::vector<size_t>{5, 3} << SortingOrder::ASCENDING << SortingStatus::UNSORTED;
+    QTest::newRow("Check ascending sorting: 7") << std::vector<size_t>{4} << SortingOrder::ASCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check ascending sorting: 8") << std::vector<size_t>{} << SortingOrder::ASCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check descending sorting: 1") << std::vector<size_t>{6, 2, 5, 1, 2, 3} << SortingOrder::DESCENDING << SortingStatus::UNSORTED;
+    QTest::newRow("Check descending sorting: 2") << std::vector<size_t>{6, 5, 4, 2, 2, 1} << SortingOrder::DESCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check descending sorting: 3") << std::vector<size_t>{1, 2, 2, 3, 5, 6} << SortingOrder::DESCENDING << SortingStatus::UNSORTED;
+    QTest::newRow("Check descending sorting: 4") << std::vector<size_t>{5, 5, 5, 5, 5, 5} << SortingOrder::DESCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check descending sorting: 5") << std::vector<size_t>{5, 3} << SortingOrder::DESCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check descending sorting: 6") << std::vector<size_t>{3, 5} << SortingOrder::DESCENDING << SortingStatus::UNSORTED;
+    QTest::newRow("Check descending sorting: 7") << std::vector<size_t>{4} << SortingOrder::DESCENDING << SortingStatus::SORTED;
+    QTest::newRow("Check descending sorting: 8") << std::vector<size_t>{} << SortingOrder::DESCENDING << SortingStatus::SORTED;
+}
+
 void ListSortingTests::initTestCase_data()
 {
     m_Fixture.init();
@@ -535,21 +463,6 @@ void ListSortingTests::init()
 void ListSortingTests::cleanup()
 {
     m_Fixture.resetToInitialState();
-}
-
-size_t ListSortingTests::_getSumOfPriorities(List *list)
-{
-    size_t sum = 0;
-
-    if (list != nullptr)
-    {
-        for (size_t index{0}; index < getListSize(list); ++index)
-        {
-            sum = sum + getListElementAtIndex(list, index)->priority;
-        }
-    }
-
-    return sum;
 }
 
 QTEST_APPLESS_MAIN(ListSortingTests)

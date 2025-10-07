@@ -7,6 +7,7 @@
 
 #define SORT_ASCENDING true
 #define SORT_DESCENDING false
+#define ENHANCED_QUICK_SORTING_THRESHOLD 6
 
 #ifdef UNIX_OS
 
@@ -106,7 +107,7 @@ void quickSortAscendingByPriority(ListElement** array, const size_t arraySize)
 {
     if (array != NULL && arraySize > 0)
     {
-        _doQuickSortAscendingByPriority(array, 0, arraySize-1);
+        _doQuickSortAscendingByPriority(array, 0, arraySize - 1);
     }
 }
 
@@ -114,7 +115,7 @@ void quickSortDescendingByPriority(ListElement** array, const size_t arraySize)
 {
     if (array != NULL && arraySize > 0)
     {
-        _doQuickSortDescendingByPriority(array, 0, arraySize-1);
+        _doQuickSortDescendingByPriority(array, 0, arraySize - 1);
     }
 }
 
@@ -143,7 +144,15 @@ void enhancedQuickSortAscendingByPriority(ListElement** array, const size_t arra
 {
     if (array != NULL && arraySize > 0)
     {
-        _doEnhancedQuickSortAscendingByPriority(array, 0, arraySize-1);
+        // this threshold was implemented in order to fix a bug of enhanced quick sorting which consisted in an incorrect sorting when the number of elements was very low
+        if (arraySize >= ENHANCED_QUICK_SORTING_THRESHOLD)
+        {
+            _doEnhancedQuickSortAscendingByPriority(array, 0, arraySize - 1);
+        }
+        else
+        {
+            _doQuickSortAscendingByPriority(array, 0, arraySize - 1);
+        }
     }
 }
 
@@ -151,7 +160,16 @@ void enhancedQuickSortDescendingByPriority(ListElement** array, const size_t arr
 {
     if (array != NULL && arraySize > 0)
     {
-        _doEnhancedQuickSortDescendingByPriority(array, 0, arraySize-1);
+        // this threshold was implemented in order to fix a bug of enhanced quick sorting which consisted in an incorrect sorting when the number of elements was very low
+        if (arraySize >= ENHANCED_QUICK_SORTING_THRESHOLD)
+        {
+            _doEnhancedQuickSortDescendingByPriority(array, 0, arraySize - 1);
+        }
+        else
+        {
+            _doQuickSortDescendingByPriority(array, 0, arraySize - 1);
+        }
+
     }
 }
 #endif
@@ -163,8 +181,8 @@ static void _doMergeSortByPriority(ListElement** array, const size_t arraySize, 
 
     if (auxArray != NULL)
     {
-        isAscendingOrderRequired ? _doMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1)
-                                 : _doMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+        isAscendingOrderRequired ? _doMergeSortAscendingByPriority(array, auxArray, 0, arraySize - 1)
+                                 : _doMergeSortDescendingByPriority(array, auxArray, 0, arraySize - 1);
 
         free(auxArray);
         auxArray = NULL;
@@ -202,8 +220,8 @@ static void _doEnhancedMergeSortByPriority(ListElement** array, const size_t arr
 
     if (auxArray != NULL)
     {
-        isAscendingOrderRequired ? _doEnhancedMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1)
-                                 : _doEnhancedMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+        isAscendingOrderRequired ? _doEnhancedMergeSortAscendingByPriority(array, auxArray, 0, arraySize - 1)
+                                 : _doEnhancedMergeSortDescendingByPriority(array, auxArray, 0, arraySize - 1);
 
         free(auxArray);
         auxArray = NULL;
@@ -252,8 +270,8 @@ static void _doQuickMergeSortByPriority(ListElement** array, const size_t arrayS
 
     if (auxArray != NULL)
     {
-        isAscendingOrderRequired ? _doQuickMergeSortAscendingByPriority(array, auxArray, 0, arraySize-1)
-                                 : _doQuickMergeSortDescendingByPriority(array, auxArray, 0, arraySize-1);
+        isAscendingOrderRequired ? _doQuickMergeSortAscendingByPriority(array, auxArray, 0, arraySize - 1)
+                                 : _doQuickMergeSortDescendingByPriority(array, auxArray, 0, arraySize - 1);
 
         free(auxArray);
         auxArray = NULL;
