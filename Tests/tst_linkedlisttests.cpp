@@ -11,7 +11,9 @@ enum class InsertionScenario
     APPEND,
     PREPEND,
     INSERT_ELEMENT_BEFORE,
-    INSERT_ELEMENT_AFTER
+    INSERT_ELEMENT_AFTER,
+    MOVE_ELEMENTS,
+    COPY_ELEMENTS
 };
 
 enum class RemovalScenario
@@ -39,8 +41,9 @@ private slots:
     void testInsertElementBeforeOrAfter();
     void testRemoveFirstOrLastElement();
     void testRemoveArbitraryElement();
-    void testMoveContentToList();
-    void testCopyContentToList();
+    void testMoveOrCopyContentWithoutPayloadToList();
+    void testMoveContentWithPayloadToList();
+    void testCopyContentWithPayloadToList();
     void testSwapElements();
     void testReverseList();
     void testBatchReverseList();
@@ -53,6 +56,7 @@ private slots:
     void testInsertElementBeforeOrAfter_data();
     void testRemoveFirstOrLastElement_data();
     void testRemoveArbitraryElement_data();
+    void testMoveOrCopyContentWithoutPayloadToList_data();
     void testReverseList_data();
     void testBatchReverseList_data();
 
@@ -209,7 +213,7 @@ void LinkedListTests::testRemoveFirstOrLastElement()
     m_Fixture.markListForDeletion(list);
 
     ListElement* removedElement = removalScenario == RemovalScenario::REMOVE_FIRST_ELEMENT ? removeFirstListElement(list)
-                                                                                    : removeLastListElement(list);
+                                                                                           : removeLastListElement(list);
     m_Fixture.markListElementForCleanup(removedElement, pool != nullptr);
 
     if (expectedResult == Result::SUCCESS)
@@ -268,8 +272,8 @@ void LinkedListTests::testRemoveArbitraryElement()
     }
 
     ListElement* removedElement = removalScenario == RemovalScenario::REMOVE_ELEMENT_BEFORE ? removePreviousListElement(it)
-                                                                            : removalScenario == RemovalScenario::REMOVE_ELEMENT_AFTER ? removeNextListElement(it)
-                                                                                                                       : removeCurrentListElement(it);
+                                                                                            : removalScenario == RemovalScenario::REMOVE_ELEMENT_AFTER ? removeNextListElement(it)
+                                                                                                                                                       : removeCurrentListElement(it);
     m_Fixture.markListElementForCleanup(removedElement, pool != nullptr);
 
     if (expectedResult == Result::SUCCESS)
@@ -294,154 +298,193 @@ void LinkedListTests::testRemoveArbitraryElement()
     }
 }
 
-void LinkedListTests::testMoveContentToList()
+void LinkedListTests::testMoveOrCopyContentWithoutPayloadToList()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    const size_t firstPrioritiesArray[2]{6, 2,};
-    const size_t secondPrioritiesArray[2]{7, 4};
+    QFETCH(std::vector<size_t>, sourcePriorities);
+    QFETCH(std::vector<size_t>, destinationPriorities);
+    QFETCH(InsertionScenario, insertionScenario);
+    QFETCH(std::vector<size_t>, expectedPriorities);
 
+    QVERIFY(insertionScenario == InsertionScenario::MOVE_ELEMENTS || insertionScenario == InsertionScenario::COPY_ELEMENTS);
+
+    const size_t sourcePrioritiesCount = sourcePriorities.size();
+    const size_t destinationPrioritiesCount = destinationPriorities.size();
+    const size_t expectedPrioritiesCount = expectedPriorities.size();
+
+    QVERIFY(sourcePrioritiesCount + destinationPrioritiesCount == expectedPrioritiesCount);
+
+    List* source = sourcePrioritiesCount > 0 ? createListFromPrioritiesArray(sourcePriorities.data(), sourcePrioritiesCount, pool) : createEmptyList(pool);
+    QVERIFY(source);
+
+    List* destination = destinationPrioritiesCount > 0 ? createListFromPrioritiesArray(destinationPriorities.data(), destinationPrioritiesCount, pool) : createEmptyList(pool);
+    QVERIFY(destination);
+
+    m_Fixture.markListForDeletion(source);
+    m_Fixture.markListForDeletion(destination);
+
+    QVERIFY(source && destination);
+
+    if (insertionScenario == InsertionScenario::MOVE_ELEMENTS)
     {
-        m_Fixture.m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
-        m_Fixture.m_List2 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
-
-        moveContentToList(m_Fixture.m_List1, m_Fixture.m_List2);
-
-        QVERIFY2(isEmptyList(m_Fixture.m_List1) &&
-                 getListSize(m_Fixture.m_List2) == 4 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 0)->priority == 7 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 1)->priority == 4 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 2)->priority == 6 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 3)->priority == 2,   "The source list content has not been correctly moved to destination");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List2)->priority == 7 && getLastListElement(m_Fixture.m_List2)->priority == 2, "First and last element of the destination list are not correctly referenced");
+        moveContentToList(source, destination);
+    }
+    else
+    {
+        copyContentToList(source, destination, copyObjectPlaceholder, deleteObjectPayload);
     }
 
+    QVERIFY(insertionScenario == InsertionScenario::MOVE_ELEMENTS ? isEmptyList(source) : getListSize(source) == sourcePrioritiesCount);
+    QVERIFY(getListSize(destination) == expectedPrioritiesCount);
+
+    const size_t sourcePrioritiesCountToCheck = insertionScenario == InsertionScenario::MOVE_ELEMENTS ? 0 : sourcePrioritiesCount;
+
+    for (size_t index = 0; index < sourcePrioritiesCountToCheck; ++index)
     {
-        m_Fixture.m_List3 = createEmptyList(pool);
-        m_Fixture.m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
-
-        moveContentToList(m_Fixture.m_List3, m_Fixture.m_List4);
-
-        QVERIFY2(isEmptyList(m_Fixture.m_List3) &&
-                 getListSize(m_Fixture.m_List4) == 2 &&
-                 getListElementAtIndex(m_Fixture.m_List4, 0)->priority == 7 &&
-                 getListElementAtIndex(m_Fixture.m_List4, 1)->priority == 4,   "The source list content has not been correctly moved to destination");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List4)->priority == 7 && getLastListElement(m_Fixture.m_List4)->priority == 4, "First and last element of the destination list are not correctly referenced");
+        const ListElement* element = getListElementAtIndex(source, index);
+        QVERIFY(element && element->priority == sourcePriorities[index] && element->object.type == -1 && !element->object.payload);
     }
 
+    for (size_t index = 0; index < expectedPrioritiesCount; ++index)
     {
-        m_Fixture.m_List5 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
-        m_Fixture.m_List6 = createEmptyList(pool);
+        const ListElement* element = getListElementAtIndex(destination, index);
+        QVERIFY(element && element->priority == expectedPriorities[index] && element->object.type == -1 && !element->object.payload);
+    }
 
-        moveContentToList(m_Fixture.m_List5, m_Fixture.m_List6);
+    if (insertionScenario == InsertionScenario::COPY_ELEMENTS && !isEmptyList(source))
+    {
+        QVERIFY(getFirstListElement(source)->priority == sourcePriorities[0] && getLastListElement(source)->priority == sourcePriorities[sourcePrioritiesCount - 1]);
+    }
 
-        QVERIFY2(isEmptyList(m_Fixture.m_List5) &&
-                 getListSize(m_Fixture.m_List6) == 2 &&
-                 getListElementAtIndex(m_Fixture.m_List6, 0)->priority == 6 &&
-                 getListElementAtIndex(m_Fixture.m_List6, 1)->priority == 2,   "The source list content has not been correctly moved to destination");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List6)->priority == 6 && getLastListElement(m_Fixture.m_List6)->priority == 2, "First and last element of the destination list are not correctly referenced");
+    if (!isEmptyList(destination))
+    {
+        QVERIFY(getFirstListElement(destination)->priority == expectedPriorities[0] && getLastListElement(destination)->priority == expectedPriorities[expectedPrioritiesCount - 1]);
     }
 }
 
-void LinkedListTests::testCopyContentToList()
+void LinkedListTests::testMoveContentWithPayloadToList()
 {
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    const size_t firstPrioritiesArray[2]{6, 2};
-    const size_t secondPrioritiesArray[2]{7, 4};
-    const size_t thirdPriorityArray[3]{5, 4, 3};
+    const size_t sourcePrioritiesArray[2]{6, 2};
+    const size_t destinationPrioritiesArray[3]{5, 4, 3};
+    const size_t resultingPrioritiesArray[5]{5, 4, 3, 6, 2};
 
+    m_Fixture.m_List1 = createListFromPrioritiesArray(sourcePrioritiesArray, 2, pool);
+    QVERIFY(m_Fixture.m_List1);
+
+    m_Fixture.m_List2 = createListFromPrioritiesArray(destinationPrioritiesArray, 3, pool);
+    QVERIFY(m_Fixture.m_List2);
+
+    void* segment = createSegmentPayload(2, 5, 4, 11);
+    void* conditions = createLocalConditionsPayload(7, -5, 10, 12.8);
+
+    ListIterator it = lbegin(m_Fixture.m_List1);
+    assignObjectContentToListElement(it.current, SEGMENT, segment);
+    lnext(&it);
+    assignObjectContentToListElement(it.current, LOCAL_CONDITIONS, conditions);
+
+    QVERIFY(segment && conditions);
+
+    moveContentToList(m_Fixture.m_List1, m_Fixture.m_List2);
+
+    QVERIFY(isEmptyList(m_Fixture.m_List1) && getListSize(m_Fixture.m_List2) == 5);
+
+    const Segment* movedSegment = static_cast<Segment*>(getListElementAtIndex(m_Fixture.m_List2, 3)->object.payload);
+    const LocalConditions* movedConditions = static_cast<LocalConditions*>(getListElementAtIndex(m_Fixture.m_List2, 4)->object.payload);
+
+    QVERIFY(movedSegment && movedConditions);
+
+    const int destObjTypes[5]{-1, -1, -1, SEGMENT, LOCAL_CONDITIONS};
+    const void* destObjPayloads[5]{nullptr, nullptr, nullptr, movedSegment, movedConditions};
+
+    for (size_t index = 0; index < getListSize(m_Fixture.m_List2); ++index)
     {
-        m_Fixture.m_List1 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
-        m_Fixture.m_List2 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
-
-        copyContentToList(m_Fixture.m_List1, m_Fixture.m_List2, copyObjectPlaceholder, deleteObjectPayload);
-
-        QVERIFY2(getListSize(m_Fixture.m_List1) == 2 &&
-                 getListSize(m_Fixture.m_List2) == 4 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 0)->priority == 7 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 1)->priority == 4 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 2)->priority == 6 &&
-                 getListElementAtIndex(m_Fixture.m_List2, 3)->priority == 2,   "The source list content has not been correctly copied to destination");
-        QVERIFY(getListElementAtIndex(m_Fixture.m_List2, 2)->object.type == -1 && getListElementAtIndex(m_Fixture.m_List2, 2)->object.payload == nullptr);
-        QVERIFY2(getFirstListElement(m_Fixture.m_List2)->priority == 7 && getLastListElement(m_Fixture.m_List2)->priority == 2, "First and last element of the destination list are not correctly referenced");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List1)->priority == 6 && getLastListElement(m_Fixture.m_List1)->priority == 2, "First and last element of the source list are not correctly referenced");
+        ListElement* element = getListElementAtIndex(m_Fixture.m_List2, index);
+        QVERIFY(element && element->priority == resultingPrioritiesArray[index] && element->object.type == destObjTypes[index] && element->object.payload == destObjPayloads[index]);
     }
 
+    QVERIFY(movedSegment->start && movedSegment->stop && movedSegment->start->x == 2 && movedSegment->start->y == 5 && movedSegment->stop->x == 4 && movedSegment->stop->y == 11 &&
+            movedConditions->position && movedConditions->position->x == 7 && movedConditions->position->y == -5 && movedConditions->temperature == 10 &&
+            areDecimalNumbersEqual(movedConditions->humidity, 12.8));
+
+    QVERIFY(getFirstListElement(m_Fixture.m_List2)->priority == 5 && getLastListElement(m_Fixture.m_List2)->priority == 2);
+
+    for (ListIterator it = lbegin(m_Fixture.m_List2); !areIteratorsEqual(it, lend(m_Fixture.m_List2)); lnext(&it))
     {
-        m_Fixture.m_List3 = createEmptyList(pool);
-        m_Fixture.m_List4 = createListFromPrioritiesArray(secondPrioritiesArray, 2, pool);
+        emptyTestObject(&it.current->object);
+    }
+}
 
-        copyContentToList(m_Fixture.m_List3, m_Fixture.m_List4, copyObjectPlaceholder, deleteObjectPayload);
+void LinkedListTests::testCopyContentWithPayloadToList()
+{
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-        QVERIFY2(isEmptyList(m_Fixture.m_List3) &&
-                 getListSize(m_Fixture.m_List4) == 2 &&
-                 getListElementAtIndex(m_Fixture.m_List4, 0)->priority == 7 &&
-                 getListElementAtIndex(m_Fixture.m_List4, 1)->priority == 4,   "The source list content has not been correctly copied to destination");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List4)->priority == 7 && getLastListElement(m_Fixture.m_List4)->priority == 4, "First and last element of the destination list are not correctly referenced");
+    const size_t sourcePrioritiesArray[2]{6, 2};
+    const size_t destinationPrioritiesArray[3]{5, 4, 3};
+    const size_t resultingPrioritiesArray[5]{5, 4, 3, 6, 2};
+
+    m_Fixture.m_List1 = createListFromPrioritiesArray(sourcePrioritiesArray, 2, pool);
+    QVERIFY(m_Fixture.m_List1);
+
+    m_Fixture.m_List2 = createListFromPrioritiesArray(destinationPrioritiesArray, 3, pool);
+    QVERIFY(m_Fixture.m_List2);
+
+    void* segment = createSegmentPayload(2, 5, 4, 11);
+    void* conditions = createLocalConditionsPayload(7, -5, 10, 12.8);
+
+    ListIterator it = lbegin(m_Fixture.m_List1);
+    assignObjectContentToListElement(it.current, SEGMENT, segment);
+    lnext(&it);
+    assignObjectContentToListElement(it.current, LOCAL_CONDITIONS, conditions);
+
+    QVERIFY(segment && conditions);
+
+    copyContentToList(m_Fixture.m_List1, m_Fixture.m_List2, customCopyObject, emptyTestObject);
+
+    QVERIFY(getListSize(m_Fixture.m_List1) == 2 && getListSize(m_Fixture.m_List2) == 5);
+
+    const Segment* copiedSegment = static_cast<Segment*>(getListElementAtIndex(m_Fixture.m_List2, 3)->object.payload);
+    const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getListElementAtIndex(m_Fixture.m_List2, 4)->object.payload);
+
+    QVERIFY(copiedSegment && copiedConditions);
+
+    const int srcObjTypes[2]{SEGMENT, LOCAL_CONDITIONS};
+    const int destObjTypes[5]{-1, -1, -1, SEGMENT, LOCAL_CONDITIONS};
+    const void* srcObjPayloads[2]{segment, conditions};
+    const void* destObjPayloads[5]{nullptr, nullptr, nullptr, copiedSegment, copiedConditions};
+
+    for (size_t index = 0; index < getListSize(m_Fixture.m_List1); ++index)
+    {
+        ListElement* element = getListElementAtIndex(m_Fixture.m_List1, index);
+        QVERIFY(element && element->priority == sourcePrioritiesArray[index] && element->object.type == srcObjTypes[index] && element->object.payload == srcObjPayloads[index]);
     }
 
+    for (size_t index = 0; index < getListSize(m_Fixture.m_List2); ++index)
     {
-        m_Fixture.m_List5 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
-        m_Fixture.m_List6 = createEmptyList(pool);
-
-        copyContentToList(m_Fixture.m_List5, m_Fixture.m_List6, copyObjectPlaceholder, deleteObjectPayload);
-
-        QVERIFY2(getListSize(m_Fixture.m_List5) == 2 &&
-                 getListSize(m_Fixture.m_List6) == 2 &&
-                 getListElementAtIndex(m_Fixture.m_List6, 0)->priority == 6 &&
-                 getListElementAtIndex(m_Fixture.m_List6, 1)->priority == 2,   "The source list content has not been correctly copied to destination");
-        QVERIFY(getListElementAtIndex(m_Fixture.m_List6, 1)->object.type == -1 && getListElementAtIndex(m_Fixture.m_List6, 1)->object.payload == nullptr);
-        QVERIFY2(getFirstListElement(m_Fixture.m_List6)->priority == 6 && getLastListElement(m_Fixture.m_List6)->priority == 2, "First and last element of the destination list are not correctly referenced");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List5)->priority == 6 && getLastListElement(m_Fixture.m_List5)->priority == 2, "First and last element of the source list are not correctly referenced");
+        ListElement* element = getListElementAtIndex(m_Fixture.m_List2, index);
+        QVERIFY(element && element->priority == resultingPrioritiesArray[index] && element->object.type == destObjTypes[index] && element->object.payload == destObjPayloads[index]);
     }
 
+    QVERIFY(copiedSegment->start && copiedSegment->stop && copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
+            copiedConditions->position && copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 &&
+            areDecimalNumbersEqual(copiedConditions->humidity, 12.8));
+
+    QVERIFY(getFirstListElement(m_Fixture.m_List1)->priority == 6 && getLastListElement(m_Fixture.m_List1)->priority == 2);
+    QVERIFY(getFirstListElement(m_Fixture.m_List2)->priority == 5 && getLastListElement(m_Fixture.m_List2)->priority == 2);
+
+    for (ListIterator it = lbegin(m_Fixture.m_List1); !areIteratorsEqual(it, lend(m_Fixture.m_List1)); lnext(&it))
     {
-        m_Fixture.m_List7 = createListFromPrioritiesArray(firstPrioritiesArray, 2, pool);
-        m_Fixture.m_List8 = createListFromPrioritiesArray(thirdPriorityArray, 3, pool);
+        emptyTestObject(&it.current->object);
+    }
 
-        ListIterator it = lbegin(m_Fixture.m_List7);
-        assignObjectContentToListElement(it.current, SEGMENT, createSegmentPayload(2, 5, 4, 11));
-        lnext(&it);
-        assignObjectContentToListElement(it.current, LOCAL_CONDITIONS, createLocalConditionsPayload(7, -5, 10, 12.8));
-
-        copyContentToList(m_Fixture.m_List7, m_Fixture.m_List8, customCopyObject, emptyTestObject);
-
-        const Segment* copiedSegment = static_cast<Segment*>(getListElementAtIndex(m_Fixture.m_List8, 3)->object.payload);
-        const LocalConditions* copiedConditions = static_cast<LocalConditions*>(getListElementAtIndex(m_Fixture.m_List8, 4)->object.payload);
-
-        QVERIFY2(getListSize(m_Fixture.m_List7) == 2 &&
-                 getListSize(m_Fixture.m_List8) == 5 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 0)->priority == 5 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 0)->object.type == -1 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 0)->object.payload == nullptr &&
-                 getListElementAtIndex(m_Fixture.m_List8, 1)->priority == 4 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 1)->object.type == -1 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 1)->object.payload == nullptr &&
-                 getListElementAtIndex(m_Fixture.m_List8, 2)->priority == 3 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 2)->object.type == -1 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 2)->object.payload == nullptr &&
-                 getListElementAtIndex(m_Fixture.m_List8, 3)->priority == 6 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 3)->object.type == SEGMENT &&
-                 copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 4)->priority == 2 &&
-                 getListElementAtIndex(m_Fixture.m_List8, 4)->object.type == LOCAL_CONDITIONS &&
-                 copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 &&
-                 areDecimalNumbersEqual(copiedConditions->humidity, 12.8), "The source list content has not been correctly copied to destination");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List8)->priority == 5 && getLastListElement(m_Fixture.m_List8)->priority == 2, "First and last element of the destination list are not correctly referenced");
-        QVERIFY2(getFirstListElement(m_Fixture.m_List7)->priority == 6 && getLastListElement(m_Fixture.m_List7)->priority == 2, "First and last element of the source list are not correctly referenced");
-
-        for (ListIterator it = lbegin(m_Fixture.m_List7); !areIteratorsEqual(it, lend(m_Fixture.m_List7)); lnext(&it))
-        {
-            emptyTestObject(&it.current->object);
-        }
-
-        for (ListIterator it = lbegin(m_Fixture.m_List8); !areIteratorsEqual(it, lend(m_Fixture.m_List8)); lnext(&it))
-        {
-            emptyTestObject(&it.current->object);
-        }
+    for (ListIterator it = lbegin(m_Fixture.m_List2); !areIteratorsEqual(it, lend(m_Fixture.m_List2)); lnext(&it))
+    {
+        emptyTestObject(&it.current->object);
     }
 }
 
@@ -822,6 +865,23 @@ void LinkedListTests::testRemoveArbitraryElement_data()
     QTest::newRow("Remove current: 5") << std::vector<size_t>{5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::SUCCESS << size_t{5} << std::vector<size_t>{};
     QTest::newRow("Remove current: 6") << std::vector<size_t>{5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{1} << Result::FAIL << size_t{0} << std::vector<size_t>{5};
     QTest::newRow("Remove current: 7") << std::vector<size_t>{} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::FAIL << size_t{0} << std::vector<size_t>{};
+}
+
+void LinkedListTests::testMoveOrCopyContentWithoutPayloadToList_data()
+{
+    QTest::addColumn<std::vector<size_t>>("sourcePriorities");
+    QTest::addColumn<std::vector<size_t>>("destinationPriorities");
+    QTest::addColumn<InsertionScenario>("insertionScenario");
+    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+
+    QTest::newRow("Move: 1") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{7, 8, 4, 2, 2, 6, 2, 5, 3};
+    QTest::newRow("Move: 2") << std::vector<size_t>{} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{7, 8, 4, 2};
+    QTest::newRow("Move: 3") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{2, 6, 2, 5, 3};
+    QTest::newRow("Move: 4") << std::vector<size_t>{} << std::vector<size_t>{} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{};
+    QTest::newRow("Copy: 1") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{7, 8, 4, 2, 2, 6, 2, 5, 3};
+    QTest::newRow("Copy: 2") << std::vector<size_t>{} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{7, 8, 4, 2};
+    QTest::newRow("Copy: 3") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{2, 6, 2, 5, 3};
+    QTest::newRow("Copy: 4") << std::vector<size_t>{} << std::vector<size_t>{} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{};
 }
 
 void LinkedListTests::testReverseList_data()

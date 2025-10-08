@@ -18,11 +18,6 @@ struct ListTestFixture
     List* m_List1;
     List* m_List2;
     List* m_List3;
-    List* m_List4;
-    List* m_List5;
-    List* m_List6;
-    List* m_List7;
-    List* m_List8;
 
     // used for storing multiple individual list element addreses; to be cleaned up after each test run (elements to be cleaned up separately)
     ListElement** m_ListElementRefs;

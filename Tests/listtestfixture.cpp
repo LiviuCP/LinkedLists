@@ -17,11 +17,6 @@ ListTestFixture::ListTestFixture()
     , m_List1{nullptr}
     , m_List2{nullptr}
     , m_List3{nullptr}
-    , m_List4{nullptr}
-    , m_List5{nullptr}
-    , m_List6{nullptr}
-    , m_List7{nullptr}
-    , m_List8{nullptr}
     , m_ListElementRefs{nullptr}
 {
 }
@@ -50,11 +45,6 @@ void ListTestFixture::resetToInitialState()
     DELETE_LIST(m_List1, deleteObjectPayload);
     DELETE_LIST(m_List2, deleteObjectPayload);
     DELETE_LIST(m_List3, deleteObjectPayload);
-    DELETE_LIST(m_List4, deleteObjectPayload);
-    DELETE_LIST(m_List5, deleteObjectPayload);
-    DELETE_LIST(m_List6, deleteObjectPayload);
-    DELETE_LIST(m_List7, deleteObjectPayload);
-    DELETE_LIST(m_List8, deleteObjectPayload);
 
     DELETE_LIST_ELEMENTS_POOL(m_TempPool1);
     DELETE_LIST_ELEMENTS_POOL(m_TempPool2);
@@ -98,7 +88,7 @@ bool ListTestFixture::hasInitialState() const
 {
     return m_Pool && getAquiredElementsCount(m_Pool) == 0 &&
            !m_TempPool1 && !m_TempPool2 &&
-           !m_List1 && !m_List2 && !m_List3 && !m_List4 && !m_List5 && !m_List6 && !m_List7 && !m_List8 &&
+           !m_List1 && !m_List2 && !m_List3 &&
            !m_ListElementRefs &&
            m_ListsMarkedForDeletion.empty() &&
            m_ListElementsMarkedForRelease.empty() && m_ListElementsMarkedForDeletion.empty() &&
