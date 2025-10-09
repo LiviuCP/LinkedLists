@@ -66,8 +66,8 @@ void PriorityQueueTests::testElementsInsertionDeletion()
     Object* firstRemovedObject = removeFromPriorityQueue(m_Queue1);
     LocalConditions* firstRemovedObjectPayload = static_cast<LocalConditions*>(firstRemovedObject->payload);
     QVERIFY2(firstRemovedObject->type == LOCAL_CONDITIONS &&
-             firstRemovedObjectPayload->position->x == 7 &&
-             firstRemovedObjectPayload->position->y == -5 &&
+             firstRemovedObjectPayload->position.x == 7 &&
+             firstRemovedObjectPayload->position.y == -5 &&
              firstRemovedObjectPayload->temperature == 10 &&
              areDecimalNumbersEqual(firstRemovedObjectPayload->humidity, 12.8), "Object has not been correctly removed from queue");
 
@@ -152,8 +152,8 @@ void PriorityQueueTests::testIterators()
         LocalConditions* firstObjectPayload = static_cast<LocalConditions*>(firstObject->payload);
         QVERIFY2(getObjectPriority(it) == 8 &&
                  firstObject->type == LOCAL_CONDITIONS &&
-                 firstObjectPayload->position->x == 7 &&
-                 firstObjectPayload->position->y == -5 &&
+                 firstObjectPayload->position.x == 7 &&
+                 firstObjectPayload->position.y == -5 &&
                  firstObjectPayload->temperature == 10 &&
                  areDecimalNumbersEqual(firstObjectPayload->humidity, 12.8), "The iterator does not point to the right queue object");
 
@@ -236,7 +236,7 @@ void PriorityQueueTests::testModifyObject()
     QVERIFY(getObjectPriority(it) == 4);
 
     LocalConditions* payloadToEdit = static_cast<LocalConditions*>(objectToEdit->payload);
-    payloadToEdit->position->y = 2;
+    payloadToEdit->position.y = 2;
     payloadToEdit->temperature = 11;
     objectToEdit = nullptr;
 
@@ -248,8 +248,8 @@ void PriorityQueueTests::testModifyObject()
     LocalConditions* removedObjectPayload = static_cast<LocalConditions*>(removedObject->payload);
 
     QVERIFY2(removedObject->type == LOCAL_CONDITIONS &&
-             removedObjectPayload->position->x == 7 &&
-             removedObjectPayload->position->y == 2 &&
+             removedObjectPayload->position.x == 7 &&
+             removedObjectPayload->position.y == 2 &&
              removedObjectPayload->temperature == 11 &&
              areDecimalNumbersEqual(removedObjectPayload->humidity, 12.8), "The object has not been correctly modified");
 

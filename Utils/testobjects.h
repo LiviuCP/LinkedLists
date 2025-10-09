@@ -18,12 +18,12 @@ typedef struct {
 } Point;
 
 typedef struct {
-    Point* start;
-    Point* stop;
+    Point start;
+    Point stop;
 } Segment;
 
 typedef struct {
-    Point* position;
+    Point position;
     int temperature;
     double humidity;
 } LocalConditions;

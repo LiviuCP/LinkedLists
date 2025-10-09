@@ -98,65 +98,37 @@ bool customCopyObject(const ListElement* source, ListElement* destination)
 {
     bool success = false;
 
+    ASSERT(source->object.type >= 0, "Invalid source object type!");
+
     /* copy a NON-EMPTY source object to EMPTY destination object to avoid any memory leaks */
-    if (source != NULL && destination != NULL && source->object.payload != NULL && destination->object.payload == NULL)
+    if (source != NULL && destination != NULL && source->object.type >= 0 && source->object.payload != NULL && destination->object.payload == NULL)
     {
-        ASSERT(source->object.type >= 0, "Invalid source object detected");
+        void* destinationObjectPayload = NULL;
 
-        if (source->object.type == SEGMENT)
+        switch(source->object.type)
         {
-            Segment* destinationObjectPayload = (Segment*)malloc(sizeof(Segment));
-            if (destinationObjectPayload != NULL)
-            {
-                destinationObjectPayload->start = (Point*)malloc(sizeof(Point));
-                destinationObjectPayload->stop = (Point*)malloc(sizeof(Point));
-
-                if (destinationObjectPayload->start != NULL && destinationObjectPayload->stop != NULL)
-                {
-                    destinationObjectPayload->start->x = ((Segment*)source->object.payload)->start->x;
-                    destinationObjectPayload->start->y = ((Segment*)source->object.payload)->start->y;
-                    destinationObjectPayload->stop->x = ((Segment*)source->object.payload)->stop->x;
-                    destinationObjectPayload->stop->y = ((Segment*)source->object.payload)->stop->y;
-                    destination->object.type = source->object.type;
-                    destination->object.payload = (void*)destinationObjectPayload;
-                    success = true;
-                }
-
-                if (!success) // ensure any allocated memory is freed in case deep copy failed
-                {
-                    free(destinationObjectPayload->start);
-                    destinationObjectPayload->start = NULL;
-                    free(destinationObjectPayload->stop);
-                    destinationObjectPayload->stop = NULL;
-                    free(destinationObjectPayload);
-                    destinationObjectPayload = NULL;
-                }
-            }
+        case SEGMENT: {
+            const Segment* sourceSegment = (Segment*)source->object.payload;
+            destinationObjectPayload = createSegmentPayload(sourceSegment->start.x, sourceSegment->start.y, sourceSegment->stop.x, sourceSegment->stop.y);
+            break;
         }
-        else if (source->object.type == LOCAL_CONDITIONS)
-        {
-            LocalConditions* destinationObjectPayload = (LocalConditions*)malloc(sizeof(LocalConditions));
-            if (destinationObjectPayload != NULL)
-            {
-                destinationObjectPayload->position = (Point*)malloc(sizeof(Point));
-                if (destinationObjectPayload->position != NULL)
-                {
-                    destinationObjectPayload->position->x = ((LocalConditions*)source->object.payload)->position->x;
-                    destinationObjectPayload->position->y = ((LocalConditions*)source->object.payload)->position->y;
-                    destinationObjectPayload->humidity = ((LocalConditions*)source->object.payload)->humidity;
-                    destinationObjectPayload->temperature = ((LocalConditions*)source->object.payload)->temperature;
-                    destination->object.type = source->object.type;
-                    destination->object.payload = (void*)destinationObjectPayload;
-                    success = true;
-                }
-
-                if (!success) // ensure any allocated memory is freed in case deep copy failed
-                {
-                    free(destinationObjectPayload);
-                    destinationObjectPayload = NULL;
-                }
-            }
+        case LOCAL_CONDITIONS: {
+            const LocalConditions* localConditions = (LocalConditions*)source->object.payload;
+            destinationObjectPayload = createLocalConditionsPayload(localConditions->position.x,
+                                                                    localConditions->position.y,
+                                                                    localConditions->temperature,
+                                                                    localConditions->humidity);
+            break;
         }
+        default:
+            ASSERT(false, "Unhandled object type!");
+            break;
+        }
+
+        destination->object.type = destinationObjectPayload != NULL ? source->object.type : -1;
+        destination->object.payload = destinationObjectPayload;
+
+        success = destination->object.type >= 0;
     }
 
     return success;

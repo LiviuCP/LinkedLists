@@ -59,8 +59,8 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
     LocalConditions* firstPoppedObjectPayload = static_cast<LocalConditions*>(firstPoppedObject->payload);
 
     QVERIFY2(firstPoppedObject->type == LOCAL_CONDITIONS &&
-             firstPoppedObjectPayload->position->x == 7 &&
-             firstPoppedObjectPayload->position->y == -5 &&
+             firstPoppedObjectPayload->position.x == 7 &&
+             firstPoppedObjectPayload->position.y == -5 &&
              firstPoppedObjectPayload->temperature == 10 &&
              areDecimalNumbersEqual(firstPoppedObjectPayload->humidity, 12.8), "Object has not been correctly popped from list");
     QVERIFY(!isEmptyStack(m_Stack1));
@@ -69,10 +69,10 @@ void StackTests::testElementsAreCorrectlyPushedAndPopped()
     Segment* secondPoppedObjectPayload = static_cast<Segment*>(secondPoppedObject->payload);
 
     QVERIFY2(secondPoppedObject->type == SEGMENT &&
-             secondPoppedObjectPayload->start->x == 2 &&
-             secondPoppedObjectPayload->start->y == 5 &&
-             secondPoppedObjectPayload->stop->x == 4 &&
-             secondPoppedObjectPayload->stop->y == 11,   "Object has not been correctly popped from list");
+             secondPoppedObjectPayload->start.x == 2 &&
+             secondPoppedObjectPayload->start.y == 5 &&
+             secondPoppedObjectPayload->stop.x == 4 &&
+             secondPoppedObjectPayload->stop.y == 11,   "Object has not been correctly popped from list");
     QVERIFY(isEmptyStack(m_Stack1));
 
     deleteObject(firstPoppedObject, emptyTestObject);

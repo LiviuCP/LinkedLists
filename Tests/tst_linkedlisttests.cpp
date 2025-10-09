@@ -407,8 +407,8 @@ void LinkedListTests::testMoveContentWithPayloadToList()
         QVERIFY(element && element->priority == resultingPrioritiesArray[index] && element->object.type == destObjTypes[index] && element->object.payload == destObjPayloads[index]);
     }
 
-    QVERIFY(movedSegment->start && movedSegment->stop && movedSegment->start->x == 2 && movedSegment->start->y == 5 && movedSegment->stop->x == 4 && movedSegment->stop->y == 11 &&
-            movedConditions->position && movedConditions->position->x == 7 && movedConditions->position->y == -5 && movedConditions->temperature == 10 &&
+    QVERIFY(movedSegment->start.x == 2 && movedSegment->start.y == 5 && movedSegment->stop.x == 4 && movedSegment->stop.y == 11 &&
+            movedConditions->position.x == 7 && movedConditions->position.y == -5 && movedConditions->temperature == 10 &&
             areDecimalNumbersEqual(movedConditions->humidity, 12.8));
 
     QVERIFY(getFirstListElement(m_Fixture.m_List2)->priority == 5 && getLastListElement(m_Fixture.m_List2)->priority == 2);
@@ -470,8 +470,8 @@ void LinkedListTests::testCopyContentWithPayloadToList()
         QVERIFY(element && element->priority == resultingPrioritiesArray[index] && element->object.type == destObjTypes[index] && element->object.payload == destObjPayloads[index]);
     }
 
-    QVERIFY(copiedSegment->start && copiedSegment->stop && copiedSegment->start->x == 2 && copiedSegment->start->y == 5 && copiedSegment->stop->x == 4 && copiedSegment->stop->y == 11 &&
-            copiedConditions->position && copiedConditions->position->x == 7 && copiedConditions->position->y == -5 && copiedConditions->temperature == 10 &&
+    QVERIFY(copiedSegment->start.x == 2 && copiedSegment->start.y == 5 && copiedSegment->stop.x == 4 && copiedSegment->stop.y == 11 &&
+            copiedConditions->position.x == 7 && copiedConditions->position.y == -5 && copiedConditions->temperature == 10 &&
             areDecimalNumbersEqual(copiedConditions->humidity, 12.8));
 
     QVERIFY(getFirstListElement(m_Fixture.m_List1)->priority == 6 && getLastListElement(m_Fixture.m_List1)->priority == 2);
