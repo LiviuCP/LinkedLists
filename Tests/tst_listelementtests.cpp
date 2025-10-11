@@ -59,7 +59,7 @@ private:
 
 void ListElementTests::testAquiringSinglePoolElement()
 {
-    m_Fixture.m_TempPool1 = createListElementsPool();
+    m_Fixture.m_TempPool1 = createListElementsPool(USE_DEFAULT_MAX_SLICES_COUNT);
     QVERIFY(m_Fixture.m_TempPool1);
 
     // in this case the temp pool is assigned to m_Fixture.m_List1 only to prevent elements deletion from list (in case of test fail); the aquiring/releasing of elements occurs externally
@@ -182,7 +182,7 @@ void ListElementTests::testAquiringSinglePoolElement()
 
 void ListElementTests::testAquiringMultiplePoolElements()
 {
-    m_Fixture.m_TempPool1 = createListElementsPool();
+    m_Fixture.m_TempPool1 = createListElementsPool(USE_DEFAULT_MAX_SLICES_COUNT);
     QVERIFY(m_Fixture.m_TempPool1);
 
     // batch 1
@@ -317,7 +317,7 @@ void ListElementTests::testAquiringMultiplePoolElements()
     CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 0, 5 * ELEMENTS_POOL_SLICE_SIZE);
 
     // combined test: aquire single element and aquire multiple elements
-    m_Fixture.m_TempPool2 = createListElementsPool();
+    m_Fixture.m_TempPool2 = createListElementsPool(USE_DEFAULT_MAX_SLICES_COUNT);
     QVERIFY(m_Fixture.m_TempPool2);
 
     ListElement* element = aquireElement(m_Fixture.m_TempPool2);
@@ -353,7 +353,7 @@ void ListElementTests::testAquiringMultiplePoolElements()
 void ListElementTests::testOptimizingPoolCapacity()
 {
     /* first pool: simple test for optimizing capacity */
-    m_Fixture.m_TempPool1 = createListElementsPool();
+    m_Fixture.m_TempPool1 = createListElementsPool(USE_DEFAULT_MAX_SLICES_COUNT);
     QVERIFY(m_Fixture.m_TempPool1);
 
     // batch 1
@@ -387,7 +387,7 @@ void ListElementTests::testOptimizingPoolCapacity()
     CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 0, ELEMENTS_POOL_SLICE_SIZE);
 
     /* second pool: test that the integrity of the aquired elements is preserved when optimization is performed */
-    m_Fixture.m_TempPool2 = createListElementsPool();
+    m_Fixture.m_TempPool2 = createListElementsPool(USE_DEFAULT_MAX_SLICES_COUNT);
     QVERIFY(m_Fixture.m_TempPool2);
 
     // batch 3
