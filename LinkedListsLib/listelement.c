@@ -31,8 +31,9 @@ void initListElement(ListElement* element)
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload)
 {
-    if (element != NULL && objectPayload != NULL && objectType >= 0)
+    if (element != NULL)
     {
+        ASSERT(objectPayload == NULL || objectType >= 0, "Attempt to assign object that has a type inconsistent with the payload!")
         ASSERT(element->object.payload == NULL, "Attempt to assign object without emptying the existing one first!");
 
         element->object.type = objectType;
@@ -40,22 +41,18 @@ void assignObjectContentToListElement(ListElement* element, const int objectType
     }
 }
 
-Object* detachContentFromListElement(ListElement* element)
+Object detachContentFromListElement(ListElement* element)
 {
-    Object* result = NULL;
+    Object result;
+    result.type = -1;
+    result.payload = NULL;
 
     if (element != NULL)
     {
-        ASSERT((element->object.type >= 0 && element->object.payload != NULL) || (element->object.type < 0 && element->object.payload == NULL), "Invalid object detected");
-
-        Object* temp = createObject(element->object.type, element->object.payload);
-
-        if (temp != NULL)
-        {
-            result = temp;
-            element->object.type = -1;
-            element->object.payload = NULL;
-        }
+        result.type = element->object.type;
+        result.payload = element->object.payload;
+        element->object.type = -1;
+        element->object.payload = NULL;
     }
 
     return result;
@@ -66,8 +63,7 @@ void deleteObjectPayload(Object *object)
 {
     if (object != NULL)
     {
-        free(object->payload);
-        object->payload = NULL;
+        FREE(object->payload);
         object->type = -1;
     }
 }
@@ -91,7 +87,7 @@ bool copyObjectPlaceholder(const ListElement* source, ListElement* destination)
     return success;
 }
 
-/* This function is just for illustrating the creation of custom deep copy function
+/* This function is just for illustrating the creation of a custom function for deep copying an Object
     ---> for test purposes only
 */
 bool customCopyObject(const ListElement* source, ListElement* destination)
@@ -107,6 +103,21 @@ bool customCopyObject(const ListElement* source, ListElement* destination)
 
         switch(source->object.type)
         {
+        case INTEGER: {
+            const int* sourceInteger = (int*)source->object.payload;
+            destinationObjectPayload = createIntegerPayload(*sourceInteger);
+            break;
+        }
+        case DECIMAL: {
+            const double* sourceDecimal = (double*)source->object.payload;
+            destinationObjectPayload = createDecimalPayload(*sourceDecimal);
+            break;
+        }
+        case POINT: {
+            const Point* sourcePoint = (Point*)source->object.payload;
+            destinationObjectPayload = createPointPayload(sourcePoint->x, sourcePoint->y);
+            break;
+        }
         case SEGMENT: {
             const Segment* sourceSegment = (Segment*)source->object.payload;
             destinationObjectPayload = createSegmentPayload(sourceSegment->start.x, sourceSegment->start.y, sourceSegment->stop.x, sourceSegment->stop.y);

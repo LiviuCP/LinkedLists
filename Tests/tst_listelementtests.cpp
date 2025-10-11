@@ -46,6 +46,7 @@ private slots:
     void testAquiringMultiplePoolElements();
     void testOptimizingPoolCapacity();
     void testAssignRemoveObject();
+    void testCustomCopyObject();
 
     void initTestCase_data();
     void cleanupTestCase();
@@ -589,48 +590,205 @@ void ListElementTests::testAssignRemoveObject()
 
     m_Fixture.m_List1 = createEmptyList(pool);
 
-    // Point
-    Point* point = static_cast<Point*>(malloc(sizeof(Point)));
-    point->x = 3;
-    point->y = 4;
-    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 2), POINT, static_cast<void*>(point));
-    point = nullptr;
-    // int
-    int* distance = static_cast<int*>(malloc(sizeof(int)));
-    *distance = 5;
-    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 3), INTEGER, static_cast<void*>(distance));
-    distance = nullptr;
-    // float
-    double* angle = static_cast<double*>(malloc(sizeof(double)));
-    *angle = 1.25;
-    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 1), DECIMAL, static_cast<void*>(angle));
-    angle = nullptr;
-    // no object
+    // create elements and assign object content (type and payload)
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 3), INTEGER, createIntegerPayload(5));
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 1), DECIMAL, createDecimalPayload(1.25));
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 2), POINT, createPointPayload(3, 4));
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 4), SEGMENT, createSegmentPayload(-3, 5, 8, 9));
+    assignObjectContentToListElement(createAndAppendToList(m_Fixture.m_List1, 4), LOCAL_CONDITIONS, createLocalConditionsPayload(4, -5, 32, 80.4));
     Q_UNUSED(createAndPrependToList(m_Fixture.m_List1, 10));
 
-    QVERIFY(getListSize(m_Fixture.m_List1) == 4);
+    QVERIFY(getListSize(m_Fixture.m_List1) == 6);
 
     ListIterator it = lbegin(m_Fixture.m_List1);
-    QVERIFY2(it.current->object.type == -1 && it.current->object.payload == nullptr, "Default object is incorrect (should be empty)");
-    lnext(&it);
-    QVERIFY2(it.current->object.type == POINT && (static_cast<Point*>(it.current->object.payload))->x == 3
-             && (static_cast<Point*>(it.current->object.payload))->y == 4, "Object has been incorrectly assigned");
-    lnext(&it);
-    QVERIFY2(it.current->object.type == INTEGER && *(static_cast<int*>(it.current->object.payload)) == 5, "Object has been incorrectly assigned");
-    lnext(&it);
-    QVERIFY2(it.current->object.type == DECIMAL && areDecimalNumbersEqual(*(static_cast<double*>(it.current->object.payload)), 1.25), "Object has been incorrectly assigned");
+    QVERIFY2(it.current->object.type == -1 && !it.current->object.payload, "Default object is incorrect (should be empty)");
 
-    Object* removedObject = static_cast<Object*>(detachContentFromListElement(getListElementAtIndex(m_Fixture.m_List1, 2)));
-    QVERIFY2(getListElementAtIndex(m_Fixture.m_List1, 2)->object.type == -1 &&
-             getListElementAtIndex(m_Fixture.m_List1, 2)->object.payload == nullptr &&
-             removedObject->type == INTEGER &&
-             (*(static_cast<int*>(removedObject->payload)) == 5), "Incorrect object removal from list element");
+    lnext(&it);
+    QVERIFY2(it.current->object.payload &&
+             it.current->object.type == INTEGER &&
+             *((int*)(it.current->object.payload)) == 5, "Object has been incorrectly assigned");
 
-    deleteObjectPayload(removedObject);
-    free(removedObject);
-    removedObject = nullptr;
+    lnext(&it);
+    QVERIFY2(it.current->object.payload &&
+             it.current->object.type == DECIMAL &&
+             areDecimalNumbersEqual(*((double*)(it.current->object.payload)), 1.25), "Object has been incorrectly assigned");
 
-    QVERIFY(getListSize(m_Fixture.m_List1) == 4);
+    lnext(&it);
+    QVERIFY2(it.current->object.payload &&
+             it.current->object.type == POINT &&
+             ((Point*)it.current->object.payload)->x == 3 &&
+             ((Point*)it.current->object.payload)->y == 4, "Object has been incorrectly assigned");
+
+    lnext(&it);
+    QVERIFY2(it.current->object.payload &&
+             it.current->object.type == SEGMENT &&
+             ((Segment*)(it.current->object.payload))->start.x == -3 &&
+             ((Segment*)(it.current->object.payload))->start.y == 5 &&
+             ((Segment*)(it.current->object.payload))->stop.x == 8 &&
+             ((Segment*)(it.current->object.payload))->stop.y == 9, "Object has been incorrectly assigned");
+
+    lnext(&it);
+    QVERIFY2(it.current->object.payload &&
+             it.current->object.type == LOCAL_CONDITIONS &&
+             ((LocalConditions*)(it.current->object.payload))->position.x == 4 &&
+             ((LocalConditions*)(it.current->object.payload))->position.y == -5 &&
+             ((LocalConditions*)(it.current->object.payload))->temperature == 32 &&
+             areDecimalNumbersEqual(((LocalConditions*)(it.current->object.payload))->humidity, 80.4), "Object has been incorrectly assigned");
+
+    QVERIFY(getListSize(m_Fixture.m_List1) == 6);
+
+    // detach object content from each list element, delete payload
+    it = lbegin(m_Fixture.m_List1);
+    Object removedObject = detachContentFromListElement(it.current);
+
+    QVERIFY(!removedObject.payload && removedObject.type == -1);
+
+    lnext(&it);
+    removedObject = detachContentFromListElement(it.current);
+
+    QVERIFY2(removedObject.payload &&
+             removedObject.type == INTEGER &&
+             *((int*)(removedObject.payload)) == 5, "Incorrect object removal from list element");
+
+    deleteObjectPayload(&removedObject);
+
+    lnext(&it);
+    removedObject = detachContentFromListElement(it.current);
+
+    QVERIFY2(removedObject.payload &&
+             removedObject.type == DECIMAL &&
+             areDecimalNumbersEqual(*((double*)(removedObject.payload)), 1.25), "Incorrect object removal from list element");
+
+    deleteObjectPayload(&removedObject);
+
+    lnext(&it);
+    removedObject = detachContentFromListElement(it.current);
+
+    QVERIFY2(removedObject.payload &&
+            removedObject.type == POINT &&
+            ((Point*)removedObject.payload)->x == 3 &&
+            ((Point*)removedObject.payload)->y == 4, "Incorrect object removal from list element");
+
+    deleteObjectPayload(&removedObject);
+
+    lnext(&it);
+    removedObject = detachContentFromListElement(it.current);
+
+    QVERIFY2(removedObject.payload &&
+             removedObject.type == SEGMENT &&
+             ((Segment*)(removedObject.payload))->start.x == -3 &&
+             ((Segment*)(removedObject.payload))->start.y == 5 &&
+             ((Segment*)(removedObject.payload))->stop.x == 8 &&
+             ((Segment*)(removedObject.payload))->stop.y == 9, "Incorrect object removal from list element");
+
+    deleteObjectPayload(&removedObject);
+
+    lnext(&it);
+    removedObject = detachContentFromListElement(it.current);
+
+    QVERIFY2(removedObject.payload &&
+             removedObject.type == LOCAL_CONDITIONS &&
+             ((LocalConditions*)(removedObject.payload))->position.x == 4 &&
+             ((LocalConditions*)(removedObject.payload))->position.y == -5 &&
+             ((LocalConditions*)(removedObject.payload))->temperature == 32 &&
+             areDecimalNumbersEqual(((LocalConditions*)(removedObject.payload))->humidity, 80.4), "Incorrect object removal from list element");
+
+    deleteObjectPayload(&removedObject);
+
+    QVERIFY(getListSize(m_Fixture.m_List1) == 6);
+    it = lbegin(m_Fixture.m_List1);
+
+    while(!areIteratorsEqual(it, lend(m_Fixture.m_List1)))
+    {
+        QVERIFY(!it.current->object.payload && it.current->object.type == -1);
+        lnext(&it);
+    }
+}
+
+void ListElementTests::testCustomCopyObject()
+{
+    const auto clearObject = [](ListElement* element) {
+        Object removedObject = detachContentFromListElement(element);
+        deleteObjectPayload(&removedObject);
+    };
+
+    QFETCH_GLOBAL(ListElementsPool*, pool);
+    QVERIFY(!pool || pool == m_Fixture.m_Pool);
+
+    ListElement* source = pool ? aquireElement(pool) : createListElement();
+    ListElement* destination = pool ? aquireElement(pool) : createListElement();
+    m_Fixture.markListElementForCleanup(source, pool != nullptr);
+    m_Fixture.markListElementForCleanup(destination, pool != nullptr);
+
+    QVERIFY(source && source->priority == 0 && !source->object.payload && source->object.type == -1);
+    QVERIFY(destination && source->priority == 0 && !destination->object.payload && destination->object.type == -1);
+
+    // integer
+    assignObjectContentToListElement(source, INTEGER, createIntegerPayload(5));
+    customCopyObject(source, destination);
+
+    QVERIFY2(destination->object.payload &&
+             destination->object.type == INTEGER &&
+             *((int*)(destination->object.payload)) == 5, "Object content has been incorrectly copied to destination");
+
+    clearObject(source);
+    clearObject(destination);
+
+    // decimal
+    assignObjectContentToListElement(source, DECIMAL, createDecimalPayload(1.25));
+    customCopyObject(source, destination);
+
+    QVERIFY2(destination->object.payload &&
+             destination->object.type == DECIMAL &&
+             areDecimalNumbersEqual(*((double*)(destination->object.payload)), 1.25), "Object content has been incorrectly copied to destination");
+
+    clearObject(source);
+    clearObject(destination);
+
+    // point
+    assignObjectContentToListElement(source, POINT, createPointPayload(3, 4));
+    customCopyObject(source, destination);
+
+    QVERIFY2(destination->object.payload &&
+             destination->object.type == POINT &&
+             ((Point*)destination->object.payload)->x == 3 &&
+             ((Point*)destination->object.payload)->y == 4, "Object content has been incorrectly copied to destination");
+
+    clearObject(source);
+    clearObject(destination);
+
+    Object removedSourceObject = detachContentFromListElement(source);
+    Object removedDestinationObject = detachContentFromListElement(destination);
+    deleteObjectPayload(&removedSourceObject);
+    deleteObjectPayload(&removedDestinationObject);
+
+    // segment
+    assignObjectContentToListElement(source, SEGMENT, createSegmentPayload(-3, 5, 8, 9));
+    customCopyObject(source, destination);
+
+    QVERIFY2(destination->object.payload &&
+             destination->object.type == SEGMENT &&
+             ((Segment*)(destination->object.payload))->start.x == -3 &&
+             ((Segment*)(destination->object.payload))->start.y == 5 &&
+             ((Segment*)(destination->object.payload))->stop.x == 8 &&
+             ((Segment*)(destination->object.payload))->stop.y == 9, "Object content has been incorrectly copied to destination");
+
+    clearObject(source);
+    clearObject(destination);
+
+    // local conditions
+    assignObjectContentToListElement(source, LOCAL_CONDITIONS, createLocalConditionsPayload(4, -5, 32, 80.4));
+    customCopyObject(source, destination);
+
+    QVERIFY2(destination->object.payload &&
+             destination->object.type == LOCAL_CONDITIONS &&
+             ((LocalConditions*)(destination->object.payload))->position.x == 4 &&
+             ((LocalConditions*)(destination->object.payload))->position.y == -5 &&
+             ((LocalConditions*)(destination->object.payload))->temperature == 32 &&
+             areDecimalNumbersEqual(((LocalConditions*)(destination->object.payload))->humidity, 80.4), "Object content has been incorrectly copied to destination");
+
+    clearObject(source);
+    clearObject(destination);
 }
 
 void ListElementTests::initTestCase_data()

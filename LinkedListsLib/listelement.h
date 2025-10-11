@@ -22,7 +22,7 @@ ListElement* createListElement();
 void initListElement(ListElement* element);
 
 void assignObjectContentToListElement(ListElement* element, const int objectType, void* const objectPayload);
-Object* detachContentFromListElement(ListElement* element);
+Object detachContentFromListElement(ListElement* element);
 
 /* don't use these two for stack created lists (heap-only) */
 void deleteObjectPayload(Object* object); // default object deallocator, only works for simple objects without associated payload heap memory (e.g. Point, primitive types payloads)

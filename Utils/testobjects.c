@@ -80,26 +80,23 @@ LocalConditions* createLocalConditionsPayload(int positionX, int positionY, int 
 
 void emptyTestObject(Object* object)
 {
-    if (object != NULL)
+    if (object != NULL && object->payload != NULL)
     {
-        if (object->payload != NULL)
-        {
-            switch (object->type) {
-            case INTEGER:
-            case DECIMAL:
-            case POINT:
-            case SEGMENT:
-            case LOCAL_CONDITIONS:
-                break;
-            /* for new payload types: include the "custom" code for freeing memory here if they have pointer members to dynamically allocated memory */
-            default:
-                ASSERT(false, "Invalid test object type!");
-            }
-
-            object->type = -1;
-            free(object->payload);
-            object->payload = NULL;
+        switch (object->type) {
+        case INTEGER:
+        case DECIMAL:
+        case POINT:
+        case SEGMENT:
+        case LOCAL_CONDITIONS:
+            break;
+        /* for new payload types: include the "custom" code for freeing memory here if they have pointer members to dynamically allocated memory */
+        default:
+            ASSERT(false, "Invalid test object type!");
         }
+
+        object->type = -1;
+        free(object->payload);
+        object->payload = NULL;
     }
 }
 

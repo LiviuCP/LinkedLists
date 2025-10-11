@@ -5,7 +5,7 @@
 
 typedef enum
 {
-    INTEGER,
+    INTEGER = 0,
     DECIMAL,
     POINT,
     SEGMENT,
