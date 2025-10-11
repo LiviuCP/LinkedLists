@@ -44,6 +44,7 @@ class ListElementTests : public QObject
 private slots:
     void testAquiringSinglePoolElement();
     void testAquiringMultiplePoolElements();
+    void testAllPoolElementsAquired();
     void testOptimizingPoolCapacity();
     void testAssignRemoveObject();
     void testCustomCopyObject();
@@ -348,6 +349,98 @@ void ListElementTests::testAquiringMultiplePoolElements()
 
     multipleElementsAquired = aquireElements(m_Fixture.m_TempPool2, nullptr, 1);
     QVERIFY(!multipleElementsAquired);
+}
+
+void ListElementTests::testAllPoolElementsAquired()
+{
+    const size_t maxSlicesCount1{2};
+
+    m_Fixture.m_TempPool1 = createListElementsPool(maxSlicesCount1);
+    QVERIFY(m_Fixture.m_TempPool1);
+
+    // batch 1
+    const size_t batchSize1 = ELEMENTS_POOL_SLICE_SIZE;
+    ListElement** listElementRefs1 = nullptr;
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs1, batchSize1, m_Fixture);
+
+    bool multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs1, batchSize1);
+
+    QVERIFY(multipleElementsAquired);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, ELEMENTS_POOL_SLICE_SIZE, 0);
+    CHECK_AQUIRED_ELEMENTS(listElementRefs1, batchSize1);
+
+    // batch 2
+    const size_t batchSize2 = 2;
+    ListElement** listElementRefs2 = nullptr;
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs2, batchSize2, m_Fixture);
+
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs2, batchSize2);
+
+    QVERIFY(multipleElementsAquired);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, ELEMENTS_POOL_SLICE_SIZE + 2, ELEMENTS_POOL_SLICE_SIZE - 2);
+    CHECK_AQUIRED_ELEMENTS(listElementRefs2, batchSize2);
+
+    // batch 3
+    const size_t batchSize3 = ELEMENTS_POOL_SLICE_SIZE - 1;
+    ListElement** listElementRefs3 = nullptr;
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs3, batchSize3, m_Fixture);
+
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs3, batchSize3);
+
+    QVERIFY(!multipleElementsAquired);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, ELEMENTS_POOL_SLICE_SIZE + 2, ELEMENTS_POOL_SLICE_SIZE - 2);
+
+    RELEASE_ELEMENTS(listElementRefs2, batchSize2, m_Fixture.m_TempPool1);
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs3, batchSize3);
+
+    QVERIFY(multipleElementsAquired);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 2 * ELEMENTS_POOL_SLICE_SIZE - 1, 1);
+    CHECK_AQUIRED_ELEMENTS(listElementRefs3, batchSize3);
+
+    ListElement* element = aquireElement(m_Fixture.m_TempPool1);
+    QVERIFY(element);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 2 * ELEMENTS_POOL_SLICE_SIZE, 0);
+    CHECK_AQUIRED_ELEMENTS(&element, 1);
+
+    ListElement* anotherElement = aquireElement(m_Fixture.m_TempPool1); // no more available elements, maximum number of slices reached
+    QVERIFY(!anotherElement);
+
+    // batch 4
+    const size_t batchSize4 = 1;
+    ListElement** listElementRefs4 = nullptr;
+    ALLOC_LIST_ELEMENT_REFS(listElementRefs4, batchSize4, m_Fixture);
+
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs4, batchSize4);
+
+    QVERIFY(!multipleElementsAquired);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 2 * ELEMENTS_POOL_SLICE_SIZE, 0);
+
+    RELEASE_ELEMENTS(&element, 1, m_Fixture.m_TempPool1);
+    element = nullptr;
+    anotherElement = aquireElement(m_Fixture.m_TempPool1);
+
+    QVERIFY(anotherElement);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 2 * ELEMENTS_POOL_SLICE_SIZE, 0);
+    CHECK_AQUIRED_ELEMENTS(&anotherElement, 1);
+
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs4, batchSize4);
+
+    QVERIFY(!multipleElementsAquired);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 2 * ELEMENTS_POOL_SLICE_SIZE, 0);
+
+    RELEASE_ELEMENTS(&anotherElement, 1, m_Fixture.m_TempPool1);
+    anotherElement = nullptr;
+    multipleElementsAquired = aquireElements(m_Fixture.m_TempPool1, listElementRefs4, batchSize4);
+
+    QVERIFY(multipleElementsAquired);
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 2 * ELEMENTS_POOL_SLICE_SIZE, 0);
+    CHECK_AQUIRED_ELEMENTS(listElementRefs4, batchSize4);
+
+    RELEASE_ELEMENTS(listElementRefs1, batchSize1, m_Fixture.m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs3, batchSize3, m_Fixture.m_TempPool1);
+    RELEASE_ELEMENTS(listElementRefs4, batchSize4, m_Fixture.m_TempPool1);
+
+    CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool1, 0, 2 * ELEMENTS_POOL_SLICE_SIZE);
 }
 
 void ListElementTests::testOptimizingPoolCapacity()
