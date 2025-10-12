@@ -27,7 +27,7 @@ ListElementsPool;
 extern "C"{
 #endif
 
-ListElementsPool* createListElementsPool();
+ListElementsPool* createListElementsPool(size_t maxSlicesCount);
 void deleteListElementsPool(ListElementsPool* elementsPool);
 ListElement* aquireElement(ListElementsPool* elementsPool);
 bool aquireElements(ListElementsPool* elementsPool, ListElement** elements, size_t requiredElementsCount);

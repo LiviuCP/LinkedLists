@@ -7,6 +7,8 @@
 #include "linkedlist.h"
 #include "listelementspool.h"
 
+#define USE_DEFAULT_MAX_SLICES_COUNT 0
+
 struct ListTestFixture
 {
     ListElementsPool* m_Pool;

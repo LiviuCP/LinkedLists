@@ -25,7 +25,7 @@ void ListTestFixture::init()
 {
     if (!m_Pool)
     {
-        m_Pool = createListElementsPool();
+        m_Pool = createListElementsPool(USE_DEFAULT_MAX_SLICES_COUNT);
         assert(hasInitialState() && "Incorrect fixture initialization!");
     }
 }

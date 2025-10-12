@@ -6,7 +6,7 @@
 #include "error.h"
 
 
-#define ELEMENTS_POOL_MAX_SLICES_COUNT 8
+#define DEFAULT_MAX_SLICES_COUNT 8
 #define SLICE_OFFSET 4
 
 typedef struct
@@ -35,20 +35,20 @@ typedef struct
 } ListElementsPoolContent;
 
 // "private" (supporting) functions
-static bool initListElementsPool(ListElementsPool* elementsPool);
+static bool initListElementsPool(ListElementsPool* elementsPool, size_t maxSlicesCount);
 static void addSliceToElementsPool(ListElementsPool* elementsPool);
 static void deleteUnusedSlices(ListElementsPool* elementsPool);
 static bool retrieveSliceIndex(const ListElement* element, const ListElementsPool* elementsPool, size_t* sliceIndex);
 static ListElementsSlice* createSlice(size_t elementsCount);
 static void deleteSlice(ListElementsSlice* slice);
 
-ListElementsPool* createListElementsPool()
+ListElementsPool* createListElementsPool(size_t maxSlicesCount)
 {
     ListElementsPool* elementsPool = (ListElementsPool*)malloc(sizeof(ListElementsPool));
 
     if (elementsPool != NULL)
     {
-        const bool success = initListElementsPool(elementsPool);
+        const bool success = initListElementsPool(elementsPool, maxSlicesCount);
 
         if (!success)
         {
@@ -292,16 +292,16 @@ size_t getAquiredElementsCount(ListElementsPool* elementsPool)
     return aquiredElementsCount;
 }
 
-static bool initListElementsPool(ListElementsPool* elementsPool)
+static bool initListElementsPool(ListElementsPool* elementsPool, size_t maxSlicesCount)
 {
     static_assert(ELEMENTS_POOL_SLICE_SIZE > 0 && ELEMENTS_POOL_SLICE_SIZE % BYTE_SIZE == 0, "Invalid slice size!");
-    static_assert(ELEMENTS_POOL_MAX_SLICES_COUNT >= 1, "The list elements pool should have at least one slice!");
+    static_assert(DEFAULT_MAX_SLICES_COUNT > 0, "The default number of slices should not be 0!");
 
     bool success = false;
 
     SliceElementId* sliceElementIds = NULL;
     const size_t totalElementsCount = ELEMENTS_POOL_SLICE_SIZE;
-    const size_t maximumSlicesCount = ELEMENTS_POOL_MAX_SLICES_COUNT;
+    const size_t maximumSlicesCount = maxSlicesCount == 0 ? DEFAULT_MAX_SLICES_COUNT : maxSlicesCount;
 
     ListElementsPoolContent* poolContent = elementsPool != NULL ? malloc(sizeof(ListElementsPoolContent)) : NULL;
     ListElementsSlice** elementSlices = poolContent != NULL ? (ListElementsSlice**)malloc(maximumSlicesCount * sizeof(ListElementsSlice*)) : NULL;
