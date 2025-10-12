@@ -23,7 +23,7 @@ List* createEmptyList(void* elementsPool)
     return list;
 }
 
-List* createListFromPrioritiesArray(const size_t* prioritiesArray, const size_t arraySize, void* elementsPool)
+List* createListFromPrioritiesArray(const Priority* prioritiesArray, const size_t arraySize, void* elementsPool)
 {
     List* list = NULL;
 
@@ -147,7 +147,7 @@ void clearList(List* list, void (*deallocObject)(Object* object))
     }
 }
 
-ListElement* createAndPrependToList(List* list, size_t priority)
+ListElement* createAndPrependToList(List* list, Priority priority)
 {
     ListElement* element = NULL;
 
@@ -171,7 +171,7 @@ ListElement* createAndPrependToList(List* list, size_t priority)
     return element;
 }
 
-ListElement* createAndAppendToList(List* list, size_t priority)
+ListElement* createAndAppendToList(List* list, Priority priority)
 {
     ListElement* element = NULL;
 
@@ -195,7 +195,7 @@ ListElement* createAndAppendToList(List* list, size_t priority)
     return element;
 }
 
-ListElement* createAndInsertBefore(ListIterator it, size_t priority)
+ListElement* createAndInsertBefore(ListIterator it, Priority priority)
 {
     ListElement* result = NULL;
     ASSERT(it.list != NULL, "Iterator points to NULL list");
@@ -215,7 +215,7 @@ ListElement* createAndInsertBefore(ListIterator it, size_t priority)
     return result;
 }
 
-ListElement* createAndInsertAfter(ListIterator it, size_t priority)
+ListElement* createAndInsertAfter(ListIterator it, Priority priority)
 {
     ListElement* result = NULL;
     ASSERT(it.list != NULL, "Iterator points to NULL list");

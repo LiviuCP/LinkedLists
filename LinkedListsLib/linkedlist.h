@@ -28,7 +28,7 @@ extern "C"{
 
 List* createEmptyList(void* elementsPool);
 
-List* createListFromPrioritiesArray(const size_t* prioritiesArray,
+List* createListFromPrioritiesArray(const Priority* prioritiesArray,
                                     const size_t arraySize,
                                     void* elementsPool);
 
@@ -37,10 +37,10 @@ void initEmptyList(List* list, void* elementsPool);
 void deleteList(List* list, void (*deallocObject)(Object* object));
 void clearList(List* list, void (*deallocObject)(Object* object));
 
-ListElement* createAndPrependToList(List* list, size_t priority);
-ListElement* createAndAppendToList(List* list, size_t priority);
-ListElement* createAndInsertBefore(ListIterator it, size_t priority);
-ListElement* createAndInsertAfter(ListIterator it, size_t priority);
+ListElement* createAndPrependToList(List* list, Priority priority);
+ListElement* createAndAppendToList(List* list, Priority priority);
+ListElement* createAndInsertBefore(ListIterator it, Priority priority);
+ListElement* createAndInsertAfter(ListIterator it, Priority priority);
 
 void moveContentToList(List* source, List* destination);
 

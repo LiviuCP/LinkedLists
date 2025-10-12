@@ -75,7 +75,7 @@ void LinkedListTests::testListIsCorrectlyCreatedAndCleared()
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     {
-        const size_t prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
+        const Priority prioritiesArray[9]{6, 2, 5, 4, 3, 1, 2, 9, 7};
         m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 9, pool);
 
         QVERIFY2(getListSize(m_Fixture.m_List1) == 9, "List size is not correct");
@@ -119,10 +119,10 @@ void LinkedListTests::testAppendOrPrepend()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(Priorities, priorities);
     QFETCH(InsertionScenario, insertionScenario);
-    QFETCH(size_t, priorityToInsert);
-    QFETCH(std::vector<size_t>, expectedPriorities);
+    QFETCH(Priority, priorityToInsert);
+    QFETCH(Priorities, expectedPriorities);
 
     QVERIFY(insertionScenario == InsertionScenario::APPEND || insertionScenario == InsertionScenario::PREPEND);
 
@@ -155,11 +155,11 @@ void LinkedListTests::testInsertElementBeforeOrAfter()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(Priorities, priorities);
     QFETCH(InsertionScenario, insertionScenario);
     QFETCH(size_t, iteratorIncrementationsCount);
-    QFETCH(size_t, priorityToInsert);
-    QFETCH(std::vector<size_t>, expectedPriorities);
+    QFETCH(Priority, priorityToInsert);
+    QFETCH(Priorities, expectedPriorities);
 
     QVERIFY(insertionScenario == InsertionScenario::INSERT_ELEMENT_BEFORE || insertionScenario == InsertionScenario::INSERT_ELEMENT_AFTER);
 
@@ -194,11 +194,11 @@ void LinkedListTests::testRemoveFirstOrLastElement()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(Priorities, priorities);
     QFETCH(RemovalScenario, removalScenario);
     QFETCH(Result, expectedResult);
-    QFETCH(size_t, removedElementPriority);
-    QFETCH(std::vector<size_t>, expectedPriorities);
+    QFETCH(Priority, removedElementPriority);
+    QFETCH(Priorities, expectedPriorities);
 
     QVERIFY(removalScenario == RemovalScenario::REMOVE_FIRST_ELEMENT || removalScenario == RemovalScenario::REMOVE_LAST_ELEMENT);
 
@@ -243,12 +243,12 @@ void LinkedListTests::testRemoveArbitraryElement()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(Priorities, priorities);
     QFETCH(RemovalScenario, removalScenario);
     QFETCH(size_t, iteratorIncrementationsCount);
     QFETCH(Result, expectedResult);
-    QFETCH(size_t, removedElementPriority);
-    QFETCH(std::vector<size_t>, expectedPriorities);
+    QFETCH(Priority, removedElementPriority);
+    QFETCH(Priorities, expectedPriorities);
 
     QVERIFY(removalScenario == RemovalScenario::REMOVE_ELEMENT_BEFORE ||
             removalScenario == RemovalScenario::REMOVE_ELEMENT_AFTER ||
@@ -303,10 +303,10 @@ void LinkedListTests::testMoveOrCopyContentWithoutPayloadToList()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    QFETCH(std::vector<size_t>, sourcePriorities);
-    QFETCH(std::vector<size_t>, destinationPriorities);
+    QFETCH(Priorities, sourcePriorities);
+    QFETCH(Priorities, destinationPriorities);
     QFETCH(InsertionScenario, insertionScenario);
-    QFETCH(std::vector<size_t>, expectedPriorities);
+    QFETCH(Priorities, expectedPriorities);
 
     QVERIFY(insertionScenario == InsertionScenario::MOVE_ELEMENTS || insertionScenario == InsertionScenario::COPY_ELEMENTS);
 
@@ -369,9 +369,9 @@ void LinkedListTests::testMoveContentWithPayloadToList()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    const size_t sourcePrioritiesArray[2]{6, 2};
-    const size_t destinationPrioritiesArray[3]{5, 4, 3};
-    const size_t resultingPrioritiesArray[5]{5, 4, 3, 6, 2};
+    const Priority sourcePrioritiesArray[2]{6, 2};
+    const Priority destinationPrioritiesArray[3]{5, 4, 3};
+    const Priority resultingPrioritiesArray[5]{5, 4, 3, 6, 2};
 
     m_Fixture.m_List1 = createListFromPrioritiesArray(sourcePrioritiesArray, 2, pool);
     QVERIFY(m_Fixture.m_List1);
@@ -424,9 +424,9 @@ void LinkedListTests::testCopyContentWithPayloadToList()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    const size_t sourcePrioritiesArray[2]{6, 2};
-    const size_t destinationPrioritiesArray[3]{5, 4, 3};
-    const size_t resultingPrioritiesArray[5]{5, 4, 3, 6, 2};
+    const Priority sourcePrioritiesArray[2]{6, 2};
+    const Priority destinationPrioritiesArray[3]{5, 4, 3};
+    const Priority resultingPrioritiesArray[5]{5, 4, 3, 6, 2};
 
     m_Fixture.m_List1 = createListFromPrioritiesArray(sourcePrioritiesArray, 2, pool);
     QVERIFY(m_Fixture.m_List1);
@@ -494,7 +494,7 @@ void LinkedListTests::testSwapElements()
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     {
-        const size_t prioritiesArray[5]{6, 2, 5, 4, 7};
+        const Priority prioritiesArray[5]{6, 2, 5, 4, 7};
         m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 5, pool);
 
         ListIterator firstIt = lbegin(m_Fixture.m_List1);
@@ -537,8 +537,8 @@ void LinkedListTests::testReverseList()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    QFETCH(std::vector<size_t>, priorities);
-    QFETCH(std::vector<size_t>, expectedPriorities);
+    QFETCH(Priorities, priorities);
+    QFETCH(Priorities, expectedPriorities);
 
     const size_t prioritiesCount = priorities.size();
     QVERIFY(prioritiesCount == expectedPriorities.size());
@@ -567,11 +567,11 @@ void LinkedListTests::testBatchReverseList()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    QFETCH(std::vector<size_t>, priorities);
+    QFETCH(Priorities, priorities);
     QFETCH(size_t, batchSize);
     QFETCH(Result, expectedResult);
-    QFETCH(std::vector<size_t>, expectedPriorities);
-    QFETCH(size_t, lastReversedElementPriority);
+    QFETCH(Priorities, expectedPriorities);
+    QFETCH(Priority, lastReversedElementPriority);
 
     const size_t prioritiesCount = priorities.size();
     QVERIFY(prioritiesCount == expectedPriorities.size());
@@ -603,7 +603,7 @@ void LinkedListTests::testIterators()
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     {
-        const size_t prioritiesArray[4]{6, 2, 5, 9};
+        const Priority prioritiesArray[4]{6, 2, 5, 9};
         m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 4, pool);
         ListIterator it = lbegin(m_Fixture.m_List1);
 
@@ -666,7 +666,7 @@ void LinkedListTests::testGetPreviousElement()
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
     {
-        const size_t prioritiesArray[3]{6, 2, 5};
+        const Priority prioritiesArray[3]{6, 2, 5};
         m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 3, pool);
 
         QVERIFY(getListSize(m_Fixture.m_List1) == 3);
@@ -698,7 +698,7 @@ void LinkedListTests::testPrintListElementsToFile()
     QFETCH_GLOBAL(ListElementsPool*, pool);
     QVERIFY(!pool || pool == m_Fixture.m_Pool);
 
-    const size_t prioritiesArray[5]{3, 2, 5, 9, 4};
+    const Priority prioritiesArray[5]{3, 2, 5, 9, 4};
     m_Fixture.m_List1 = createListFromPrioritiesArray(prioritiesArray, 5, pool);
 
     QVERIFY(getListSize(m_Fixture.m_List1) == 5);
@@ -783,148 +783,148 @@ void LinkedListTests::testPrintListElementsToFile()
 
 void LinkedListTests::testAppendOrPrepend_data()
 {
-    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<Priorities>("priorities");
     QTest::addColumn<InsertionScenario>("insertionScenario");
-    QTest::addColumn<size_t>("priorityToInsert");
-    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+    QTest::addColumn<Priority>("priorityToInsert");
+    QTest::addColumn<Priorities>("expectedPriorities");
 
-    QTest::newRow("Append: 1") << std::vector<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7} << InsertionScenario::APPEND << size_t{10} << std::vector<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7, 10};
-    QTest::newRow("Append: 2") << std::vector<size_t>{6, 2} << InsertionScenario::APPEND << size_t{10} << std::vector<size_t>{6, 2, 10};
-    QTest::newRow("Append: 3") << std::vector<size_t>{6} << InsertionScenario::APPEND << size_t{10} << std::vector<size_t>{6, 10};
-    QTest::newRow("Append: 4") << std::vector<size_t>{} << InsertionScenario::APPEND << size_t{10} << std::vector<size_t>{10};
-    QTest::newRow("Prepend: 1") << std::vector<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 7} << InsertionScenario::PREPEND << size_t{10} << std::vector<size_t>{10, 6, 2, 5, 4, 3, 1, 2, 9, 7};
-    QTest::newRow("Prepend: 2") << std::vector<size_t>{6, 2} << InsertionScenario::PREPEND << size_t{10} << std::vector<size_t>{10, 6, 2};
-    QTest::newRow("Prepend: 3") << std::vector<size_t>{6} << InsertionScenario::PREPEND << size_t{10} << std::vector<size_t>{10, 6};
-    QTest::newRow("Prepend: 4") << std::vector<size_t>{} << InsertionScenario::PREPEND << size_t{10} << std::vector<size_t>{10};
+    QTest::newRow("Append: 1") << Priorities{6, 2, 5, 4, 3, 1, 2, 9, 7} << InsertionScenario::APPEND << Priority{10} << Priorities{6, 2, 5, 4, 3, 1, 2, 9, 7, 10};
+    QTest::newRow("Append: 2") << Priorities{6, 2} << InsertionScenario::APPEND << Priority{10} << Priorities{6, 2, 10};
+    QTest::newRow("Append: 3") << Priorities{6} << InsertionScenario::APPEND << Priority{10} << Priorities{6, 10};
+    QTest::newRow("Append: 4") << Priorities{} << InsertionScenario::APPEND << Priority{10} << Priorities{10};
+    QTest::newRow("Prepend: 1") << Priorities{6, 2, 5, 4, 3, 1, 2, 9, 7} << InsertionScenario::PREPEND << Priority{10} << Priorities{10, 6, 2, 5, 4, 3, 1, 2, 9, 7};
+    QTest::newRow("Prepend: 2") << Priorities{6, 2} << InsertionScenario::PREPEND << Priority{10} << Priorities{10, 6, 2};
+    QTest::newRow("Prepend: 3") << Priorities{6} << InsertionScenario::PREPEND << Priority{10} << Priorities{10, 6};
+    QTest::newRow("Prepend: 4") << Priorities{} << InsertionScenario::PREPEND << Priority{10} << Priorities{10};
 }
 
 void LinkedListTests::testInsertElementBeforeOrAfter_data()
 {
-    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<Priorities>("priorities");
     QTest::addColumn<InsertionScenario>("insertionScenario");
     QTest::addColumn<size_t>("iteratorIncrementationsCount");
-    QTest::addColumn<size_t>("priorityToInsert");
-    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+    QTest::addColumn<Priority>("priorityToInsert");
+    QTest::addColumn<Priorities>("expectedPriorities");
 
-    QTest::newRow("Insert before: 1") << std::vector<size_t>{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{0} << size_t{10} << std::vector<size_t>{10, 6, 2, 5, 4};
-    QTest::newRow("Insert before: 2") << std::vector<size_t>{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{1} << size_t{10} << std::vector<size_t>{6, 10, 2, 5, 4};
-    QTest::newRow("Insert before: 3") << std::vector<size_t>{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{3} << size_t{10} << std::vector<size_t>{6, 2, 5, 10, 4};
-    QTest::newRow("Insert before: 4") << std::vector<size_t>{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{4} << size_t{10} << std::vector<size_t>{6, 2, 5, 4, 10};
-    QTest::newRow("Insert before: 5") << std::vector<size_t>{} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{0} << size_t{10} << std::vector<size_t>{10};
-    QTest::newRow("Insert after: 1") << std::vector<size_t>{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{0} << size_t{10} << std::vector<size_t>{6, 10, 2, 5, 4};
-    QTest::newRow("Insert after: 2") << std::vector<size_t>{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{1} << size_t{10} << std::vector<size_t>{6, 2, 10, 5, 4};
-    QTest::newRow("Insert after: 3") << std::vector<size_t>{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{3} << size_t{10} << std::vector<size_t>{6, 2, 5, 4, 10};
-    QTest::newRow("Insert after: 4") << std::vector<size_t>{} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{0} << size_t{10} << std::vector<size_t>{10};
+    QTest::newRow("Insert before: 1") << Priorities{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{0} << Priority{10} << Priorities{10, 6, 2, 5, 4};
+    QTest::newRow("Insert before: 2") << Priorities{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{1} << Priority{10} << Priorities{6, 10, 2, 5, 4};
+    QTest::newRow("Insert before: 3") << Priorities{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{3} << Priority{10} << Priorities{6, 2, 5, 10, 4};
+    QTest::newRow("Insert before: 4") << Priorities{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{4} << Priority{10} << Priorities{6, 2, 5, 4, 10};
+    QTest::newRow("Insert before: 5") << Priorities{} << InsertionScenario::INSERT_ELEMENT_BEFORE << size_t{0} << Priority{10} << Priorities{10};
+    QTest::newRow("Insert after: 1") << Priorities{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{0} << Priority{10} << Priorities{6, 10, 2, 5, 4};
+    QTest::newRow("Insert after: 2") << Priorities{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{1} << Priority{10} << Priorities{6, 2, 10, 5, 4};
+    QTest::newRow("Insert after: 3") << Priorities{6, 2, 5, 4} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{3} << Priority{10} << Priorities{6, 2, 5, 4, 10};
+    QTest::newRow("Insert after: 4") << Priorities{} << InsertionScenario::INSERT_ELEMENT_AFTER << size_t{0} << Priority{10} << Priorities{10};
 }
 
 void LinkedListTests::testRemoveFirstOrLastElement_data()
 {
-    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<Priorities>("priorities");
     QTest::addColumn<RemovalScenario>("removalScenario");
     QTest::addColumn<Result>("expectedResult");
-    QTest::addColumn<size_t>("removedElementPriority");
-    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+    QTest::addColumn<Priority>("removedElementPriority");
+    QTest::addColumn<Priorities>("expectedPriorities");
 
-    QTest::newRow("Remove first: 1") << std::vector<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 8} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::SUCCESS << size_t{6} << std::vector<size_t>{2, 5, 4, 3, 1, 2, 9, 8};
-    QTest::newRow("Remove first: 2") << std::vector<size_t>{6, 2} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::SUCCESS << size_t{6} << std::vector<size_t>{2};
-    QTest::newRow("Remove first: 3") << std::vector<size_t>{6} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::SUCCESS << size_t{6} << std::vector<size_t>{};
-    QTest::newRow("Remove first: 4") << std::vector<size_t>{} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::FAIL << size_t{0} << std::vector<size_t>{};
-    QTest::newRow("Remove last: 1") << std::vector<size_t>{6, 2, 5, 4, 3, 1, 2, 9, 8} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::SUCCESS << size_t{8} << std::vector<size_t>{6, 2, 5, 4, 3, 1, 2, 9};
-    QTest::newRow("Remove last: 2") << std::vector<size_t>{6, 2} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::SUCCESS << size_t{2} << std::vector<size_t>{6};
-    QTest::newRow("Remove last: 3") << std::vector<size_t>{6} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::SUCCESS << size_t{6} << std::vector<size_t>{};
-    QTest::newRow("Remove last: 4") << std::vector<size_t>{} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::FAIL << size_t{0} << std::vector<size_t>{};
+    QTest::newRow("Remove first: 1") << Priorities{6, 2, 5, 4, 3, 1, 2, 9, 8} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::SUCCESS << Priority{6} << Priorities{2, 5, 4, 3, 1, 2, 9, 8};
+    QTest::newRow("Remove first: 2") << Priorities{6, 2} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::SUCCESS << Priority{6} << Priorities{2};
+    QTest::newRow("Remove first: 3") << Priorities{6} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::SUCCESS << Priority{6} << Priorities{};
+    QTest::newRow("Remove first: 4") << Priorities{} << RemovalScenario::REMOVE_FIRST_ELEMENT << Result::FAIL << Priority{0} << Priorities{};
+    QTest::newRow("Remove last: 1") << Priorities{6, 2, 5, 4, 3, 1, 2, 9, 8} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::SUCCESS << Priority{8} << Priorities{6, 2, 5, 4, 3, 1, 2, 9};
+    QTest::newRow("Remove last: 2") << Priorities{6, 2} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::SUCCESS << Priority{2} << Priorities{6};
+    QTest::newRow("Remove last: 3") << Priorities{6} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::SUCCESS << Priority{6} << Priorities{};
+    QTest::newRow("Remove last: 4") << Priorities{} << RemovalScenario::REMOVE_LAST_ELEMENT << Result::FAIL << Priority{0} << Priorities{};
 }
 
 void LinkedListTests::testRemoveArbitraryElement_data()
 {
-    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<Priorities>("priorities");
     QTest::addColumn<RemovalScenario>("removalScenario");
     QTest::addColumn<size_t>("iteratorIncrementationsCount");
     QTest::addColumn<Result>("expectedResult");
-    QTest::addColumn<size_t>("removedElementPriority");
-    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+    QTest::addColumn<Priority>("removedElementPriority");
+    QTest::addColumn<Priorities>("expectedPriorities");
 
-    QTest::newRow("Remove previous: 1") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{0} << Result::FAIL << size_t{0} << std::vector<size_t>{6, 2, 5, 4};
-    QTest::newRow("Remove previous: 2") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{1} << Result::SUCCESS << size_t{6} << std::vector<size_t>{2, 5, 4};
-    QTest::newRow("Remove previous: 3") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{2} << Result::SUCCESS << size_t{2} << std::vector<size_t>{6, 5, 4};
-    QTest::newRow("Remove previous: 4") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{3} << Result::SUCCESS << size_t{5} << std::vector<size_t>{6, 2, 4};
-    QTest::newRow("Remove previous: 5") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{4} << Result::SUCCESS << size_t{4} << std::vector<size_t>{6, 2, 5};
-    QTest::newRow("Remove previous: 6") << std::vector<size_t>{5} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{0} << Result::FAIL << size_t{0} << std::vector<size_t>{5};
-    QTest::newRow("Remove previous: 7") << std::vector<size_t>{5} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{1} << Result::SUCCESS << size_t{5} << std::vector<size_t>{};
-    QTest::newRow("Remove previous: 8") << std::vector<size_t>{} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{0} << Result::FAIL << size_t{0} << std::vector<size_t>{};
-    QTest::newRow("Remove next: 1") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{0} << Result::SUCCESS << size_t{2} << std::vector<size_t>{6, 5, 4};
-    QTest::newRow("Remove next: 2") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{1} << Result::SUCCESS << size_t{5} << std::vector<size_t>{6, 2, 4};
-    QTest::newRow("Remove next: 3") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{2} << Result::SUCCESS << size_t{4} << std::vector<size_t>{6, 2, 5};
-    QTest::newRow("Remove next: 4") << std::vector<size_t>{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{3} << Result::FAIL << size_t{0} << std::vector<size_t>{6, 2, 5, 4};
-    QTest::newRow("Remove next: 5") << std::vector<size_t>{5} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{0} << Result::FAIL << size_t{0} << std::vector<size_t>{5};
-    QTest::newRow("Remove next: 6") << std::vector<size_t>{} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{0} << Result::FAIL << size_t{0} << std::vector<size_t>{};
-    QTest::newRow("Remove current: 1") << std::vector<size_t>{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::SUCCESS << size_t{6} << std::vector<size_t>{2, 5};
-    QTest::newRow("Remove current: 2") << std::vector<size_t>{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{1} << Result::SUCCESS << size_t{2} << std::vector<size_t>{6, 5};
-    QTest::newRow("Remove current: 3") << std::vector<size_t>{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{2} << Result::SUCCESS << size_t{5} << std::vector<size_t>{6, 2};
-    QTest::newRow("Remove current: 4") << std::vector<size_t>{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{3} << Result::FAIL << size_t{0} << std::vector<size_t>{6, 2, 5};
-    QTest::newRow("Remove current: 5") << std::vector<size_t>{5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::SUCCESS << size_t{5} << std::vector<size_t>{};
-    QTest::newRow("Remove current: 6") << std::vector<size_t>{5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{1} << Result::FAIL << size_t{0} << std::vector<size_t>{5};
-    QTest::newRow("Remove current: 7") << std::vector<size_t>{} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::FAIL << size_t{0} << std::vector<size_t>{};
+    QTest::newRow("Remove previous: 1") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{0} << Result::FAIL << Priority{0} << Priorities{6, 2, 5, 4};
+    QTest::newRow("Remove previous: 2") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{1} << Result::SUCCESS << Priority{6} << Priorities{2, 5, 4};
+    QTest::newRow("Remove previous: 3") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{2} << Result::SUCCESS << Priority{2} << Priorities{6, 5, 4};
+    QTest::newRow("Remove previous: 4") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{3} << Result::SUCCESS << Priority{5} << Priorities{6, 2, 4};
+    QTest::newRow("Remove previous: 5") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{4} << Result::SUCCESS << Priority{4} << Priorities{6, 2, 5};
+    QTest::newRow("Remove previous: 6") << Priorities{5} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{0} << Result::FAIL << Priority{0} << Priorities{5};
+    QTest::newRow("Remove previous: 7") << Priorities{5} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{1} << Result::SUCCESS << Priority{5} << Priorities{};
+    QTest::newRow("Remove previous: 8") << Priorities{} << RemovalScenario::REMOVE_ELEMENT_BEFORE << size_t{0} << Result::FAIL << Priority{0} << Priorities{};
+    QTest::newRow("Remove next: 1") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{0} << Result::SUCCESS << Priority{2} << Priorities{6, 5, 4};
+    QTest::newRow("Remove next: 2") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{1} << Result::SUCCESS << Priority{5} << Priorities{6, 2, 4};
+    QTest::newRow("Remove next: 3") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{2} << Result::SUCCESS << Priority{4} << Priorities{6, 2, 5};
+    QTest::newRow("Remove next: 4") << Priorities{6, 2, 5, 4} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{3} << Result::FAIL << Priority{0} << Priorities{6, 2, 5, 4};
+    QTest::newRow("Remove next: 5") << Priorities{5} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{0} << Result::FAIL << Priority{0} << Priorities{5};
+    QTest::newRow("Remove next: 6") << Priorities{} << RemovalScenario::REMOVE_ELEMENT_AFTER << size_t{0} << Result::FAIL << Priority{0} << Priorities{};
+    QTest::newRow("Remove current: 1") << Priorities{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::SUCCESS << Priority{6} << Priorities{2, 5};
+    QTest::newRow("Remove current: 2") << Priorities{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{1} << Result::SUCCESS << Priority{2} << Priorities{6, 5};
+    QTest::newRow("Remove current: 3") << Priorities{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{2} << Result::SUCCESS << Priority{5} << Priorities{6, 2};
+    QTest::newRow("Remove current: 4") << Priorities{6, 2, 5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{3} << Result::FAIL << Priority{0} << Priorities{6, 2, 5};
+    QTest::newRow("Remove current: 5") << Priorities{5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::SUCCESS << Priority{5} << Priorities{};
+    QTest::newRow("Remove current: 6") << Priorities{5} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{1} << Result::FAIL << Priority{0} << Priorities{5};
+    QTest::newRow("Remove current: 7") << Priorities{} << RemovalScenario::REMOVE_CURRENT_ELEMENT << size_t{0} << Result::FAIL << Priority{0} << Priorities{};
 }
 
 void LinkedListTests::testMoveOrCopyContentWithoutPayloadToList_data()
 {
-    QTest::addColumn<std::vector<size_t>>("sourcePriorities");
-    QTest::addColumn<std::vector<size_t>>("destinationPriorities");
+    QTest::addColumn<Priorities>("sourcePriorities");
+    QTest::addColumn<Priorities>("destinationPriorities");
     QTest::addColumn<InsertionScenario>("insertionScenario");
-    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+    QTest::addColumn<Priorities>("expectedPriorities");
 
-    QTest::newRow("Move: 1") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{7, 8, 4, 2, 2, 6, 2, 5, 3};
-    QTest::newRow("Move: 2") << std::vector<size_t>{} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{7, 8, 4, 2};
-    QTest::newRow("Move: 3") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{2, 6, 2, 5, 3};
-    QTest::newRow("Move: 4") << std::vector<size_t>{} << std::vector<size_t>{} << InsertionScenario::MOVE_ELEMENTS << std::vector<size_t>{};
-    QTest::newRow("Copy: 1") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{7, 8, 4, 2, 2, 6, 2, 5, 3};
-    QTest::newRow("Copy: 2") << std::vector<size_t>{} << std::vector<size_t>{7, 8, 4, 2} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{7, 8, 4, 2};
-    QTest::newRow("Copy: 3") << std::vector<size_t>{2, 6, 2, 5, 3} << std::vector<size_t>{} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{2, 6, 2, 5, 3};
-    QTest::newRow("Copy: 4") << std::vector<size_t>{} << std::vector<size_t>{} << InsertionScenario::COPY_ELEMENTS << std::vector<size_t>{};
+    QTest::newRow("Move: 1") << Priorities{2, 6, 2, 5, 3} << Priorities{7, 8, 4, 2} << InsertionScenario::MOVE_ELEMENTS << Priorities{7, 8, 4, 2, 2, 6, 2, 5, 3};
+    QTest::newRow("Move: 2") << Priorities{} << Priorities{7, 8, 4, 2} << InsertionScenario::MOVE_ELEMENTS << Priorities{7, 8, 4, 2};
+    QTest::newRow("Move: 3") << Priorities{2, 6, 2, 5, 3} << Priorities{} << InsertionScenario::MOVE_ELEMENTS << Priorities{2, 6, 2, 5, 3};
+    QTest::newRow("Move: 4") << Priorities{} << Priorities{} << InsertionScenario::MOVE_ELEMENTS << Priorities{};
+    QTest::newRow("Copy: 1") << Priorities{2, 6, 2, 5, 3} << Priorities{7, 8, 4, 2} << InsertionScenario::COPY_ELEMENTS << Priorities{7, 8, 4, 2, 2, 6, 2, 5, 3};
+    QTest::newRow("Copy: 2") << Priorities{} << Priorities{7, 8, 4, 2} << InsertionScenario::COPY_ELEMENTS << Priorities{7, 8, 4, 2};
+    QTest::newRow("Copy: 3") << Priorities{2, 6, 2, 5, 3} << Priorities{} << InsertionScenario::COPY_ELEMENTS << Priorities{2, 6, 2, 5, 3};
+    QTest::newRow("Copy: 4") << Priorities{} << Priorities{} << InsertionScenario::COPY_ELEMENTS << Priorities{};
 }
 
 void LinkedListTests::testReverseList_data()
 {
-    QTest::addColumn<std::vector<size_t>>("priorities");
-    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
+    QTest::addColumn<Priorities>("priorities");
+    QTest::addColumn<Priorities>("expectedPriorities");
 
-    QTest::newRow("1") << std::vector<size_t>{6, 2, 5, 4} << std::vector<size_t>{4, 5, 2, 6};
-    QTest::newRow("2") << std::vector<size_t>{6, 2} << std::vector<size_t>{2, 6};
-    QTest::newRow("3") << std::vector<size_t>{2} << std::vector<size_t>{2};
-    QTest::newRow("4") << std::vector<size_t>{} << std::vector<size_t>{};
+    QTest::newRow("1") << Priorities{6, 2, 5, 4} << Priorities{4, 5, 2, 6};
+    QTest::newRow("2") << Priorities{6, 2} << Priorities{2, 6};
+    QTest::newRow("3") << Priorities{2} << Priorities{2};
+    QTest::newRow("4") << Priorities{} << Priorities{};
 }
 
 void LinkedListTests::testBatchReverseList_data()
 {
-    QTest::addColumn<std::vector<size_t>>("priorities");
+    QTest::addColumn<Priorities>("priorities");
     QTest::addColumn<size_t>("batchSize");
     QTest::addColumn<Result>("expectedResult");
-    QTest::addColumn<std::vector<size_t>>("expectedPriorities");
-    QTest::addColumn<size_t>("lastReversedElementPriority");
+    QTest::addColumn<Priorities>("expectedPriorities");
+    QTest::addColumn<Priority>("lastReversedElementPriority");
 
-    QTest::newRow("1") << std::vector<size_t>{6, 2, 5, 4} << size_t{0} << Result::FAIL << std::vector<size_t>{6, 2, 5, 4} << size_t{0};
-    QTest::newRow("2") << std::vector<size_t>{6, 2, 5, 4} << size_t{1} << Result::FAIL << std::vector<size_t>{6, 2, 5, 4} << size_t{0};
-    QTest::newRow("3") << std::vector<size_t>{6, 2, 5, 4} << size_t{2} << Result::SUCCESS << std::vector<size_t>{2, 6, 4, 5} << size_t{5};
-    QTest::newRow("4") << std::vector<size_t>{6, 2, 5, 4} << size_t{3} << Result::SUCCESS << std::vector<size_t>{5, 2, 6, 4} << size_t{6};
-    QTest::newRow("5") << std::vector<size_t>{6, 2, 5, 4} << size_t{4} << Result::SUCCESS << std::vector<size_t>{4, 5, 2, 6} << size_t{6};
-    QTest::newRow("6") << std::vector<size_t>{6, 2, 5, 4} << size_t{5} << Result::FAIL << std::vector<size_t>{6, 2, 5, 4} << size_t{0};
-    QTest::newRow("7") << std::vector<size_t>{6, 2, 5, 4, 1} << size_t{2} << Result::SUCCESS << std::vector<size_t>{2, 6, 4, 5, 1} << size_t{5};
-    QTest::newRow("8") << std::vector<size_t>{6, 2, 5, 4, 1} << size_t{3} << Result::SUCCESS << std::vector<size_t>{5, 2, 6, 4, 1} << size_t{6};
-    QTest::newRow("9") << std::vector<size_t>{6, 2, 5, 4, 1, 2, 7} << size_t{2} << Result::SUCCESS << std::vector<size_t>{2, 6, 4, 5, 2, 1, 7} << size_t{1};
-    QTest::newRow("10") << std::vector<size_t>{6, 2, 5, 4, 1, 2, 7} << size_t{3} << Result::SUCCESS << std::vector<size_t>{5, 2, 6, 2, 1, 4, 7} << size_t{4};
-    QTest::newRow("11") << std::vector<size_t>{6, 2, 5, 4, 1, 2, 7, 8} << size_t{2} << Result::SUCCESS << std::vector<size_t>{2, 6, 4, 5, 2, 1, 8, 7} << size_t{7};
-    QTest::newRow("12") << std::vector<size_t>{6, 2, 5, 4, 1, 2, 7, 8} << size_t{3} << Result::SUCCESS << std::vector<size_t>{5, 2, 6, 2, 1, 4, 7, 8} << size_t{4};
-    QTest::newRow("13") << std::vector<size_t>{6, 2, 5, 4, 1, 2, 7, 8} << size_t{4} << Result::SUCCESS << std::vector<size_t>{4, 5, 2, 6, 8, 7, 2, 1} << size_t{1};
-    QTest::newRow("14") << std::vector<size_t>{6, 2} << size_t{0} << Result::FAIL << std::vector<size_t>{6, 2} << size_t{0};
-    QTest::newRow("15") << std::vector<size_t>{6, 2} << size_t{1} << Result::FAIL << std::vector<size_t>{6, 2} << size_t{0};
-    QTest::newRow("16") << std::vector<size_t>{6, 2} << size_t{2} << Result::SUCCESS << std::vector<size_t>{2, 6} << size_t{6};
-    QTest::newRow("17") << std::vector<size_t>{6, 2} << size_t{3} << Result::FAIL << std::vector<size_t>{6, 2} << size_t{0};
-    QTest::newRow("18") << std::vector<size_t>{6} << size_t{0} << Result::FAIL << std::vector<size_t>{6} << size_t{0};
-    QTest::newRow("19") << std::vector<size_t>{6} << size_t{1} << Result::FAIL << std::vector<size_t>{6} << size_t{0};
-    QTest::newRow("20") << std::vector<size_t>{6} << size_t{2} << Result::FAIL << std::vector<size_t>{6} << size_t{0};
-    QTest::newRow("21") << std::vector<size_t>{} << size_t{0} << Result::FAIL << std::vector<size_t>{} << size_t{0};
-    QTest::newRow("22") << std::vector<size_t>{} << size_t{1} << Result::FAIL << std::vector<size_t>{} << size_t{0};
+    QTest::newRow("1") << Priorities{6, 2, 5, 4} << size_t{0} << Result::FAIL << Priorities{6, 2, 5, 4} << Priority{0};
+    QTest::newRow("2") << Priorities{6, 2, 5, 4} << size_t{1} << Result::FAIL << Priorities{6, 2, 5, 4} << Priority{0};
+    QTest::newRow("3") << Priorities{6, 2, 5, 4} << size_t{2} << Result::SUCCESS << Priorities{2, 6, 4, 5} << Priority{5};
+    QTest::newRow("4") << Priorities{6, 2, 5, 4} << size_t{3} << Result::SUCCESS << Priorities{5, 2, 6, 4} << Priority{6};
+    QTest::newRow("5") << Priorities{6, 2, 5, 4} << size_t{4} << Result::SUCCESS << Priorities{4, 5, 2, 6} << Priority{6};
+    QTest::newRow("6") << Priorities{6, 2, 5, 4} << size_t{5} << Result::FAIL << Priorities{6, 2, 5, 4} << Priority{0};
+    QTest::newRow("7") << Priorities{6, 2, 5, 4, 1} << size_t{2} << Result::SUCCESS << Priorities{2, 6, 4, 5, 1} << Priority{5};
+    QTest::newRow("8") << Priorities{6, 2, 5, 4, 1} << size_t{3} << Result::SUCCESS << Priorities{5, 2, 6, 4, 1} << Priority{6};
+    QTest::newRow("9") << Priorities{6, 2, 5, 4, 1, 2, 7} << size_t{2} << Result::SUCCESS << Priorities{2, 6, 4, 5, 2, 1, 7} << Priority{1};
+    QTest::newRow("10") << Priorities{6, 2, 5, 4, 1, 2, 7} << size_t{3} << Result::SUCCESS << Priorities{5, 2, 6, 2, 1, 4, 7} << Priority{4};
+    QTest::newRow("11") << Priorities{6, 2, 5, 4, 1, 2, 7, 8} << size_t{2} << Result::SUCCESS << Priorities{2, 6, 4, 5, 2, 1, 8, 7} << Priority{7};
+    QTest::newRow("12") << Priorities{6, 2, 5, 4, 1, 2, 7, 8} << size_t{3} << Result::SUCCESS << Priorities{5, 2, 6, 2, 1, 4, 7, 8} << Priority{4};
+    QTest::newRow("13") << Priorities{6, 2, 5, 4, 1, 2, 7, 8} << size_t{4} << Result::SUCCESS << Priorities{4, 5, 2, 6, 8, 7, 2, 1} << Priority{1};
+    QTest::newRow("14") << Priorities{6, 2} << size_t{0} << Result::FAIL << Priorities{6, 2} << Priority{0};
+    QTest::newRow("15") << Priorities{6, 2} << size_t{1} << Result::FAIL << Priorities{6, 2} << Priority{0};
+    QTest::newRow("16") << Priorities{6, 2} << size_t{2} << Result::SUCCESS << Priorities{2, 6} << Priority{6};
+    QTest::newRow("17") << Priorities{6, 2} << size_t{3} << Result::FAIL << Priorities{6, 2} << Priority{0};
+    QTest::newRow("18") << Priorities{6} << size_t{0} << Result::FAIL << Priorities{6} << Priority{0};
+    QTest::newRow("19") << Priorities{6} << size_t{1} << Result::FAIL << Priorities{6} << Priority{0};
+    QTest::newRow("20") << Priorities{6} << size_t{2} << Result::FAIL << Priorities{6} << Priority{0};
+    QTest::newRow("21") << Priorities{} << size_t{0} << Result::FAIL << Priorities{} << Priority{0};
+    QTest::newRow("22") << Priorities{} << size_t{1} << Result::FAIL << Priorities{} << Priority{0};
 }
 
 void LinkedListTests::initTestCase_data()

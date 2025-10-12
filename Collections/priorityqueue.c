@@ -1,9 +1,8 @@
-#include <stdio.h>
-#include <string.h>
-
 #include "priorityqueue.h"
 #include "linkedlist.h"
 #include "error.h"
+
+#include <stdio.h>
 
 #define QUEUE_OFFSET 4
 
@@ -44,7 +43,7 @@ void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* obj
     FREE(data);
 }
 
-bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload)
+bool insertIntoPriorityQueue(PriorityQueue* queue, const Priority priority, const int objectType, void* const objectPayload)
 {
     bool success = false;
 
@@ -237,7 +236,7 @@ Object* getPriorityQueueObject(PriorityQueueIterator it)
     return object;
 }
 
-size_t getObjectPriority(PriorityQueueIterator it)
+Priority getObjectPriority(PriorityQueueIterator it)
 {
     Object* object = NULL;
 
@@ -250,7 +249,7 @@ size_t getObjectPriority(PriorityQueueIterator it)
         ASSERT(false, "Attempt to access a NULL priority queue item");
     }
 
-    size_t priority = 0;
+    Priority priority = 0;
 
     // we must still ensure the object is valid even if only the priority is requested
     if (object != NULL && object->payload != NULL)

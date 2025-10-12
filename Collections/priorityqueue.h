@@ -1,6 +1,7 @@
 #ifndef PRIORITYQUEUE_H
 #define PRIORITYQUEUE_H
 
+#include "listelement.h"
 #include "codeutils.h"
 
 typedef struct
@@ -32,7 +33,7 @@ bool isEmptyQueue(const PriorityQueue* queue);
 PriorityQueueIterator pqbegin(const PriorityQueue* queue);
 void pqnext(PriorityQueueIterator *it);
 Object* getPriorityQueueObject(PriorityQueueIterator it);
-size_t getObjectPriority(PriorityQueueIterator it);
+Priority getObjectPriority(PriorityQueueIterator it);
 
 #ifdef __cplusplus
 }

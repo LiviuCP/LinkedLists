@@ -3,10 +3,12 @@
 
 #include "codeutils.h"
 
+typedef size_t Priority;
+
 struct ListElement
 {
     Object object;
-    size_t priority;
+    Priority priority;
 
     struct ListElement* next;
 };

@@ -451,7 +451,7 @@ void ListElementTests::testOptimizingPoolCapacity()
     QVERIFY(multipleElementsAquired);
     CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool2, 3 * ELEMENTS_POOL_SLICE_SIZE + 1, ELEMENTS_POOL_SLICE_SIZE - 1);
 
-    const size_t prioritiesArray1[8] = {2, 4, 5, 8, 7, 0, 2, 3};
+    const Priority prioritiesArray1[8] = {2, 4, 5, 8, 7, 0, 2, 3};
     m_Fixture.m_List2 = createListFromPrioritiesArray(prioritiesArray1, 8, m_Fixture.m_TempPool2);
     QVERIFY(m_Fixture.m_List2);
 
@@ -537,7 +537,7 @@ void ListElementTests::testOptimizingPoolCapacity()
     QVERIFY(m_Fixture.m_List1->first && m_Fixture.m_List1->first->next && m_Fixture.m_List1->first->next->priority == 20);
     CHECK_AQUIRED_AND_AVAILABLE_ELEMENTS_COUNT(m_Fixture.m_TempPool2, 5, ELEMENTS_POOL_SLICE_SIZE - 5);
 
-    const size_t prioritiesArray2[4] = {9, 5, 12, 7};
+    const Priority prioritiesArray2[4] = {9, 5, 12, 7};
     m_Fixture.m_List3 = createListFromPrioritiesArray(prioritiesArray2, 4, m_Fixture.m_TempPool2);
     QVERIFY(m_Fixture.m_List3);
 

@@ -9,6 +9,8 @@
 
 #define USE_DEFAULT_MAX_SLICES_COUNT 0
 
+using Priorities = std::vector<Priority>;
+
 struct ListTestFixture
 {
     ListElementsPool* m_Pool;
