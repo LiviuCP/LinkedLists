@@ -2,7 +2,6 @@
 #define ASYNCUTILS_H
 
 #include <vector>
-#include <array>
 #include <future>
 
 size_t requestListElementsCountFromUser();

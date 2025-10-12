@@ -7,7 +7,6 @@
 #include <semaphore.h>
 #include <string.h>
 
-#include "linkedlist.h"
 #include "listprintutils.h"
 
 #define BYTES_COUNT 512

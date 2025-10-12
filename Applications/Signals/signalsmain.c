@@ -5,7 +5,6 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 
-#include "../../LinkedListsLib/linkedlist.h"
 #include "listprintutils.h"
 
 static const size_t nrOfPriorities = 5;

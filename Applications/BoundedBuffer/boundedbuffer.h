@@ -4,7 +4,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "../../LinkedListsLib/linkedlist.h"
+#include "linkedlist.h"
 
 // for values stored in bounded buffer only (can be combined with size_t index values to get new values)
 using value_t = size_t;

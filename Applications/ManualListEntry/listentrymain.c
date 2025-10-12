@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "listprintutils.h"
-#include "linkedlist.h"
 #include "codeutils.h"
 
 int main()

@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "linkedlist.h"
 #include "listprintutils.h"
 
 #define BUFFER_SIZE 256

@@ -1,7 +1,6 @@
 #include <iostream>
 #include <thread>
 
-#include "boundedbuffer.h"
 #include "buffermanipulation.h"
 
 int main()

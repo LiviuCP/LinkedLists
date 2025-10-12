@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "messagequeue.h"
-#include "linkedlist.h"
 #include "listprintutils.h"
 
 void createQueueFile(void);
