@@ -8,7 +8,7 @@
 #include "listprintutils.h"
 
 static const size_t nrOfPriorities = 5;
-static const size_t priorities[] = {6, 2, 7, 3, 4};
+static const Priority priorities[] = {6, 2, 7, 3, 4};
 
 // need global variable as it is accessed by child process termination handler
 static List* list = NULL;

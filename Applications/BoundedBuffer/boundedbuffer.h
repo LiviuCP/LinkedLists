@@ -22,7 +22,7 @@ public:
 
 private:
     size_t m_BufferCapacity;
-    size_t m_FilledSlots;
+    size_t m_FilledSlotsCount;
     List* m_Container;
     ListIterator m_ReadIterator;
     ListIterator m_WriteIterator;

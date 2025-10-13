@@ -24,9 +24,9 @@ int main() {
 
     List* list = NULL;
 
-    if (readBytesNumber >= sizeof(size_t))
+    if (readBytesNumber >= sizeof(Priority))
     {
-        size_t* readAddress = (size_t*)buffer;
+        Priority* readAddress = (Priority*)buffer;
 
         const size_t payloadSize = *readAddress++;
 

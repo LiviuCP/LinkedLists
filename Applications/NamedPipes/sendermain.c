@@ -8,11 +8,11 @@
 
 #include "listprintutils.h"
 
-size_t makePipeAndSend(const char *pipeName, const size_t* priorities, const size_t elementsCount);
+size_t makePipeAndSend(const char* pipeName, const Priority* priorities, const size_t elementsCount);
 
 int main()
 {
-    const size_t priorities[] = {5, 2, 7, 3, 4};
+    const Priority priorities[] = {5, 2, 7, 3, 4};
     const char* fifoName = "/tmp/linkedlistpipe";
 
     List* senderList = createListFromPrioritiesArray(priorities, 5, NULL);
@@ -38,13 +38,13 @@ int main()
     return 0;
 }
 
-size_t makePipeAndSend(const char* pipeName, const size_t* priorities, const size_t elementsCount)
+size_t makePipeAndSend(const char* pipeName, const Priority* priorities, const size_t elementsCount)
 {
     size_t result = 0;
 
     if (priorities != NULL && elementsCount > 0)
     {
-        const size_t nrOfBytes = elementsCount * sizeof (size_t);
+        const size_t nrOfBytes = elementsCount * sizeof(Priority);
         const mode_t mode = 0666;
 
         printf("Creating named pipe\n");

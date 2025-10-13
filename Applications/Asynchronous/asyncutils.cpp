@@ -27,10 +27,10 @@ size_t requestListElementsCountFromUser()
     return result;
 }
 
-std::vector<size_t> generateListElementPriorities(size_t nrOfElements)
+std::vector<Priority> generateListElementPriorities(size_t nrOfElements)
 {
-    static const std::array<size_t, 12> c_AvailablePriorities{2, 1, 5, 8, 14, 4, 6, 12, 11, 7, 5, 18};
-    std::vector<size_t> result{};
+    static const std::array<Priority, 12> c_AvailablePriorities{2, 1, 5, 8, 14, 4, 6, 12, 11, 7, 5, 18};
+    std::vector<Priority> result{};
 
     if (nrOfElements > 0)
     {
@@ -46,7 +46,7 @@ std::vector<size_t> generateListElementPriorities(size_t nrOfElements)
     return result;
 }
 
-void getDataFromTask(std::future<std::vector<size_t> > &result, std::vector<size_t> &data)
+void getDataFromTask(std::future<std::vector<Priority>>& result, std::vector<Priority>& data)
 {
     while(result.valid())
     {
@@ -63,7 +63,7 @@ void getDataFromTask(std::future<std::vector<size_t> > &result, std::vector<size
     }
 }
 
-void putPrioritiesIntoList(const std::vector<size_t> receivedPriorities)
+void putPrioritiesIntoList(const std::vector<Priority>& receivedPriorities)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds{500});
     std::cout << "Constructing list and sorting descending...";

@@ -6,7 +6,7 @@
 
 int main()
 {
-    size_t priority = 0;
+    Priority priority = 0;
     size_t index = 0;
     List* list = createEmptyList(NULL);
 
@@ -195,7 +195,7 @@ int main()
                     else
                     {
                         clearScreen();
-                        printf("Element with index %d has priority %zu\n\n", (unsigned int)index, (size_t)getListElementAtIndex(list, index)->priority);
+                        printf("Element with index %d has priority %zu\n\n", (unsigned int)index, (Priority)getListElementAtIndex(list, index)->priority);
                     }
                     break;
                 default:

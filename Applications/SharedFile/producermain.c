@@ -4,13 +4,14 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "listelement.h"
 #include "codeutils.h"
 
 #define BUFFER_SIZE 256
 
 static const char* dataFile = "/tmp/listdata";
 static const size_t nrOfPriorities = 5;
-static const size_t priorities[] = {6, 2, 7, 3, 4};
+static const Priority priorities[] = {6, 2, 7, 3, 4};
 static const char* endMessage = "Sorry mate, this is all I've got!";
 
 void writeDataToFile(const char* dataFile, const char* buffer, size_t bufferSize);
@@ -20,7 +21,7 @@ int main()
     char buffer[BUFFER_SIZE];
     setNChars(buffer, '\0', BUFFER_SIZE);
 
-    size_t* writeAddress = (size_t*)buffer;
+    Priority* writeAddress = (Priority*)buffer;
     *writeAddress++ = nrOfPriorities;
 
     for (size_t index = 0; index < nrOfPriorities; ++index)

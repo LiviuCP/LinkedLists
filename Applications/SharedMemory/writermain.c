@@ -7,6 +7,7 @@
 #include <semaphore.h>
 #include <string.h>
 
+#include "listelement.h"
 #include "codeutils.h"
 
 #define BYTES_COUNT 512
@@ -17,7 +18,7 @@ static const char* dataFile = "/listdata";
 static const char* semaphoreName = "listSemaphore";
 
 static const size_t nrOfPriorities = 5;
-static const size_t priorities[] = {6, 2, 7, 3, 4};
+static const Priority priorities[] = {6, 2, 7, 3, 4};
 static const char* endMessage = "Sorry mate, this is all I've got!";
 
 int main()
@@ -48,7 +49,7 @@ int main()
         exit(-1);
     }
 
-    size_t* writeAddress = (size_t*)sharedMemory;
+    Priority* writeAddress = (Priority*)sharedMemory;
     *writeAddress++ = nrOfPriorities;
 
     for (size_t index = 0; index < nrOfPriorities; ++index)

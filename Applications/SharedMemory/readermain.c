@@ -42,7 +42,7 @@ int main()
 
     if (!sem_wait(semaphore))
     {
-        size_t* readAddress = (size_t*)sharedMemory;
+        Priority* readAddress = (Priority*)sharedMemory;
         printf("Gained access to shared memory. Checking payload data size...\n");
         sleep(1);
         size_t payloadSize = *readAddress++;

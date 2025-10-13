@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
             {
                 setNChars(buffer, '\0', sizeof(buffer));
 
-                size_t* startAddress = (size_t*)buffer;
+                Priority* startAddress = (Priority*)buffer;
 
                 if (read(fileDescriptor, buffer, sizeof (buffer)))
                 {

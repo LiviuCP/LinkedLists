@@ -4,9 +4,11 @@
 #include <vector>
 #include <future>
 
+#include "listelement.h"
+
 size_t requestListElementsCountFromUser();
-std::vector<size_t> generateListElementPriorities(size_t nrOfElements);
-void getDataFromTask(std::future<std::vector<size_t>>& result, std::vector<size_t>& data);
-void putPrioritiesIntoList(const std::vector<size_t> receivedPriorities);
+std::vector<Priority> generateListElementPriorities(size_t nrOfElements);
+void getDataFromTask(std::future<std::vector<Priority>>& result, std::vector<Priority>& data);
+void putPrioritiesIntoList(const std::vector<Priority>& receivedPriorities);
 
 #endif // ASYNCUTILS_H

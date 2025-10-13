@@ -5,21 +5,21 @@
 #include "asyncutils.h"
 #include "codeutils.h"
 
-void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t>> prioritiesRetrievalPromise);  // move semantics
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t>>* prioritiesRetrievalPromise); // pointer
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t>>& prioritiesRetrievalPromise); // reference
+void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>> prioritiesRetrievalPromise);  // move semantics
+//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>>* prioritiesRetrievalPromise); // pointer
+//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>>& prioritiesRetrievalPromise); // reference
 
 int main()
 {
     size_t nrOfElements{requestListElementsCountFromUser()};
     clearScreen();
 
-    std::vector<size_t> receivedPriorities{};
+    std::vector<Priority> receivedPriorities{};
     if (nrOfElements > 0)
     {
         std::cout << "Launching thread...";
-        std::promise<std::vector<size_t>> resultPromise;
-        std::future<std::vector<size_t>> result{resultPromise.get_future()};
+        std::promise<std::vector<Priority>> resultPromise;
+        std::future<std::vector<Priority>> result{resultPromise.get_future()};
         std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, std::move(resultPromise)}; // move semantics
 //        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, &resultPromise}; // pointer
 //        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, std::ref(resultPromise)}; // reference
@@ -53,17 +53,17 @@ int main()
     return 0;
 }
 
-void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t> > prioritiesRetrievalPromise) // move semantics
+void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> > prioritiesRetrievalPromise) // move semantics
 {
     prioritiesRetrievalPromise.set_value(generateListElementPriorities(nrOfElements));
 }
 
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t> >* prioritiesRetrievalPromise) // pointer
+//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> >* prioritiesRetrievalPromise) // pointer
 //{
 //    prioritiesRetrievalPromise->set_value(generateListElementPriorities(nrOfElements));
 //}
 
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<size_t> >& prioritiesRetrievalPromise) // reference
+//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> >& prioritiesRetrievalPromise) // reference
 //{
 //    prioritiesRetrievalPromise.set_value(generateListElementPriorities(nrOfElements));
 //}

@@ -70,20 +70,20 @@ void fillListFromPipe(List* list, const char* pipeName, size_t* nrOfBytes, size_
 
     while(1)
     {
-        size_t currentValue;
-        ssize_t bytesRead = read(fDescriptor, &currentValue, sizeof(size_t));
+        Priority currentValue;
+        ssize_t readBytesCount = read(fDescriptor, &currentValue, sizeof(Priority));
 
-        if (bytesRead == sizeof(size_t))
+        if (readBytesCount == sizeof(Priority))
         {
             createAndAppendToList(list, currentValue);
             ++(*nrOfElements);
         }
-        else if (bytesRead == 0)
+        else if (readBytesCount == 0)
         {
             break;
         }
 
-        *nrOfBytes += (size_t)bytesRead;
+        *nrOfBytes += (size_t)readBytesCount;
     }
 
     printf("Done reading from pipe, creating and appending\n");

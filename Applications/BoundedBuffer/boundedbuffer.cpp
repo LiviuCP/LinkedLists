@@ -3,7 +3,7 @@
 
 BoundedBuffer::BoundedBuffer(size_t bufferCapacity)
     : m_BufferCapacity{bufferCapacity}
-    , m_FilledSlots{0}
+    , m_FilledSlotsCount{0}
 {
     ASSERT(m_BufferCapacity > 0, "Requested capacity of the bounded buffer is 0");
 
@@ -34,9 +34,9 @@ void BoundedBuffer::writeElement(value_t value)
 {
     std::unique_lock<std::mutex> writeLock{m_BufferLock};
 
-    m_BufferNotFull.wait(writeLock, [this](){return m_FilledSlots != m_BufferCapacity;});
+    m_BufferNotFull.wait(writeLock, [this](){return m_FilledSlotsCount != m_BufferCapacity;});
     m_WriteIterator.current->priority = value;
-    ++m_FilledSlots;
+    ++m_FilledSlotsCount;
     lnext(&m_WriteIterator);
 
     if (areIteratorsEqual(m_WriteIterator, lend(m_Container)))
@@ -52,9 +52,9 @@ value_t BoundedBuffer::readElement()
 {
     std::unique_lock<std::mutex> readLock{m_BufferLock};
 
-    m_BufferNotEmpty.wait(readLock, [this]{return  m_FilledSlots != 0;});
+    m_BufferNotEmpty.wait(readLock, [this]{return  m_FilledSlotsCount != 0;});
     value_t value = m_ReadIterator.current->priority;
-    --m_FilledSlots;
+    --m_FilledSlotsCount;
     lnext(&m_ReadIterator);
 
     if (areIteratorsEqual(m_ReadIterator, lend(m_Container)))

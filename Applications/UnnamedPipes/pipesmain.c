@@ -45,7 +45,7 @@ int main()
 
             if (receiverList != NULL)
             {
-                size_t* startAddress = (size_t*)buffer;
+                Priority* startAddress = (Priority*)buffer;
                 for (size_t index = 0; index < LIST_SIZE; ++index)
                 {
                     createAndAppendToList(receiverList, *(startAddress + index));
@@ -77,7 +77,7 @@ int main()
     else                                                                                                    /* parent */
     {
         close(fileDescriptors[READ_SIDE]);
-        const size_t priorities[] = {5, 2, 7, 3, 4};
+        const Priority priorities[] = {5, 2, 7, 3, 4};
 
         List* senderList = createListFromPrioritiesArray(priorities, LIST_SIZE, NULL);
 
@@ -97,7 +97,7 @@ int main()
 
         printf("[PID: %d] Sending priorities to pipe...\n\n", getpid());
 
-        size_t* startAddress = (size_t*)buffer;
+        Priority* startAddress = (Priority*)buffer;
         for (size_t index = 0; index < LIST_SIZE; ++index)
         {
             *(startAddress + index) = priorities[index];

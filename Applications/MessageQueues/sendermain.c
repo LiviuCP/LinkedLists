@@ -8,11 +8,11 @@
 #include "listprintutils.h"
 
 void createQueueFile(void);
-void sendToQueue(const size_t* priorities, const long* priorityTypes, const size_t elementsCount);
+void sendToQueue(const Priority* priorities, const long* priorityTypes, const size_t elementsCount);
 
 int main()
 {
-    const size_t priorities[] = {5, 2, 104, 205, 1200, 1099};
+    const Priority priorities[] = {5, 2, 104, 205, 1200, 1099};
     const long priorityTypes[] = {1, 1, 2, 2, 3, 3};
 
     createQueueFile();
@@ -52,7 +52,7 @@ void createQueueFile()
     }
 }
 
-void sendToQueue(const size_t* priorities, const long* priorityTypes, const size_t elementsCount)
+void sendToQueue(const Priority* priorities, const long* priorityTypes, const size_t elementsCount)
 {
     const key_t queueKey = ftok(QUEUE_FILENAME, BASE_ID);
     if (queueKey < 0)

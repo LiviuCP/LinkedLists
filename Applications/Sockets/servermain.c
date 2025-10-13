@@ -7,6 +7,7 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+#include "listelement.h"
 #include "bitoperations.h"
 #include "codeutils.h"
 
@@ -16,7 +17,7 @@
 #define NR_OF_REQUESTS      2
 
 static const size_t nrOfAvailablePriorities = 10;
-static const size_t prioritiesList[10] = {5, 12, 4, 6, 1, 2, 3, 8, 7, 14};
+static const Priority prioritiesList[10] = {5, 12, 4, 6, 1, 2, 3, 8, 7, 14};
 
 void setSocket(const int* fileDescriptor);
 
@@ -52,9 +53,9 @@ int main()
             setNChars(buffer, '\0', sizeof(buffer));
 
             printf("Client request received. Reading client request data...\n");
-            ssize_t count = read(clientFileDescriptor, buffer, sizeof (buffer));
+            ssize_t count = read(clientFileDescriptor, buffer, sizeof(buffer));
 
-            if (count >= (ssize_t)sizeof(size_t))
+            if (count >= (ssize_t)sizeof(size_t)) // buffer size should be >= the length of the variable storing the number of priorities to send
             {
                 if (*bufferAddress > 0)
                 {
@@ -64,13 +65,13 @@ int main()
                     for (size_t index = 0; index < nrOfPrioritiesToSend; ++index)
                     {
                         printf("Writing priority %d into buffer\n", (int)prioritiesList[index]);
-                        *(bufferAddress + index) = prioritiesList[index];
+                        *((Priority*)bufferAddress + index) = prioritiesList[index];
                     }
                 }
                 else
                 {
                     *bufferAddress = nrOfAvailablePriorities;
-                    printf("Client only reequires to know how many priorities are available. The number is %d\n", (int)nrOfAvailablePriorities);
+                    printf("Client only requires to know how many priorities are available. The number is %d\n", (int)nrOfAvailablePriorities);
                 }
 
                 printf("Sending requested data to client...\n");
