@@ -1,4 +1,4 @@
-project(Collections LANGUAGES C CXX)
+project(Collections LANGUAGES C)
 
 include_directories(
     ../LinkedListsLib
@@ -6,7 +6,6 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME} ${LIB_TYPE}
-    collections.cpp
     hashtable.c
     priorityqueue.c
     stack.c
@@ -14,5 +13,3 @@ add_library(${PROJECT_NAME} ${LIB_TYPE}
 
 target_link_libraries(${PROJECT_NAME} PRIVATE LinkedListsLib)
 target_link_libraries(${PROJECT_NAME} PRIVATE Utils)
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE COLLECTIONS_LIBRARY)
