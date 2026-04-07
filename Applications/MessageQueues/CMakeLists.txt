@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-
 project(MessageQueues LANGUAGES C)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(QueueSender
     sendermain.c
