@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
-#include "messagequeue.h"
 #include "listprintutils.h"
+#include "messagequeue.h"
 
 void createQueueFile(void);
 void sendToQueue(const Priority* priorities, const long* priorityTypes, const size_t elementsCount);
@@ -75,6 +75,7 @@ void sendToQueue(const Priority* priorities, const long* priorityTypes, const si
         currentMessage.priorityType = priorityTypes[index];
         msgsnd(queueId, &currentMessage, sizeof(currentMessage), IPC_NOWAIT);
 
-        printf("Sent list element priority %d of type %d\n", (int)currentMessage.priority, (int)currentMessage.priorityType);
+        printf("Sent list element priority %d of type %d\n", (int)currentMessage.priority,
+               (int)currentMessage.priorityType);
     }
 }

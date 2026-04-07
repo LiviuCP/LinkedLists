@@ -13,7 +13,9 @@ BoundedBuffer::BoundedBuffer(size_t bufferCapacity)
     {
         for (size_t index = 0; index < m_BufferCapacity; ++index)
         {
-            ListElement* appendedElement{createAndAppendToList(m_Container, 0)}; // all elements with priority 0 by default, this will get modified with reads and writes
+            ListElement* appendedElement{createAndAppendToList(
+                m_Container,
+                0)}; // all elements with priority 0 by default, this will get modified with reads and writes
 
             if (appendedElement == nullptr)
             {
@@ -34,7 +36,7 @@ void BoundedBuffer::writeElement(value_t value)
 {
     std::unique_lock<std::mutex> writeLock{m_BufferLock};
 
-    m_BufferNotFull.wait(writeLock, [this](){return m_FilledSlotsCount != m_BufferCapacity;});
+    m_BufferNotFull.wait(writeLock, [this]() { return m_FilledSlotsCount != m_BufferCapacity; });
     m_WriteIterator.current->priority = value;
     ++m_FilledSlotsCount;
     lnext(&m_WriteIterator);
@@ -52,7 +54,7 @@ value_t BoundedBuffer::readElement()
 {
     std::unique_lock<std::mutex> readLock{m_BufferLock};
 
-    m_BufferNotEmpty.wait(readLock, [this]{return  m_FilledSlotsCount != 0;});
+    m_BufferNotEmpty.wait(readLock, [this] { return m_FilledSlotsCount != 0; });
     value_t value = m_ReadIterator.current->priority;
     --m_FilledSlotsCount;
     lnext(&m_ReadIterator);

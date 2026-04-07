@@ -1,8 +1,8 @@
 #ifndef PRIORITYQUEUE_H
 #define PRIORITYQUEUE_H
 
-#include "listelement.h"
 #include "codeutils.h"
+#include "listelement.h"
 
 typedef struct
 {
@@ -17,23 +17,25 @@ typedef struct
 } PriorityQueueIterator;
 
 #ifdef __cplusplus
-extern "C"{
+extern "C"
+{
 #endif
 
-PriorityQueue* createPriorityQueue(void* elementsPool);
-void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
+    PriorityQueue* createPriorityQueue(void* elementsPool);
+    void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
 
-bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType, void* const objectPayload);
-Object* removeFromPriorityQueue(PriorityQueue* queue);
+    bool insertIntoPriorityQueue(PriorityQueue* queue, const size_t priority, const int objectType,
+                                 void* const objectPayload);
+    Object* removeFromPriorityQueue(PriorityQueue* queue);
 
-void clearPriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
+    void clearPriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* object));
 
-bool isEmptyQueue(const PriorityQueue* queue);
+    bool isEmptyQueue(const PriorityQueue* queue);
 
-PriorityQueueIterator pqbegin(const PriorityQueue* queue);
-void pqnext(PriorityQueueIterator *it);
-Object* getPriorityQueueObject(PriorityQueueIterator it);
-Priority getObjectPriority(PriorityQueueIterator it);
+    PriorityQueueIterator pqbegin(const PriorityQueue* queue);
+    void pqnext(PriorityQueueIterator* it);
+    Object* getPriorityQueueObject(PriorityQueueIterator it);
+    Priority getObjectPriority(PriorityQueueIterator it);
 
 #ifdef __cplusplus
 }

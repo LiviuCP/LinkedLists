@@ -10,18 +10,19 @@ typedef struct
 } Stack;
 
 #ifdef __cplusplus
-extern "C"{
+extern "C"
+{
 #endif
 
-Stack* createStack(void* elementsPool);
-void deleteStack(Stack* stack, void (*deallocObject)(Object* object));
+    Stack* createStack(void* elementsPool);
+    void deleteStack(Stack* stack, void (*deallocObject)(Object* object));
 
-bool pushToStack(Stack* stack, const int objectType, void* const objectPayload);
-Object* popFromStack(Stack* stack);
+    bool pushToStack(Stack* stack, const int objectType, void* const objectPayload);
+    Object* popFromStack(Stack* stack);
 
-void clearStack(Stack* stack, void (*deallocObject)(Object* object));
+    void clearStack(Stack* stack, void (*deallocObject)(Object* object));
 
-bool isEmptyStack(const Stack* stack);
+    bool isEmptyStack(const Stack* stack);
 
 #ifdef __cplusplus
 }

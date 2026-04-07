@@ -1,8 +1,8 @@
 #ifndef ASYNCUTILS_H
 #define ASYNCUTILS_H
 
-#include <vector>
 #include <future>
+#include <vector>
 
 #include "listelement.h"
 

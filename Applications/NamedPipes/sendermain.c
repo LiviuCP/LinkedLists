@@ -1,10 +1,10 @@
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <time.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "listprintutils.h"
 
@@ -79,4 +79,3 @@ size_t makePipeAndSend(const char* pipeName, const Priority* priorities, const s
 
     return result;
 }
-

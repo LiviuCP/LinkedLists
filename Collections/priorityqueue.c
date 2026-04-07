@@ -1,6 +1,6 @@
 #include "priorityqueue.h"
-#include "linkedlist.h"
 #include "error.h"
+#include "linkedlist.h"
 
 #include <stdio.h>
 
@@ -10,7 +10,8 @@ PriorityQueue* createPriorityQueue(void* elementsPool)
 {
     PriorityQueue* queue = NULL;
 
-    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category (queue object)
+    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category
+    // (queue object)
     void* data = malloc(QUEUE_OFFSET + sizeof(PriorityQueue) + sizeof(List));
 
     if (data)
@@ -43,7 +44,8 @@ void deletePriorityQueue(PriorityQueue* queue, void (*deallocObject)(Object* obj
     FREE(data);
 }
 
-bool insertIntoPriorityQueue(PriorityQueue* queue, const Priority priority, const int objectType, void* const objectPayload)
+bool insertIntoPriorityQueue(PriorityQueue* queue, const Priority priority, const int objectType,
+                             void* const objectPayload)
 {
     bool success = false;
 
@@ -58,7 +60,9 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const Priority priority, cons
 
         if (queueContainer != NULL)
         {
-            newElement = queueContainer->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&queueContainer->elementsPoolProxy) : createListElement();
+            newElement = queueContainer->elementsPoolProxy.elementsPool != NULL
+                             ? aquireListElement(&queueContainer->elementsPoolProxy)
+                             : createListElement();
         }
 
         if (newElement != NULL)
@@ -105,7 +109,6 @@ bool insertIntoPriorityQueue(PriorityQueue* queue, const Priority priority, cons
     return success;
 }
 
-
 Object* removeFromPriorityQueue(PriorityQueue* queue)
 {
     Object* result = NULL;
@@ -135,7 +138,8 @@ Object* removeFromPriorityQueue(PriorityQueue* queue)
                 ASSERT(false, "Invalid or empty queue element object detected");
             }
 
-            // move object type and payload into a new object as the current one is deallocated together with the list element
+            // move object type and payload into a new object as the current one is deallocated together with the list
+            // element
             if (newObject != NULL)
             {
                 result = newObject;
@@ -230,7 +234,8 @@ Object* getPriorityQueueObject(PriorityQueueIterator it)
         ASSERT(false, "Attempt to access a NULL priority queue item");
     }
 
-    // every queue object must be valid; we must ensure this throughout the usage period of the queue (user can modify objects by using the priority queue iterator)
+    // every queue object must be valid; we must ensure this throughout the usage period of the queue (user can modify
+    // objects by using the priority queue iterator)
     ASSERT(object != NULL && object->payload != NULL, "Invalid queue element object detected");
 
     return object;

@@ -13,7 +13,8 @@ int main()
     if (nrOfElements > 0)
     {
         std::cout << "Launching async task...";
-        std::future<std::vector<Priority>> result{std::async(std::launch::async, generateListElementPriorities, nrOfElements)};
+        std::future<std::vector<Priority>> result{
+            std::async(std::launch::async, generateListElementPriorities, nrOfElements)};
         std::cout << "DONE" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         std::cout << "Waiting for result..." << std::endl << std::endl;
@@ -32,7 +33,7 @@ int main()
     }
     else
     {
-        std::cout<<"You exited the app!"<<std::endl;
+        std::cout << "You exited the app!" << std::endl;
     }
 
     return 0;

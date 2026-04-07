@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 
 #include <cstring>
@@ -958,3 +959,4 @@ void LinkedListTests::cleanup()
 QTEST_APPLESS_MAIN(LinkedListTests)
 
 #include "tst_linkedlisttests.moc"
+// clang-format on

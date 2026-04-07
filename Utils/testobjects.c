@@ -82,14 +82,16 @@ void emptyTestObject(Object* object)
 {
     if (object != NULL && object->payload != NULL)
     {
-        switch (object->type) {
+        switch (object->type)
+        {
         case INTEGER:
         case DECIMAL:
         case POINT:
         case SEGMENT:
         case LOCAL_CONDITIONS:
             break;
-        /* for new payload types: include the "custom" code for freeing memory here if they have pointer members to dynamically allocated memory */
+        /* for new payload types: include the "custom" code for freeing memory here if they have pointer members to
+         * dynamically allocated memory */
         default:
             ASSERT(false, "Invalid test object type!");
         }
@@ -104,7 +106,7 @@ const char* getTestObjectTypeAsString(int type)
 {
     const char* result;
 
-    switch(type)
+    switch (type)
     {
     case INTEGER:
         result = "integer";

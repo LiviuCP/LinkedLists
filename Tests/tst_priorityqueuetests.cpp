@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 
 #include "listtestfixture.h"
@@ -293,3 +294,4 @@ void PriorityQueueTests::cleanup()
 QTEST_APPLESS_MAIN(PriorityQueueTests)
 
 #include "tst_priorityqueuetests.moc"
+// clang-format on

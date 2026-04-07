@@ -1,6 +1,6 @@
+#include <array>
 #include <iostream>
 #include <thread>
-#include <array>
 
 #include "asyncutils.h"
 #include "codeutils.h"
@@ -12,7 +12,7 @@ size_t requestListElementsCountFromUser()
 
     bool isValidElementsCount{false};
 
-    while(!isValidElementsCount)
+    while (!isValidElementsCount)
     {
         std::cout << "Enter the number of elements (enter 0 to quit): ";
 
@@ -34,7 +34,8 @@ std::vector<Priority> generateListElementPriorities(size_t nrOfElements)
 
     if (nrOfElements > 0)
     {
-        const size_t providedNrOfPriorities{nrOfElements <= c_AvailablePriorities.size() ? nrOfElements : c_AvailablePriorities.size()};
+        const size_t providedNrOfPriorities{
+            nrOfElements <= c_AvailablePriorities.size() ? nrOfElements : c_AvailablePriorities.size()};
 
         for (size_t index{0}; index < providedNrOfPriorities; ++index)
         {
@@ -48,13 +49,14 @@ std::vector<Priority> generateListElementPriorities(size_t nrOfElements)
 
 void getDataFromTask(std::future<std::vector<Priority>>& result, std::vector<Priority>& data)
 {
-    while(result.valid())
+    while (result.valid())
     {
         if (result.wait_for(std::chrono::seconds{1}) == std::future_status::ready)
         {
             data = result.get();
             std::this_thread::sleep_for(std::chrono::milliseconds{500});
-            std::cout << "The wait is over! Received priorities for " << data.size() << " elements" << std::endl << std::endl;
+            std::cout << "The wait is over! Received priorities for " << data.size() << " elements" << std::endl
+                      << std::endl;
         }
         else
         {

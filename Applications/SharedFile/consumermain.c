@@ -1,8 +1,8 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "listprintutils.h"
 
@@ -12,7 +12,8 @@ static const char* dataFile = "/tmp/listdata";
 
 void readDataFromFile(const char* dataFile, char* buffer, size_t* bytesNumber);
 
-int main() {
+int main()
+{
     char buffer[BUFFER_SIZE];
     setNChars(buffer, '\0', BUFFER_SIZE);
 

@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <string.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "codeutils.h"
 #include "error.h"
@@ -87,7 +87,8 @@ size_t copyNCharsToString(char* destination, const char* source, size_t count)
         }
         else
         {
-            // the destination might or might not include the source, yet copying chars should not cause overriding the source content
+            // the destination might or might not include the source, yet copying chars should not cause overriding the
+            // source content
             if (copiedCharsCount >= delta)
             {
                 copiedCharsCount = 0;
@@ -122,7 +123,7 @@ char* getLine()
         exit(-1);
     }
 
-    for(;;)
+    for (;;)
     {
         if (currentPosition == bufferSize)
         {
@@ -171,7 +172,7 @@ bool readUnsignedLong(size_t* number)
     return isValidInt;
 }
 
-bool isUnsignedLong(const char *input)
+bool isUnsignedLong(const char* input)
 {
     bool isValid = true;
 
@@ -181,7 +182,7 @@ bool isUnsignedLong(const char *input)
 
         while (input[currentPos] != '\0')
         {
-            switch(input[currentPos])
+            switch (input[currentPos])
             {
             case '0':
             case '1':
@@ -245,8 +246,7 @@ bool convertIntToString(int valueToConvert, char* str, size_t availableCharsCoun
             quotient = quotient / 10;
             convertedDigitChars[convertedDigitCharsCount] = (char)(asciiChar0 + remainder);
             ++convertedDigitCharsCount;
-        }
-        while (quotient > 0);
+        } while (quotient > 0);
 
         ASSERT(convertedDigitCharsCount > 0, "At least one char should have been found for the integer!");
 
@@ -272,7 +272,7 @@ bool areDecimalNumbersEqual(double first, double second)
 
 void clearScreen()
 {
-#if defined (UNIX_OS)
+#if defined(UNIX_OS)
     system("clear"); // Linux & Mac
 #elif defined(_WIN32)
     system("cls"); // Windows

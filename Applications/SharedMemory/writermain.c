@@ -1,14 +1,14 @@
+#include <fcntl.h>
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <semaphore.h>
-#include <string.h>
 
-#include "listelement.h"
 #include "codeutils.h"
+#include "listelement.h"
 
 #define BYTES_COUNT 512
 #define PERMISSIONS 0644
@@ -39,7 +39,7 @@ int main()
     }
 
     printf("Shared memory address: %p [0..%d]\n", sharedMemory, BYTES_COUNT - 1);
-    printf("Backing file: /dev/shm%s\n", dataFile );
+    printf("Backing file: /dev/shm%s\n", dataFile);
 
     sem_t* semaphore = sem_open(semaphoreName, O_CREAT, PERMISSIONS, 0);
 

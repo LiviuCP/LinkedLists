@@ -58,7 +58,7 @@ byte_t reverseBits(const byte_t byte)
 
     for (size_t bitIndex = 0; bitIndex < BYTE_SIZE; ++bitIndex)
     {
-        result =(byte & rightMask) == 0u ? result & (~leftMask) : result | leftMask;
+        result = (byte & rightMask) == 0u ? result & (~leftMask) : result | leftMask;
         leftMask = leftMask >> 1;
         rightMask = (byte_t)(rightMask << 1);
     }
@@ -137,8 +137,7 @@ size_t getMinNrOfRequiredBits(const byte_t byte)
         ++result;
         temp = temp >> 1;
 
-    }
-    while (temp > 0);
+    } while (temp > 0);
 
     return result;
 }

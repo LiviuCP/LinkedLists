@@ -1,13 +1,14 @@
 #include <stdio.h>
 
-#include "listelementspoolproxy.h"
-#include "listelementspool.h"
 #include "error.h"
+#include "listelementspool.h"
+#include "listelementspoolproxy.h"
 
 ListElement* aquireListElement(ListElementsPoolProxy* elementsPoolProxy)
 {
     ListElement* element = NULL;
-    ListElementsPool* elementsPool = elementsPoolProxy != NULL ? (ListElementsPool*)elementsPoolProxy->elementsPool : NULL;
+    ListElementsPool* elementsPool =
+        elementsPoolProxy != NULL ? (ListElementsPool*)elementsPoolProxy->elementsPool : NULL;
 
     ASSERT(elementsPoolProxy == NULL || elementsPool != NULL, "Invalid list elements pool proxy!");
 
@@ -22,7 +23,8 @@ ListElement* aquireListElement(ListElementsPoolProxy* elementsPoolProxy)
 bool aquireListElements(ListElementsPoolProxy* elementsPoolProxy, ListElement** elements, size_t requiredElementsCount)
 {
     bool result = false;
-    ListElementsPool* elementsPool = elementsPoolProxy != NULL ? (ListElementsPool*)elementsPoolProxy->elementsPool : NULL;
+    ListElementsPool* elementsPool =
+        elementsPoolProxy != NULL ? (ListElementsPool*)elementsPoolProxy->elementsPool : NULL;
 
     ASSERT(elementsPoolProxy == NULL || elementsPool != NULL, "Invalid list elements pool proxy!");
 
@@ -37,7 +39,8 @@ bool aquireListElements(ListElementsPoolProxy* elementsPoolProxy, ListElement** 
 bool releaseListElement(ListElement* element, ListElementsPoolProxy* elementsPoolProxy)
 {
     bool result = false;
-    ListElementsPool* elementsPool = elementsPoolProxy != NULL ? (ListElementsPool*)elementsPoolProxy->elementsPool : NULL;
+    ListElementsPool* elementsPool =
+        elementsPoolProxy != NULL ? (ListElementsPool*)elementsPoolProxy->elementsPool : NULL;
 
     ASSERT(elementsPoolProxy == NULL || elementsPool != NULL, "Invalid list elements pool proxy!");
 

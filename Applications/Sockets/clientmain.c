@@ -1,30 +1,31 @@
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "bitoperations.h"
 #include "codeutils.h"
 #include "listprintutils.h"
 
-#define PORT_NUMBER         9801
-#define MAX_CONNECTS        4
-#define BUFFER_SIZE         512
+#define PORT_NUMBER 9801
+#define MAX_CONNECTS 4
+#define BUFFER_SIZE 512
 
-static const size_t availabilityRequestCode = 0; // used for querying server about the maximum number of retrievable priorities
+static const size_t availabilityRequestCode =
+    0; // used for querying server about the maximum number of retrievable priorities
 
 void establishServerSocketConnection(const int* fileDescriptor, const char* ipAddress);
 size_t retrieveRequestedNrOfPriorities(void);
 
 int main(int argc, char* argv[])
 {
-    if(argc != 2)
+    if (argc != 2)
     {
         printf("Usage: %s <server ip address> \n", argv[0]);
         exit(-1);
@@ -59,7 +60,7 @@ int main(int argc, char* argv[])
 
             size_t* startAddress = (size_t*)buffer;
 
-            if (read(fileDescriptor, buffer, sizeof (buffer)))
+            if (read(fileDescriptor, buffer, sizeof(buffer)))
             {
                 availableCount = *startAddress;
             }
@@ -75,10 +76,12 @@ int main(int argc, char* argv[])
         {
             if (nrOfUserRequestedPriorities > availableCount)
             {
-                printf("You requested more data than available. Number of requested entries will be limited to maximum available.\n\n");
+                printf("You requested more data than available. Number of requested entries will be limited to maximum "
+                       "available.\n\n");
             }
 
-            actuallyRequestedCount = nrOfUserRequestedPriorities <= availableCount ? nrOfUserRequestedPriorities : availableCount;
+            actuallyRequestedCount =
+                nrOfUserRequestedPriorities <= availableCount ? nrOfUserRequestedPriorities : availableCount;
 
             printf("Requesting a number of %d list element priorities...\n", (int)actuallyRequestedCount);
 
@@ -88,7 +91,7 @@ int main(int argc, char* argv[])
 
                 Priority* startAddress = (Priority*)buffer;
 
-                if (read(fileDescriptor, buffer, sizeof (buffer)))
+                if (read(fileDescriptor, buffer, sizeof(buffer)))
                 {
                     sleep(1);
                     printf("Response received from server\n\n");
@@ -145,13 +148,13 @@ void establishServerSocketConnection(const int* fileDescriptor, const char* ipAd
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_port = htons(PORT_NUMBER);
 
-    if(inet_pton(AF_INET, ipAddress, &socketAddress.sin_addr)<=0)
+    if (inet_pton(AF_INET, ipAddress, &socketAddress.sin_addr) <= 0)
     {
         printf("inet_pton error\n");
         exit(-1);
     }
 
-    if (connect(*fileDescriptor, (struct sockaddr*) &socketAddress, sizeof(socketAddress)) < 0)
+    if (connect(*fileDescriptor, (struct sockaddr*)&socketAddress, sizeof(socketAddress)) < 0)
     {
         printf("Connection error\n");
         exit(-1);

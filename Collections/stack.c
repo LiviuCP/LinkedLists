@@ -1,6 +1,6 @@
 #include "stack.h"
-#include "linkedlist.h"
 #include "error.h"
+#include "linkedlist.h"
 
 #include <stdio.h>
 
@@ -10,7 +10,8 @@ Stack* createStack(void* elementsPool)
 {
     Stack* stack = NULL;
 
-    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category (stack object)
+    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category
+    // (stack object)
     void* data = malloc(STACK_OFFSET + sizeof(Stack) + sizeof(List));
 
     if (data)
@@ -54,7 +55,8 @@ bool pushToStack(Stack* stack, const int objectType, void* const objectPayload)
 
         if (objectType >= 0 && stack->container != NULL)
         {
-            ListElement* newElement = createAndPrependToList((List*)(stack->container), 0); // all stack elements have priority 0 (priority is not relevant here)
+            ListElement* newElement = createAndPrependToList(
+                (List*)(stack->container), 0); // all stack elements have priority 0 (priority is not relevant here)
 
             if (newElement != NULL)
             {

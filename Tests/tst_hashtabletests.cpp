@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 
 #include <cstring>
@@ -203,3 +204,4 @@ void HashTableTests::cleanup()
 QTEST_APPLESS_MAIN(HashTableTests)
 
 #include "tst_hashtabletests.moc"
+// clang-format on

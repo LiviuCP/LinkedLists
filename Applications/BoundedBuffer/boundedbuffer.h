@@ -1,8 +1,8 @@
 #ifndef BOUNDEDBUFFER_H
 #define BOUNDEDBUFFER_H
 
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 #include "linkedlist.h"
 

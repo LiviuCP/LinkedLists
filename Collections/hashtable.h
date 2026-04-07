@@ -1,8 +1,8 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef struct
 {
@@ -18,20 +18,21 @@ typedef struct
 } HashTable;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-HashTable* createHashTable(const size_t hashSize, void* elementsPool);
-void deleteHashTable(HashTable* hashTable);
-bool insertHashEntry(const char* key, const char* value, HashTable* hashTable);
-void eraseHashEntry(const char* key, HashTable* hashTable);
+    HashTable* createHashTable(const size_t hashSize, void* elementsPool);
+    void deleteHashTable(HashTable* hashTable);
+    bool insertHashEntry(const char* key, const char* value, HashTable* hashTable);
+    void eraseHashEntry(const char* key, HashTable* hashTable);
 
-const char* getHashEntryValue(const char* key, const HashTable* hashTable);
-size_t getHashTableEntriesCount(const HashTable* hashTable);
-size_t getHashIndexesCount(const HashTable* hashTable);
+    const char* getHashEntryValue(const char* key, const HashTable* hashTable);
+    size_t getHashTableEntriesCount(const HashTable* hashTable);
+    size_t getHashIndexesCount(const HashTable* hashTable);
 
-// for testing purposes only
-size_t getHashIndexForKey(const char* key, size_t hashSize);
+    // for testing purposes only
+    size_t getHashIndexForKey(const char* key, size_t hashSize);
 
 #ifdef __cplusplus
 }

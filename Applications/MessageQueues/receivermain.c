@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 
-#include "messagequeue.h"
 #include "listprintutils.h"
+#include "messagequeue.h"
 
 void fillListFromQueue(List* list, const size_t expectedElementsNr, const long* priorityTypes);
 
@@ -60,12 +60,14 @@ void fillListFromQueue(List* list, const size_t expectedElementsNr, const long* 
         {
             QueueMessage currentMessage;
 
-            if (msgrcv(queueId, &currentMessage, sizeof(currentMessage), priorityTypes[index], MSG_NOERROR | IPC_NOWAIT) < 0)
+            if (msgrcv(queueId, &currentMessage, sizeof(currentMessage), priorityTypes[index],
+                       MSG_NOERROR | IPC_NOWAIT) < 0)
             {
                 printf("Issues with receiving message\n");
             }
 
-            printf("Received list element priority %d of type %d\n", (int)currentMessage.priority, (int)currentMessage.priorityType);
+            printf("Received list element priority %d of type %d\n", (int)currentMessage.priority,
+                   (int)currentMessage.priorityType);
 
             createAndAppendToList(list, currentMessage.priority);
         }

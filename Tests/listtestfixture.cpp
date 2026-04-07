@@ -1,13 +1,13 @@
 #include <cassert>
 
-#include "listtestfixture.h"
 #include "codeutils.h"
+#include "listtestfixture.h"
 
-#define DELETE_LIST_ELEMENTS_POOL(elementsPool) \
-    if (elementsPool) \
-    { \
-        deleteListElementsPool(elementsPool); \
-        elementsPool = nullptr; \
+#define DELETE_LIST_ELEMENTS_POOL(elementsPool)                                                                        \
+    if (elementsPool)                                                                                                  \
+    {                                                                                                                  \
+        deleteListElementsPool(elementsPool);                                                                          \
+        elementsPool = nullptr;                                                                                        \
     }
 
 ListTestFixture::ListTestFixture()
@@ -86,11 +86,8 @@ void ListTestFixture::resetToInitialState()
 
 bool ListTestFixture::hasInitialState() const
 {
-    return m_Pool && getAquiredElementsCount(m_Pool) == 0 &&
-           !m_TempPool1 && !m_TempPool2 &&
-           !m_List1 && !m_List2 && !m_List3 &&
-           !m_ListElementRefs &&
-           m_ListsMarkedForDeletion.empty() &&
+    return m_Pool && getAquiredElementsCount(m_Pool) == 0 && !m_TempPool1 && !m_TempPool2 && !m_List1 && !m_List2 &&
+           !m_List3 && !m_ListElementRefs && m_ListsMarkedForDeletion.empty() &&
            m_ListElementsMarkedForRelease.empty() && m_ListElementsMarkedForDeletion.empty() &&
            m_ListElementRefGroupsMarkedForDeletion.empty();
 }

@@ -1,8 +1,8 @@
 #ifndef LISTTESTFIXTURE_H
 #define LISTTESTFIXTURE_H
 
-#include <vector>
 #include <cstdlib>
+#include <vector>
 
 #include "linkedlist.h"
 #include "listelementspool.h"
@@ -23,10 +23,12 @@ struct ListTestFixture
     List* m_List2;
     List* m_List3;
 
-    // used for storing multiple individual list element addreses; to be cleaned up after each test run (elements to be cleaned up separately)
+    // used for storing multiple individual list element addreses; to be cleaned up after each test run (elements to be
+    // cleaned up separately)
     ListElement** m_ListElementRefs;
 
-    // lists that are not test class members marked for deletion (deleted when running cleanup()) - do not add members (e.g. m_List1) here
+    // lists that are not test class members marked for deletion (deleted when running cleanup()) - do not add members
+    // (e.g. m_List1) here
     std::vector<List*> m_ListsMarkedForDeletion;
 
     // elements collected from test cases that need to be discarded (released to pool or freed)

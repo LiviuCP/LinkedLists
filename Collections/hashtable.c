@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "error.h"
 #include "hashtable.h"
 #include "linkedlist.h"
-#include "error.h"
 
 #define HASH_OFFSET 4
 
@@ -22,7 +22,8 @@ HashTable* createHashTable(const size_t hashSize, void* elementsPool)
 {
     HashTable* hashTable = NULL;
 
-    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category (hash table object)
+    // the offset bytes are required in order to prevent de-allocating data by deleting pointer to the first category
+    // (hash table object)
     void* data = hashSize > 0 ? malloc(HASH_OFFSET + sizeof(HashTable) + hashSize * sizeof(List)) : NULL;
 
     if (data != NULL)
@@ -89,7 +90,8 @@ bool insertHashEntry(const char* key, const char* value, HashTable* hashTable)
 
         if (hashEntry != NULL)
         {
-            ListElement* newElement = createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
+            ListElement* newElement =
+                createAndAppendToList(currentBucket, 0); // all hash elements have priority 0 by default
 
             if (newElement != NULL)
             {
@@ -242,7 +244,7 @@ static HashEntry* _createHashEntry(const char* key, const char* value)
 
     if (key != NULL && value != NULL && strlen(key) > 0 && strlen(value) > 0)
     {
-        entry = (HashEntry*)malloc(sizeof (HashEntry));
+        entry = (HashEntry*)malloc(sizeof(HashEntry));
 
         if (entry != NULL)
         {
@@ -297,7 +299,7 @@ static bool _updateHashEntry(HashEntry* hashEntry, const char* value)
         }
     }
 
-    return  success;
+    return success;
 }
 
 static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char* key)
@@ -318,7 +320,8 @@ static HashEntry* _getMatchingKeyHashEntry(const List* currentBucket, const char
 
             HashEntry* currentHashEntry = (HashEntry*)(currentBucketEntry->object.payload);
 
-            if (currentHashEntry->key == NULL || currentHashEntry->value == NULL || strlen(currentHashEntry->key) == 0 || strlen(currentHashEntry->value) == 0)
+            if (currentHashEntry->key == NULL || currentHashEntry->value == NULL ||
+                strlen(currentHashEntry->key) == 0 || strlen(currentHashEntry->value) == 0)
             {
                 ASSERT(false, "Invalid key-value pair");
                 break;
@@ -397,7 +400,7 @@ static List* _getCurrentBucket(const char* key, HashTable* hashTable)
 {
     List* currentBucket = NULL;
 
-    if (key!= NULL && strlen(key) > 0 && hashTable != NULL)
+    if (key != NULL && strlen(key) > 0 && hashTable != NULL)
     {
         if (hashTable->hashSize > 0 && hashTable->hashBuckets != NULL)
         {
@@ -414,4 +417,3 @@ static List* _getCurrentBucket(const char* key, HashTable* hashTable)
 
     return currentBucket;
 }
-

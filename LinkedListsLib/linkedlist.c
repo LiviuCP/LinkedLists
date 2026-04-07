@@ -1,13 +1,14 @@
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 
 #include "linkedlist.h"
 #include "listsortutils.h"
 #include "testobjects.h"
 
 /* This function is for private use only; it erases the list elements without deallocating the payload of the Object
-   Should be used with caution (might cause memory leaks) and only when sure that references to each Object data (type + payload) are contained within another list
+   Should be used with caution (might cause memory leaks) and only when sure that references to each Object data (type +
+   payload) are contained within another list
 */
 static void clearListWithoutObjectsDeallocation(List* list);
 
@@ -153,7 +154,8 @@ ListElement* createAndPrependToList(List* list, Priority priority)
 
     if (list != NULL)
     {
-        element = list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&list->elementsPoolProxy) : (ListElement*)malloc(sizeof(ListElement));
+        element = list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&list->elementsPoolProxy)
+                                                               : (ListElement*)malloc(sizeof(ListElement));
 
         if (element != NULL)
         {
@@ -177,7 +179,8 @@ ListElement* createAndAppendToList(List* list, Priority priority)
 
     if (list != NULL)
     {
-        element = list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&list->elementsPoolProxy) : (ListElement*)malloc(sizeof(ListElement));
+        element = list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&list->elementsPoolProxy)
+                                                               : (ListElement*)malloc(sizeof(ListElement));
 
         if (element != NULL)
         {
@@ -202,7 +205,9 @@ ListElement* createAndInsertBefore(ListIterator it, Priority priority)
 
     if (it.list != NULL)
     {
-        ListElement* const previousElement = it.list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&it.list->elementsPoolProxy) : createListElement();
+        ListElement* const previousElement = it.list->elementsPoolProxy.elementsPool != NULL
+                                                 ? aquireListElement(&it.list->elementsPoolProxy)
+                                                 : createListElement();
 
         if (previousElement != NULL)
         {
@@ -222,7 +227,9 @@ ListElement* createAndInsertAfter(ListIterator it, Priority priority)
 
     if (it.list != NULL)
     {
-        ListElement* const nextElement = it.list->elementsPoolProxy.elementsPool != NULL ? aquireListElement(&it.list->elementsPoolProxy) : createListElement();
+        ListElement* const nextElement = it.list->elementsPoolProxy.elementsPool != NULL
+                                             ? aquireListElement(&it.list->elementsPoolProxy)
+                                             : createListElement();
 
         if (nextElement != NULL)
         {
@@ -270,11 +277,13 @@ void moveContentToList(List* source, List* destination)
                 free(temp);
                 temp = NULL;
 
-                clearListWithoutObjectsDeallocation(source); // reference of elements Object data (type + payload) kept by destination list
+                clearListWithoutObjectsDeallocation(
+                    source); // reference of elements Object data (type + payload) kept by destination list
             }
             else
             {
-                clearListWithoutObjectsDeallocation(temp); // reference of elements Object data (type + payload) kept by source list
+                clearListWithoutObjectsDeallocation(
+                    temp); // reference of elements Object data (type + payload) kept by source list
 
                 free(temp);
                 temp = NULL;
@@ -291,11 +300,14 @@ void moveContentToList(List* source, List* destination)
     }
 }
 
-/* The objects of the source list will not be copied into the destination list unless a proper custom copier function is provided (like customCopyObject()).
-   This is because without knowing the object types the only way to achieve this is by shallow copying, which is not safe (two pointers would indicate to the same object).
-   For this reason, by default (with copyObjectPlaceholder()) the objects will not be copied at all so the new elements of the destination list will contain NULL objects.
+/* The objects of the source list will not be copied into the destination list unless a proper custom copier function is
+   provided (like customCopyObject()). This is because without knowing the object types the only way to achieve this is
+   by shallow copying, which is not safe (two pointers would indicate to the same object). For this reason, by default
+   (with copyObjectPlaceholder()) the objects will not be copied at all so the new elements of the destination list will
+   contain NULL objects.
 */
-ListElement* copyContentToList(const List* source, List* destination, bool (*copyObjectToElement)(const ListElement* source, ListElement* destination),
+ListElement* copyContentToList(const List* source, List* destination,
+                               bool (*copyObjectToElement)(const ListElement* source, ListElement* destination),
                                void (*deallocObject)(Object* object))
 {
     ListElement* result = NULL;
@@ -375,7 +387,8 @@ ListElement** moveListToArray(List* list, size_t* arraySize)
             {
                 *currentArrayElement = currentElement;
                 currentElement = currentElement->next;
-                (*currentArrayElement)->next = NULL; // decouple the list elements, array will now maintain cohesion and order
+                (*currentArrayElement)->next =
+                    NULL; // decouple the list elements, array will now maintain cohesion and order
                 ++currentArrayElement;
             }
 
@@ -716,7 +729,7 @@ void reverseList(List* list)
         ListElement* currentElement = previousElement->next;
         previousElement->next = NULL;
 
-        while(currentElement != NULL)
+        while (currentElement != NULL)
         {
             ListElement* nextElement = currentElement->next;
             currentElement->next = previousElement;
@@ -748,7 +761,8 @@ ListElement* batchReverseList(List* list, size_t batchSize)
     }
 
     ListElement* firstElementInBatch = list->first;
-    ListElement* elementToLinkToNextBatch = NULL; // connection point to the next batch (once this has been reversed) / the unchanged elements
+    ListElement* elementToLinkToNextBatch =
+        NULL; // connection point to the next batch (once this has been reversed) / the unchanged elements
     ListElement* previousElement = NULL;
     ListElement* currentElement = NULL;
     size_t nrOfBatchesLeftToReverse = nrOfBatchesToReverse;
@@ -757,9 +771,11 @@ ListElement* batchReverseList(List* list, size_t batchSize)
     {
         previousElement = firstElementInBatch;
         currentElement = previousElement->next;
-        previousElement->next = NULL; // break the connection between the two nodes, they will be connected the other way around (reversed)
+        previousElement->next =
+            NULL; // break the connection between the two nodes, they will be connected the other way around (reversed)
 
-        // elements in batch are reversed 2 at a time (0 - 1, 1 -2, ...), hence the decrease by 1 (for 2 elements in batch only 1 reversal etc)
+        // elements in batch are reversed 2 at a time (0 - 1, 1 -2, ...), hence the decrease by 1 (for 2 elements in
+        // batch only 1 reversal etc)
         size_t reversalsCountInBatch = batchSize - 1;
 
         while (reversalsCountInBatch > 0)
@@ -778,17 +794,21 @@ ListElement* batchReverseList(List* list, size_t batchSize)
 
         if (0 == nrOfUnreversableElements && 1 == nrOfBatchesLeftToReverse)
         {
-            list->last = firstElementInBatch; // reference to last element to be updated during last batch if no unreversable elements exist after
+            list->last = firstElementInBatch; // reference to last element to be updated during last batch if no
+                                              // unreversable elements exist after
         }
 
         if (elementToLinkToNextBatch != NULL)
         {
-            elementToLinkToNextBatch->next = previousElement; // this is applicable starting with second batch (there is no previous batch to be linked to first batch)
+            elementToLinkToNextBatch->next = previousElement; // this is applicable starting with second batch (there is
+                                                              // no previous batch to be linked to first batch)
         }
 
-        firstElementInBatch->next = currentElement; // link the reversed batch to the elements to follow (firstElementInBatch is actually the last element after reversal)
-        elementToLinkToNextBatch = firstElementInBatch; // this is for later relinking if the elements to follow are from a batch to be reversed (once this has been done)
-        firstElementInBatch = currentElement; // finalize move to next batch (if any)
+        firstElementInBatch->next = currentElement; // link the reversed batch to the elements to follow
+                                                    // (firstElementInBatch is actually the last element after reversal)
+        elementToLinkToNextBatch = firstElementInBatch; // this is for later relinking if the elements to follow are
+                                                        // from a batch to be reversed (once this has been done)
+        firstElementInBatch = currentElement;           // finalize move to next batch (if any)
 
         if (1 == nrOfBatchesLeftToReverse)
         {
@@ -803,12 +823,12 @@ ListElement* batchReverseList(List* list, size_t batchSize)
 
 void sortAscendingByPriority(List* list)
 {
-    BUBBLE_SORT(ASCENDING , priority)
+    BUBBLE_SORT(ASCENDING, priority)
 }
 
 void sortDescendingByPriority(List* list)
 {
-    BUBBLE_SORT(DESCENDING , priority)
+    BUBBLE_SORT(DESCENDING, priority)
 }
 
 bool sortByPriorityUsingRandomAccess(List* list, void (*sortingAlgorithm)(ListElement** array, const size_t arraySize))
@@ -859,7 +879,8 @@ bool isEmptyList(const List* list)
     if (list != NULL)
     {
         isEmpty = list->first == NULL;
-        ASSERT((isEmpty && list->last == NULL) || (!isEmpty && list->last != NULL), "Last element should be NULL for an empty list and NOT NULL for a unempty list");
+        ASSERT((isEmpty && list->last == NULL) || (!isEmpty && list->last != NULL),
+               "Last element should be NULL for an empty list and NOT NULL for a unempty list");
     }
 
     return isEmpty;
@@ -899,7 +920,7 @@ ListElement* getPreviousListElement(ListIterator it)
 
     const List* list = it.list;
 
-    if (list != NULL && list->first != NULL  && it.current != list->first)
+    if (list != NULL && list->first != NULL && it.current != list->first)
     {
         ListElement* previousElement = list->first;
 
@@ -1095,7 +1116,8 @@ void printListContentToFile(const List* list, const char* outFile, const char* h
     }
 }
 
-// not to be used for heap created lists unless the references to first and last have been previously stored (memory leaks might occur)
+// not to be used for heap created lists unless the references to first and last have been previously stored (memory
+// leaks might occur)
 void detachListElements(List* list)
 {
     list->first = NULL;

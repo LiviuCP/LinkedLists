@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 
 #include "listtestfixture.h"
@@ -133,3 +134,4 @@ void StackTests::cleanup()
 QTEST_APPLESS_MAIN(StackTests)
 
 #include "tst_stacktests.moc"
+// clang-format on

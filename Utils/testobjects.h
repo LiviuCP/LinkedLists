@@ -12,35 +12,39 @@ typedef enum
     LOCAL_CONDITIONS
 } TestObjectTypes;
 
-typedef struct {
+typedef struct
+{
     int x;
     int y;
 } Point;
 
-typedef struct {
+typedef struct
+{
     Point start;
     Point stop;
 } Segment;
 
-typedef struct {
+typedef struct
+{
     Point position;
     int temperature;
     double humidity;
 } LocalConditions;
 
 #ifdef __cplusplus
-extern "C"{
+extern "C"
+{
 #endif
 
-int* createIntegerPayload(int value);
-double* createDecimalPayload(double value);
-Point* createPointPayload(int startX, int startY);
-Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY);
-LocalConditions* createLocalConditionsPayload(int coordinateX, int coordinateY, int temperature, double humidity);
+    int* createIntegerPayload(int value);
+    double* createDecimalPayload(double value);
+    Point* createPointPayload(int startX, int startY);
+    Segment* createSegmentPayload(int startX, int startY, int stopX, int stopY);
+    LocalConditions* createLocalConditionsPayload(int coordinateX, int coordinateY, int temperature, double humidity);
 
-void emptyTestObject(Object* object);
+    void emptyTestObject(Object* object);
 
-const char* getTestObjectTypeAsString(int type);
+    const char* getTestObjectTypeAsString(int type);
 
 #ifdef __cplusplus
 }

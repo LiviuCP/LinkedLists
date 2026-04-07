@@ -1,7 +1,7 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 #include "listprintutils.h"
@@ -16,7 +16,8 @@ int main()
     {
         const char* fifoName = "/tmp/linkedlistpipe";
 
-        printf("We will read priorities from a named pipe and use them for creating and appending new elements to list. Please wait...\n\n");
+        printf("We will read priorities from a named pipe and use them for creating and appending new elements to "
+               "list. Please wait...\n\n");
 
         sleep(1);
 
@@ -68,7 +69,7 @@ void fillListFromPipe(List* list, const char* pipeName, size_t* nrOfBytes, size_
     printf("\nReading from pipe, creating and appending to list\n");
     sleep(1);
 
-    while(1)
+    while (1)
     {
         Priority currentValue;
         ssize_t readBytesCount = read(fDescriptor, &currentValue, sizeof(Priority));

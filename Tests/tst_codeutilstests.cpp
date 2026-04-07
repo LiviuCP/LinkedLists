@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 
 #include "codeutils.h"
@@ -273,3 +274,4 @@ void CodeUtilsTests::testCopyNCharsToString()
 QTEST_APPLESS_MAIN(CodeUtilsTests)
 
 #include "tst_codeutilstests.moc"
+// clang-format on

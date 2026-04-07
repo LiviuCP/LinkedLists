@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 #include <set>
 
@@ -468,3 +469,4 @@ void ListSortingTests::cleanup()
 QTEST_APPLESS_MAIN(ListSortingTests)
 
 #include "tst_listsortingtests.moc"
+// clang-format on

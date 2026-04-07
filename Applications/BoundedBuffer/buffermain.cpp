@@ -23,7 +23,7 @@ int main()
 
         return 0;
     }
-    catch(std::runtime_error& err)
+    catch (std::runtime_error& err)
     {
         std::cout << "Error! " << err.what() << std::endl;
         exit(-1);

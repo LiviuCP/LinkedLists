@@ -1,11 +1,11 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "listelement.h"
 #include "codeutils.h"
+#include "listelement.h"
 
 #define BUFFER_SIZE 256
 

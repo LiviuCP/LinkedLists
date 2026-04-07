@@ -1,9 +1,9 @@
-#include <sys/wait.h>
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "listprintutils.h"
 
@@ -31,7 +31,7 @@ int main()
         exit(-1);
     }
 
-    if (childId == 0)                                                                                       /* child */
+    if (childId == 0) /* child */
     {
         close(fileDescriptors[WRITE_SIDE]);
 
@@ -74,7 +74,7 @@ int main()
         close(fileDescriptors[READ_SIDE]);
         _exit(0);
     }
-    else                                                                                                    /* parent */
+    else /* parent */
     {
         close(fileDescriptors[READ_SIDE]);
         const Priority priorities[] = {5, 2, 7, 3, 4};

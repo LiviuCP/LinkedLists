@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 
 #include "bitoperations.h"
@@ -125,3 +126,4 @@ void BitOperationsTests::testIsPalyndrome()
 QTEST_APPLESS_MAIN(BitOperationsTests)
 
 #include "tst_bitoperationstests.moc"
+// clang-format on

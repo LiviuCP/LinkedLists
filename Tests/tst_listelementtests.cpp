@@ -1,3 +1,4 @@
+// clang-format off
 #include <QTest>
 
 #include "listtestfixture.h"
@@ -1020,3 +1021,4 @@ void ListElementTests::cleanup()
 QTEST_APPLESS_MAIN(ListElementTests)
 
 #include "tst_listelementtests.moc"
+// clang-format on

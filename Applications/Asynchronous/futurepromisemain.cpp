@@ -1,13 +1,15 @@
+#include <future>
 #include <iostream>
 #include <thread>
-#include <future>
 
 #include "asyncutils.h"
 #include "codeutils.h"
 
-void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>> prioritiesRetrievalPromise);  // move semantics
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>>* prioritiesRetrievalPromise); // pointer
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>>& prioritiesRetrievalPromise); // reference
+void wrapperGeneratePriorities(size_t nrOfElements,
+                               std::promise<std::vector<Priority>> prioritiesRetrievalPromise); // move semantics
+// void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>>* prioritiesRetrievalPromise);
+// // pointer void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority>>&
+// prioritiesRetrievalPromise); // reference
 
 int main()
 {
@@ -20,9 +22,11 @@ int main()
         std::cout << "Launching thread...";
         std::promise<std::vector<Priority>> resultPromise;
         std::future<std::vector<Priority>> result{resultPromise.get_future()};
-        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, std::move(resultPromise)}; // move semantics
-//        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, &resultPromise}; // pointer
-//        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, std::ref(resultPromise)}; // reference
+        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements,
+                                        std::move(resultPromise)}; // move semantics
+        //        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, &resultPromise}; // pointer
+        //        std::thread prioritiesRetrieval{wrapperGeneratePriorities, nrOfElements, std::ref(resultPromise)}; //
+        //        reference
         std::cout << "DONE" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds{500});
         std::cout << "Waiting for result..." << std::endl << std::endl;
@@ -47,23 +51,26 @@ int main()
     }
     else
     {
-        std::cout<<"You exited the app!"<<std::endl;
+        std::cout << "You exited the app!" << std::endl;
     }
 
     return 0;
 }
 
-void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> > prioritiesRetrievalPromise) // move semantics
+void wrapperGeneratePriorities(size_t nrOfElements,
+                               std::promise<std::vector<Priority>> prioritiesRetrievalPromise) // move semantics
 {
     prioritiesRetrievalPromise.set_value(generateListElementPriorities(nrOfElements));
 }
 
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> >* prioritiesRetrievalPromise) // pointer
+// void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> >* prioritiesRetrievalPromise)
+// // pointer
 //{
-//    prioritiesRetrievalPromise->set_value(generateListElementPriorities(nrOfElements));
-//}
+//     prioritiesRetrievalPromise->set_value(generateListElementPriorities(nrOfElements));
+// }
 
-//void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> >& prioritiesRetrievalPromise) // reference
+// void wrapperGeneratePriorities(size_t nrOfElements, std::promise<std::vector<Priority> >& prioritiesRetrievalPromise)
+// // reference
 //{
-//    prioritiesRetrievalPromise.set_value(generateListElementPriorities(nrOfElements));
-//}
+//     prioritiesRetrievalPromise.set_value(generateListElementPriorities(nrOfElements));
+// }

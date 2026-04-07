@@ -1,9 +1,9 @@
-#include <stdio.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "listprintutils.h"
 
@@ -26,7 +26,7 @@ int main()
         exit(-1);
     }
 
-    if (0 == pid)                                                                                               // child
+    if (0 == pid) // child
     {
         setGracefulTerminationHandler();
 
@@ -56,7 +56,7 @@ int main()
             puts("[CHILD] Going back to sleep\n");
         }
     }
-    else                                                                                                        // parent
+    else // parent
     {
         puts("[PARENT] Sleeping for a time...\n");
         sleep(5);

@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "listprintutils.h"
 #include "codeutils.h"
+#include "listprintutils.h"
 
 int main()
 {
@@ -32,7 +32,6 @@ int main()
                 break;
             }
         }
-
 
         clearScreen();
         printf("You created the list. Now you can choose one of the below options.\n\n");
@@ -195,7 +194,8 @@ int main()
                     else
                     {
                         clearScreen();
-                        printf("Element with index %d has priority %zu\n\n", (unsigned int)index, (Priority)getListElementAtIndex(list, index)->priority);
+                        printf("Element with index %d has priority %zu\n\n", (unsigned int)index,
+                               (Priority)getListElementAtIndex(list, index)->priority);
                     }
                     break;
                 default:

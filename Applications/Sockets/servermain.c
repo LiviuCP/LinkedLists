@@ -1,20 +1,20 @@
-﻿#include <string.h>
+﻿#include <arpa/inet.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
+#include <string.h>
 #include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "listelement.h"
 #include "bitoperations.h"
 #include "codeutils.h"
+#include "listelement.h"
 
-#define PORT_NUMBER         9801
-#define MAX_CONNECTS        4
-#define BUFFER_SIZE         512
-#define NR_OF_REQUESTS      2
+#define PORT_NUMBER 9801
+#define MAX_CONNECTS 4
+#define BUFFER_SIZE 512
+#define NR_OF_REQUESTS 2
 
 static const size_t nrOfAvailablePriorities = 10;
 static const Priority prioritiesList[10] = {5, 12, 4, 6, 1, 2, 3, 8, 7, 14};
@@ -34,11 +34,12 @@ int main()
 
     printf("Server is listening on port %d for clients...\n\n", (int)PORT_NUMBER);
 
-    while (1) {
+    while (1)
+    {
         struct sockaddr_in clientAddress;
         unsigned int len = sizeof(clientAddress);
 
-        int clientFileDescriptor = accept(fileDescriptor, (struct sockaddr*) &clientAddress, &len);
+        int clientFileDescriptor = accept(fileDescriptor, (struct sockaddr*)&clientAddress, &len);
         if (clientFileDescriptor < 0)
         {
             perror("Connection accept error");
@@ -55,11 +56,13 @@ int main()
             printf("Client request received. Reading client request data...\n");
             ssize_t count = read(clientFileDescriptor, buffer, sizeof(buffer));
 
-            if (count >= (ssize_t)sizeof(size_t)) // buffer size should be >= the length of the variable storing the number of priorities to send
+            if (count >= (ssize_t)sizeof(size_t)) // buffer size should be >= the length of the variable storing the
+                                                  // number of priorities to send
             {
                 if (*bufferAddress > 0)
                 {
-                    const size_t nrOfPrioritiesToSend = *bufferAddress <= nrOfAvailablePriorities ? *bufferAddress : nrOfAvailablePriorities;
+                    const size_t nrOfPrioritiesToSend =
+                        *bufferAddress <= nrOfAvailablePriorities ? *bufferAddress : nrOfAvailablePriorities;
                     printf("Client will get first %d priorities from list\n", (int)nrOfPrioritiesToSend);
 
                     for (size_t index = 0; index < nrOfPrioritiesToSend; ++index)
@@ -71,7 +74,8 @@ int main()
                 else
                 {
                     *bufferAddress = nrOfAvailablePriorities;
-                    printf("Client only requires to know how many priorities are available. The number is %d\n", (int)nrOfAvailablePriorities);
+                    printf("Client only requires to know how many priorities are available. The number is %d\n",
+                           (int)nrOfAvailablePriorities);
                 }
 
                 printf("Sending requested data to client...\n");
@@ -83,7 +87,8 @@ int main()
         close(clientFileDescriptor);
     }
 
-    return 0; // not used as return point, kept only for the sake of standards (providing a return value to int function())
+    return 0; // not used as return point, kept only for the sake of standards (providing a return value to int
+              // function())
 }
 
 void setSocket(const int* fileDescriptor)
@@ -94,7 +99,7 @@ void setSocket(const int* fileDescriptor)
     serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddress.sin_port = htons(PORT_NUMBER);
 
-    if (bind(*fileDescriptor, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) < 0)
+    if (bind(*fileDescriptor, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0)
     {
         perror("Error when binding socket address");
         exit(-1);
