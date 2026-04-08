@@ -1,5 +1,4 @@
-#ifndef ERROR_H
-#define ERROR_H
+#pragma once
 
 #include <assert.h>
 
@@ -17,5 +16,3 @@
 #else
 #define ASSERT(condition, message)
 #endif
-
-#endif // ERROR_H

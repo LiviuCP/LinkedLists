@@ -1,5 +1,4 @@
-#ifndef LISTELEMENTSPOOLPROXY_H
-#define LISTELEMENTSPOOLPROXY_H
+#pragma once
 
 #include "listelement.h"
 
@@ -28,5 +27,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // LISTELEMENTSPOOLPROXY_H

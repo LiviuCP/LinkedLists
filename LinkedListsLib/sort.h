@@ -1,5 +1,4 @@
-#ifndef SORT_H
-#define SORT_H
+#pragma once
 
 #include <stdlib.h>
 
@@ -31,5 +30,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // SORT_H

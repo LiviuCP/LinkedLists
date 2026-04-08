@@ -1,5 +1,4 @@
-#ifndef STACK_H
-#define STACK_H
+#pragma once
 
 #include "codeutils.h"
 
@@ -27,5 +26,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // STACK_H

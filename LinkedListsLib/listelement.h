@@ -1,5 +1,4 @@
-#ifndef LISTELEMENT_H
-#define LISTELEMENT_H
+#pragma once
 
 #include "codeutils.h"
 
@@ -40,5 +39,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // LISTELEMENT_H

@@ -1,5 +1,4 @@
-#ifndef BOUNDEDBUFFER_H
-#define BOUNDEDBUFFER_H
+#pragma once
 
 #include <condition_variable>
 #include <mutex>
@@ -30,5 +29,3 @@ private:
     std::condition_variable m_BufferNotEmpty;
     std::condition_variable m_BufferNotFull;
 };
-
-#endif // BOUNDEDBUFFER_H

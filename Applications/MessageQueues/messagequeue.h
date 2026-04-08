@@ -1,5 +1,4 @@
-#ifndef MESSAGEQUEUE_H
-#define MESSAGEQUEUE_H
+#pragma once
 
 #include "listelement.h"
 
@@ -12,5 +11,3 @@ typedef struct
     long priorityType; // convention: 1 - low (one digit), 2 - medium (two digits), 3 - high (three digits)
     Priority priority;
 } QueueMessage;
-
-#endif // MESSAGEQUEUE_H

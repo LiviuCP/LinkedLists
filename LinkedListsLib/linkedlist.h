@@ -1,5 +1,4 @@
-#ifndef LINKEDLIST_H
-#define LINKEDLIST_H
+#pragma once
 
 #include <stdlib.h>
 
@@ -100,5 +99,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // LINKEDLIST_H

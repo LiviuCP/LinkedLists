@@ -1,5 +1,4 @@
-#ifndef LISTTESTFIXTURE_H
-#define LISTTESTFIXTURE_H
+#pragma once
 
 #include <cstdlib>
 #include <vector>
@@ -52,5 +51,3 @@ struct ListTestFixture
     void markListElementRefsForDeletion(ListElement** elementRefs);
     void clearListElementsMarkedForCleanup();
 };
-
-#endif // LISTTESTFIXTURE_H

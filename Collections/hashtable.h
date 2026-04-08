@@ -1,5 +1,4 @@
-#ifndef HASHTABLE_H
-#define HASHTABLE_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -37,5 +36,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // HASHTABLE_H

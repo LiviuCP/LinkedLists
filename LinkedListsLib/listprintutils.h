@@ -1,5 +1,4 @@
-#ifndef APPUTILS_H
-#define APPUTILS_H
+#pragma once
 
 #include "linkedlist.h"
 
@@ -14,5 +13,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // APPUTILS_H

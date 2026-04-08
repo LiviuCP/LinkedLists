@@ -1,8 +1,7 @@
-#ifndef LISTUTILS_H
-#define LISTUTILS_H
+#pragma once
 
-#include "../Utils/codeutils.h"
-#include "../Utils/error.h"
+#include "codeutils.h"
+#include "error.h"
 
 #define ASCENDING >
 #define DESCENDING <
@@ -475,5 +474,3 @@
                                                                                                                        \
         return isSorted;                                                                                               \
     }
-
-#endif // LISTUTILS_H

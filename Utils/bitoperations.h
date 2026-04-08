@@ -1,5 +1,4 @@
-#ifndef BITOPERATIONS_H
-#define BITOPERATIONS_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -35,5 +34,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // BITOPERATIONS_H

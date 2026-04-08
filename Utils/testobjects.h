@@ -1,5 +1,4 @@
-#ifndef TESTOBJECTS_H
-#define TESTOBJECTS_H
+#pragma once
 
 #include "codeutils.h"
 
@@ -49,5 +48,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // TESTOBJECTS_H

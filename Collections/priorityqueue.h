@@ -1,5 +1,4 @@
-#ifndef PRIORITYQUEUE_H
-#define PRIORITYQUEUE_H
+#pragma once
 
 #include "codeutils.h"
 #include "listelement.h"
@@ -40,5 +39,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // PRIORITYQUEUE_H

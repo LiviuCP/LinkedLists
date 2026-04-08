@@ -1,5 +1,4 @@
-#ifndef CODEUTILS_H
-#define CODEUTILS_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -55,5 +54,3 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
-#endif // CODEUTILS_H
